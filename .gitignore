@@ -1,0 +1,5 @@
+hub_rh_v7_backup_*.html
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
