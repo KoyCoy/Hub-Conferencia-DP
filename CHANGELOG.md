@@ -11,3 +11,5 @@
 - Indicador de versao no rodape.
 - Modal inicial com orientacao de fluxo de equipe.
 - Clique na caixa inteira para selecionar arquivos, sem abertura duplicada do seletor.
+- Organizacao inicial do projeto no GitHub.
+- Script local de publicacao e workflow preparado para GitHub Pages.

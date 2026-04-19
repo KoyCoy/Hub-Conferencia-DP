@@ -6,6 +6,16 @@ Aplicacao HTML unica para apoiar rotinas de conferencia do Departamento Pessoal.
 
 Abra o arquivo `hub_rh_v7.html` no navegador. O arquivo `index.html` e uma copia do HTML principal para facilitar publicacao no GitHub Pages.
 
+## Como atualizar no GitHub
+
+Depois de alterar o `hub_rh_v7.html`, publique a nova versao com:
+
+```powershell
+.\scripts\publicar.ps1 "Descreva a alteracao"
+```
+
+O script atualiza tambem o `index.html`, cria um commit e envia para o GitHub.
+
 ## Modulos atuais
 
 - Ocorrencias
@@ -25,3 +35,12 @@ Abra o arquivo `hub_rh_v7.html` no navegador. O arquivo `index.html` e uma copia
 ## Observacoes
 
 Os arquivos `hub_rh_v7_backup_*.html` ficam ignorados pelo Git para evitar duplicacao. A partir deste repositorio, o historico de alteracoes passa a ser controlado pelos commits.
+
+## GitHub Pages
+
+O repositorio ja possui um workflow em `.github/workflows/pages.yml` para publicar o `index.html` como site estatico. Para liberar um link web:
+
+1. Abra o repositorio no GitHub.
+2. Va em `Settings` > `Pages`.
+3. Em `Build and deployment`, selecione `GitHub Actions`.
+4. Rode o workflow `Publicar Hub RH` ou faça um novo push na branch `main`.
