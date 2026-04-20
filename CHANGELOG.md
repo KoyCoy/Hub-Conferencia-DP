@@ -1,5 +1,10 @@
 # Changelog
 
+## Desktop Icone Janela - 2026-04-20
+
+- Define explicitamente o icone da janela do app desktop.
+- Inclui `hub-rh.ico` dentro do pacote Windows para evitar o icone padrao colorido.
+
 ## Desktop Icone - 2026-04-20
 
 - Adiciona geracao de icone Windows `.ico` para o app desktop.

@@ -29,6 +29,7 @@ namespace HubRH
             Height = 820;
             MinimumSize = new Size(960, 640);
             StartPosition = FormStartPosition.CenterScreen;
+            Icon = LoadAppIcon();
 
             browser = new WebView2
             {
@@ -38,6 +39,18 @@ namespace HubRH
             Controls.Add(browser);
 
             Load += async (sender, args) => await InitializeAsync();
+        }
+
+        private static Icon LoadAppIcon()
+        {
+            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "hub-rh.ico");
+            if (File.Exists(iconPath))
+            {
+                return new Icon(iconPath);
+            }
+
+            Icon executableIcon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+            return executableIcon ?? SystemIcons.Application;
         }
 
         private async System.Threading.Tasks.Task InitializeAsync()

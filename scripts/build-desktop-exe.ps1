@@ -79,6 +79,7 @@ if ($LASTEXITCODE -ne 0) {
 Copy-Item -LiteralPath (Join-Path $WebViewLib "Microsoft.Web.WebView2.Core.dll") -Destination $AppDist -Force
 Copy-Item -LiteralPath (Join-Path $WebViewLib "Microsoft.Web.WebView2.WinForms.dll") -Destination $AppDist -Force
 Copy-Item -LiteralPath $WebViewNative -Destination $AppDist -Force
+Copy-Item -LiteralPath $IconPath -Destination (Join-Path $AppDist "hub-rh.ico") -Force
 
 $AppFiles = @(
   "index.html",
