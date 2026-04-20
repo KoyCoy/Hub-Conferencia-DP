@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3 - 2026-04-20
+
+- Menu principal mobile recolhivel para liberar espaco vertical.
+- Abas internas dos modulos recolhiveis no celular.
+- APK travado em modo retrato para evitar quebra ao virar o aparelho.
+- Mais respiro inferior no conteudo mobile para evitar lista cortada perto do rodape.
+
 ## 1.0.2 - 2026-04-20
 
 - Menu principal mobile em grade visivel, sem depender de arrastar lateralmente.

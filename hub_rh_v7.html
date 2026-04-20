@@ -89,6 +89,25 @@
     letter-spacing: -0.01em;
   }
 
+  .mobile-menu-toggle {
+    display: none;
+    margin-left: auto;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-app);
+    color: var(--text-strong);
+    border-radius: 8px;
+    width: 36px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .mobile-menu-toggle i {
+    width: 18px;
+    height: 18px;
+  }
+
   .sidebar-nav {
     padding: 20px 12px;
     flex: 1;
@@ -439,7 +458,11 @@
     .sidebar-header h1 {
       font-size: 0.82rem !important;
       line-height: 1.1;
-      max-width: calc(100vw - 54px);
+      max-width: calc(100vw - 102px);
+    }
+
+    .mobile-menu-toggle {
+      display: inline-flex;
     }
 
     .sidebar-nav {
@@ -449,6 +472,16 @@
       gap: 8px;
       overflow: visible;
       flex: 0 0 auto;
+    }
+
+    body:not(.mobile-nav-open) .sidebar-nav {
+      display: none;
+    }
+
+    body.mobile-nav-open .mobile-menu-toggle {
+      color: var(--brand-primary);
+      border-color: rgba(37, 99, 235, 0.35);
+      background: rgba(37, 99, 235, 0.08);
     }
 
     .nav-label,
@@ -501,7 +534,7 @@
 
     .content-container {
       padding: 8px;
-      padding-bottom: 52px;
+      padding-bottom: 58px;
       min-width: 0;
       overflow: hidden;
     }
@@ -632,6 +665,9 @@
   <div class="sidebar-header">
     <div class="logo-box"><i data-lucide="check-circle"></i></div>
     <h1 style="font-size: 0.9rem;">Validador de Lançamentos Manuais</h1>
+    <button class="mobile-menu-toggle" type="button" onclick="toggleMobileMenu()" aria-label="Mostrar módulos" aria-expanded="false">
+      <i data-lucide="menu"></i>
+    </button>
   </div>
 
   <nav class="sidebar-nav">
@@ -5449,7 +5485,7 @@ function checkTipoA(tipoA64, chapasP5, evtsByChapa, info30){
 // ═══ Salvar Fechamento ═══════════════════════════════════════════════
 
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.0.2'; } catch(e) { return '1.0.2'; }
+  try { return window.parent.HUB_RH_VERSION || '1.0.3'; } catch(e) { return '1.0.3'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -6498,7 +6534,7 @@ function renderRegraDetalhe(){
 
 // ── TAB: COMPETÊNCIA ─────────────────────────────────────────────────────────
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.0.2'; } catch(e) { return '1.0.2'; }
+  try { return window.parent.HUB_RH_VERSION || '1.0.3'; } catch(e) { return '1.0.3'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -7260,6 +7296,10 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       border-radius: 999px !important;
     }
 
+    .shell-mobile-tabs-toggle {
+      display: none;
+    }
+
     /* Mobile iframe layout for APK and narrow browsers */
     @media (max-width: 760px) {
       html,
@@ -7325,6 +7365,36 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         overflow: visible !important;
         gap: 8px !important;
         padding-bottom: 6px !important;
+      }
+
+      .shell-mobile-tabs-toggle {
+        display: inline-flex !important;
+        width: 100% !important;
+        min-height: 38px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        margin: 0 0 10px !important;
+        border: 1px solid var(--vf-border, var(--border, #334155)) !important;
+        border-radius: 8px !important;
+        background: var(--vf-bg-surface, var(--surface, #ffffff)) !important;
+        color: var(--vf-text-strong, var(--text-1, #0f172a)) !important;
+        font-size: 12px !important;
+        font-weight: 800 !important;
+        cursor: pointer !important;
+      }
+
+      body.dark-mode .shell-mobile-tabs-toggle {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+      }
+
+      body.shell-tabs-collapsed .tabs,
+      body.shell-tabs-collapsed .mode-tabs,
+      body.shell-tabs-collapsed .view-tabs,
+      body.shell-tabs-collapsed .sub-tabs {
+        display: none !important;
       }
 
       .tab-btn,
@@ -7400,6 +7470,13 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       .table-wrap {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
+      }
+
+      .results,
+      #results,
+      #resultsSection,
+      #reportSection {
+        padding-bottom: 48px !important;
       }
 
       table {
@@ -7761,7 +7838,27 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       style.textContent = iframeVisualCSS;
       doc.body.classList.toggle('dark-mode', document.body.classList.contains('dark-mode'));
       enableUploadBoxClicks(doc);
+      enableMobileTabToggle(doc);
     } catch (e) {}
+  }
+
+  function enableMobileTabToggle(doc) {
+    if (!doc || !doc.body || doc.getElementById('shell-mobile-tabs-toggle')) return;
+    const tabGroup = doc.querySelector('.tabs, .mode-tabs, .view-tabs, .sub-tabs');
+    if (!tabGroup || !tabGroup.parentNode) return;
+    doc.body.classList.add('shell-tabs-collapsed');
+    const btn = doc.createElement('button');
+    btn.type = 'button';
+    btn.id = 'shell-mobile-tabs-toggle';
+    btn.className = 'shell-mobile-tabs-toggle';
+    btn.textContent = 'Mostrar abas';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.addEventListener('click', () => {
+      const isOpen = doc.body.classList.toggle('shell-tabs-collapsed') === false;
+      btn.textContent = isOpen ? 'Ocultar abas' : 'Mostrar abas';
+      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    tabGroup.parentNode.insertBefore(btn, tabGroup);
   }
 
   function syncIframes() {
@@ -7774,7 +7871,24 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
     document.getElementById(id).classList.add('active');
     el.classList.add('active');
     document.getElementById('current-module').textContent = title;
+    if (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) {
+      setMobileMenuOpen(false);
+    }
     setTimeout(syncIframes, 50);
+  }
+
+  function setMobileMenuOpen(isOpen) {
+    document.body.classList.toggle('mobile-nav-open', isOpen);
+    const btn = document.querySelector('.mobile-menu-toggle');
+    if (!btn) return;
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    btn.setAttribute('aria-label', isOpen ? 'Ocultar módulos' : 'Mostrar módulos');
+    btn.innerHTML = isOpen ? '<i data-lucide="x"></i>' : '<i data-lucide="menu"></i>';
+    if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+  }
+
+  function toggleMobileMenu() {
+    setMobileMenuOpen(!document.body.classList.contains('mobile-nav-open'));
   }
 
   function toggleDarkMode() {
@@ -7819,7 +7933,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 </script>
 
   <script>
-    const HUB_RH_VERSION = '1.0.2';
+    const HUB_RH_VERSION = '1.0.3';
     const HUB_RH_VERSION_DATE = '18/04/2026';
     window.HUB_RH_VERSION = HUB_RH_VERSION;
     window.HUB_RH_VERSION_DATE = HUB_RH_VERSION_DATE;
@@ -7873,10 +7987,10 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   " id="lgpdBar">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     <span class="footer-full" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Hub RH v1.0.2</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
+      <span data-hub-version>Hub RH v1.0.3</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
     </span>
     <span class="footer-mobile" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Hub RH v1.0.2</span> · Processamento local · LGPD
+      <span data-hub-version>Hub RH v1.0.3</span> · Processamento local · LGPD
     </span>
     <button type="button" class="footer-help-btn" onclick="openTeamFlowModal()">Fluxo de equipe</button>
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -7890,7 +8004,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         <div class="flow-step"><div class="num">1</div><div><strong>Centralize os arquivos JSON</strong><span>Crie ou use uma pasta compartilhada no OneDrive, por exemplo: RH / Hub RH / Fechamentos JSON.</span></div></div>
         <div class="flow-step"><div class="num">2</div><div><strong>Antes de uma nova conferencia</strong><span>Na aba Historico &amp; Excecoes, carregue os fechamentos anteriores e o arquivo de excecoes ativo, se existir.</span></div></div>
         <div class="flow-step"><div class="num">3</div><div><strong>Depois de salvar o fechamento</strong><span>Guarde o JSON gerado na mesma pasta do OneDrive e mantenha o nome por competencia, como conferencia_03-2026.json.</span></div></div>
-        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Hub RH v1.0.2</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
+        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Hub RH v1.0.3</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
       </div>
       <div class="flow-note">O navegador nao salva automaticamente direto no OneDrive. Baixe o JSON e mova/salve na pasta compartilhada combinada pela equipe.</div>
       <div class="flow-actions">
