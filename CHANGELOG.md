@@ -1,5 +1,12 @@
 # Changelog
 
+## SharePoint - 2026-04-20
+
+- Adiciona pacote de publicacao para SharePoint.
+- Adiciona guia de instalacao pelo Edge sem `.cmd` ou PowerShell.
+- Adiciona script local para gerar `dist/sharepoint/HubRH-SharePoint.zip`.
+- Documenta caminho futuro para app desktop nativo instalavel.
+
 ## PWA Desktop - 2026-04-20
 
 - Adiciona manifesto PWA para instalar o Hub RH pelo Microsoft Edge/Chrome.

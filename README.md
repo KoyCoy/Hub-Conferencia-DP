@@ -6,13 +6,25 @@ Aplicacao HTML unica para apoiar rotinas de conferencia do Departamento Pessoal.
 
 ### Opcao recomendada na empresa: instalar pelo Edge
 
-Depois que o GitHub Pages estiver publicado, abra o link do Hub RH no Microsoft Edge e use:
+Publique o pacote em uma pasta do SharePoint e abra o `index.html` no Microsoft Edge. Depois use:
 
 ```text
 Menu ... > Apps > Instalar este site como aplicativo
 ```
 
 Essa opcao nao depende de `.cmd`, PowerShell ou instalador. O Windows cria o app no Menu Iniciar pelo proprio navegador.
+
+Para gerar o pacote:
+
+```powershell
+.\scripts\gerar-pacote-sharepoint.ps1
+```
+
+O ZIP fica em:
+
+```text
+dist/sharepoint/HubRH-SharePoint.zip
+```
 
 ### Opcao local por atalho
 

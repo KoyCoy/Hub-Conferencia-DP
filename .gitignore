@@ -8,3 +8,4 @@ mobile/android/keystore/*.jks
 mobile/android/keystore/*.keystore
 mobile/android/*.idsig
 mobile/android/dist/*.idsig
+dist/
