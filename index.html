@@ -93,7 +93,7 @@
   .guide-overlay.open { display: flex; }
 
   .guide-panel {
-    width: min(420px, calc(100% - 28px));
+    width: min(480px, calc(100% - 28px));
     height: 100%;
     background: var(--guide-surface);
     border-left: 1px solid var(--guide-border);
@@ -210,6 +210,38 @@
     line-height: 1.55;
   }
 
+  .guide-detail p {
+    margin: 0 0 9px;
+  }
+
+  .criteria-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 7px;
+  }
+
+  .criteria-list li {
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .criteria-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.68em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--guide-primary);
+  }
+
+  .criteria-list strong {
+    color: #0f172a;
+  }
+
   .guide-note {
     margin: 0 14px 16px;
     padding: 12px 14px;
@@ -258,8 +290,8 @@
       <header class="guide-head">
         <div>
           <p class="guide-kicker">Mapa das validacoes</p>
-          <h1 id="guideTitle">O que cada modulo confere</h1>
-          <p>Consulta rapida para explicar o criterio de cada rotina sem ocupar a tela principal.</p>
+          <h1 id="guideTitle">O que cada rotina esta conferindo</h1>
+          <p>Lista objetiva dos pontos que o hub procura nos arquivos, sem ocupar a tela de trabalho.</p>
         </div>
         <button class="guide-close" type="button" id="guideClose" aria-label="Fechar guia">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
@@ -270,59 +302,110 @@
         <details class="guide-item" open>
           <summary>
             <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 17h.01"></path><path d="M12 11v3"></path></svg>
-            <span><strong>Ocorrencias</strong><span>Compara eventos manuais e inconsistencias por colaborador.</span></span>
+            <span><strong>Ocorrencias</strong><span>Compara bases de ocorrencias e lancamentos manuais.</span></span>
             <svg class="guide-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
           </summary>
-          <div class="guide-detail">Aponta lancamentos que precisam de revisao antes do fechamento, como ocorrencias sem correspondencia esperada, duplicidades ou diferencas entre arquivos importados.</div>
+          <div class="guide-detail">
+            <ul class="criteria-list">
+              <li><strong>Presenca nas duas bases:</strong> mostra colaborador/evento que existe em uma planilha e nao aparece na outra.</li>
+              <li><strong>Nome diferente:</strong> aponta quando a mesma chapa ou identificador aparece com nomes divergentes.</li>
+              <li><strong>Evento sem par:</strong> identifica ocorrencia importada sem lancamento correspondente, ou lancamento sem ocorrencia de origem.</li>
+              <li><strong>Valor ou referencia diferente:</strong> destaca diferenca de quantidade, horas, dias ou valor para o mesmo colaborador e evento.</li>
+              <li><strong>Duplicidades:</strong> sinaliza repeticoes que podem gerar desconto, pagamento ou ajuste em dobro.</li>
+            </ul>
+          </div>
         </details>
 
         <details class="guide-item">
           <summary>
             <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
-            <span><strong>Espelho de Ponto</strong><span>Valida jornadas, saldos e apontamentos do ponto.</span></span>
+            <span><strong>Espelho de Ponto</strong><span>Confere jornadas e apontamentos que impactam folha.</span></span>
             <svg class="guide-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
           </summary>
-          <div class="guide-detail">Ajuda a conferir se o espelho fecha com o esperado para a competencia: faltas, atrasos, extras, ajustes manuais e divergencias que podem impactar folha.</div>
+          <div class="guide-detail">
+            <ul class="criteria-list">
+              <li><strong>Batidas faltantes:</strong> identifica dias com entrada, saida ou intervalo incompleto.</li>
+              <li><strong>Atrasos e faltas:</strong> separa ocorrencias que podem gerar desconto ou justificar ajuste manual.</li>
+              <li><strong>Horas extras:</strong> aponta extras registradas para validar se devem ir para pagamento ou banco.</li>
+              <li><strong>Jornada fora do padrao:</strong> destaca dias com carga muito acima ou abaixo do esperado.</li>
+              <li><strong>Ajustes manuais:</strong> evidencia marcacoes ou tratamentos que merecem revisao antes do fechamento.</li>
+            </ul>
+          </div>
         </details>
 
         <details class="guide-item">
           <summary>
             <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l7-4 7 4v14"></path><path d="M9 21v-8h6v8"></path></svg>
-            <span><strong>Banco de Horas</strong><span>Confere credito, debito e evolucao do saldo.</span></span>
+            <span><strong>Banco de Horas</strong><span>Confere saldo, credito, debito e movimentacoes.</span></span>
             <svg class="guide-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
           </summary>
-          <div class="guide-detail">Mostra se o banco esta acumulando ou consumindo horas de forma coerente, destacando saldos fora do padrao, movimentacoes altas e possiveis impactos para tratativa.</div>
+          <div class="guide-detail">
+            <ul class="criteria-list">
+              <li><strong>Credito e debito:</strong> separa horas que entram e horas que saem do banco.</li>
+              <li><strong>Saldo final:</strong> confere se o saldo acumulado faz sentido depois das movimentacoes da competencia.</li>
+              <li><strong>Saldos altos ou negativos:</strong> destaca casos fora do padrao para tratativa com gestor ou DP.</li>
+              <li><strong>Movimentacao incomum:</strong> aponta credito/debito muito alto no periodo.</li>
+              <li><strong>Colaborador sem movimentacao esperada:</strong> ajuda a localizar quem deveria ter reflexo no banco e nao teve.</li>
+            </ul>
+          </div>
         </details>
 
         <details class="guide-item">
           <summary>
             <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12c0 4.97-4.03 9-9 9"></path><path d="M3 12a9 9 0 0 1 9-9v9z"></path><path d="M12 3a9 9 0 0 1 9 9h-9z"></path></svg>
-            <span><strong>Relatorio de Marcacoes</strong><span>Analisa batidas registradas e padroes de frequencia.</span></span>
+            <span><strong>Relatorio de Marcacoes</strong><span>Analisa as batidas registradas por dia e colaborador.</span></span>
             <svg class="guide-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
           </summary>
-          <div class="guide-detail">Resume as marcacoes importadas para encontrar ausencias de batida, excesso de registros, concentracoes por dia e sinais de tratamento manual necessario.</div>
+          <div class="guide-detail">
+            <ul class="criteria-list">
+              <li><strong>Dias sem marcacao:</strong> mostra colaborador com dia esperado sem batida registrada.</li>
+              <li><strong>Marcacao impar:</strong> aponta quantidade de batidas que nao fecha pares de entrada/saida.</li>
+              <li><strong>Excesso de marcacoes:</strong> evidencia dias com muitas batidas para revisar duplicidade ou correcao.</li>
+              <li><strong>Padrao por dia:</strong> agrupa ocorrencias por data para enxergar concentracoes de problema.</li>
+              <li><strong>Colaborador recorrente:</strong> ajuda a ver quem aparece repetidamente nas inconsistencias.</li>
+            </ul>
+          </div>
         </details>
 
         <details class="guide-item">
           <summary>
             <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-            <span><strong>Conferencia de Folha</strong><span>Confere lancamentos antes de consolidar pagamento.</span></span>
+            <span><strong>Conferencia de Folha</strong><span>Cruza eventos, rubricas, valores e colaboradores entre arquivos.</span></span>
             <svg class="guide-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
           </summary>
-          <div class="guide-detail">Cruza itens que podem refletir na folha, priorizando diferencas de valores, rubricas, eventos e colaboradores que precisam de validacao antes do envio final.</div>
+          <div class="guide-detail">
+            <ul class="criteria-list">
+              <li><strong>Colaborador em uma planilha e ausente na outra:</strong> identifica chapa/CPF/matricula que tem lancamento em uma base, mas nao tem contrapartida na outra.</li>
+              <li><strong>Nome divergente:</strong> confere se o mesmo identificador aparece com nome diferente entre os arquivos.</li>
+              <li><strong>Rubrica ou evento sem contrapartida:</strong> mostra verba existente em uma planilha e inexistente na base comparada.</li>
+              <li><strong>Valor divergente:</strong> aponta quando o mesmo colaborador e a mesma rubrica existem nas duas bases, mas com valores diferentes.</li>
+              <li><strong>Referencia ou quantidade divergente:</strong> confere diferencas de horas, dias, quantidade ou percentual quando essas colunas existem.</li>
+              <li><strong>Duplicidade de lancamento:</strong> sinaliza mesmo colaborador/evento repetido, evitando pagamento ou desconto em dobro.</li>
+              <li><strong>Total por colaborador:</strong> compara o somatorio dos lancamentos para encontrar diferenca mesmo quando o detalhe parece parecido.</li>
+              <li><strong>Eventos zerados, negativos ou fora do padrao:</strong> destaca valores que precisam de validacao manual antes do fechamento.</li>
+            </ul>
+          </div>
         </details>
 
         <details class="guide-item">
           <summary>
             <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path><path d="M12 7v5l3 2"></path></svg>
-            <span><strong>Historico e Excecoes</strong><span>Guarda contexto e separa casos justificados.</span></span>
+            <span><strong>Historico e Excecoes</strong><span>Usa fechamentos anteriores e justificativas aprovadas.</span></span>
             <svg class="guide-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
           </summary>
-          <div class="guide-detail">Permite carregar fechamentos anteriores e registrar excecoes aprovadas, para que reincidencias e justificativas fiquem consistentes entre competencias.</div>
+          <div class="guide-detail">
+            <ul class="criteria-list">
+              <li><strong>Reincidencia:</strong> compara o fechamento atual com historicos carregados para ver se o caso se repete.</li>
+              <li><strong>Excecao cadastrada:</strong> separa apontamentos ja justificados dos itens novos que precisam de analise.</li>
+              <li><strong>Competencia anterior:</strong> permite conferir se uma pendencia vem de meses anteriores ou nasceu no periodo atual.</li>
+              <li><strong>Consistencia da justificativa:</strong> ajuda a manter o mesmo tratamento para casos equivalentes.</li>
+              <li><strong>Rastro de auditoria:</strong> preserva o contexto usado pela equipe para explicar por que algo foi aceito ou tratado.</li>
+            </ul>
+          </div>
         </details>
       </div>
 
-      <p class="guide-note">A guia explica o objetivo da validacao. O resultado exato continua sendo calculado dentro de cada modulo, a partir dos arquivos importados e filtros selecionados.</p>
+      <p class="guide-note">A conferencia depende das colunas disponiveis nos arquivos importados. Quando uma coluna nao existe na planilha, o hub nao inventa o criterio: ele usa os identificadores e campos encontrados para apontar o que precisa de revisao.</p>
     </aside>
   </section>
 
