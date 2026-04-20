@@ -19,6 +19,12 @@ dist/desktop/HubRH-Windows.zip
 
 O ZIP pode ser distribuido internamente. A pessoa extrai a pasta e abre `HubRH.exe`.
 
+O executavel e compilado com o icone:
+
+```text
+assets/icons/hub-rh.ico
+```
+
 ## Requisitos no PC
 
 - Windows 10/11.

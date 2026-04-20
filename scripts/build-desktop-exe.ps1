@@ -11,9 +11,17 @@ $DistRoot = Join-Path $RepoRoot "dist\desktop"
 $AppDist = Join-Path $DistRoot "HubRH-Windows"
 $ZipPath = Join-Path $DistRoot "HubRH-Windows.zip"
 $Csc = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+$IconPath = Join-Path $RepoRoot "assets\icons\hub-rh.ico"
 
 if (-not (Test-Path -LiteralPath $Csc)) {
   throw "Compilador C# nao encontrado: $Csc"
+}
+
+if (-not (Test-Path -LiteralPath $IconPath)) {
+  & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $ScriptDir "gerar-icone-windows.ps1")
+  if ($LASTEXITCODE -ne 0) {
+    throw "Falha ao gerar icone Windows"
+  }
 }
 
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $PackageFile) | Out-Null
@@ -55,6 +63,7 @@ $ExePath = Join-Path $AppDist "HubRH.exe"
   /target:winexe `
   /platform:x64 `
   /out:$ExePath `
+  /win32icon:$IconPath `
   /reference:System.dll `
   /reference:System.Core.dll `
   /reference:System.Drawing.dll `

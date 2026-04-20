@@ -1,5 +1,10 @@
 # Changelog
 
+## Desktop Icone - 2026-04-20
+
+- Adiciona geracao de icone Windows `.ico` para o app desktop.
+- Recompila `HubRH.exe` com icone proprio embutido.
+
 ## Desktop EXE - 2026-04-20
 
 - Adiciona app Windows portatil `HubRH.exe` com WebView2.
