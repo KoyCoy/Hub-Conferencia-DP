@@ -3,3 +3,8 @@ hub_rh_v7_backup_*.html
 *.log
 .DS_Store
 Thumbs.db
+mobile/android/build/
+mobile/android/keystore/*.jks
+mobile/android/keystore/*.keystore
+mobile/android/*.idsig
+mobile/android/dist/*.idsig

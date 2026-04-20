@@ -13,3 +13,4 @@
 - Clique na caixa inteira para selecionar arquivos, sem abertura duplicada do seletor.
 - Organizacao inicial do projeto no GitHub.
 - Script local de publicacao e workflow preparado para GitHub Pages.
+- Primeira versao de APK interno Android com WebView, selecao de arquivos, downloads e impressao/PDF via sistema Android.

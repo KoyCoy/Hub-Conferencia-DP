@@ -16,6 +16,24 @@ Depois de alterar o `hub_rh_v7.html`, publique a nova versao com:
 
 O script atualiza tambem o `index.html`, cria um commit e envia para o GitHub.
 
+## APK interno
+
+O projeto tambem possui uma versao Android interna em `mobile/android`.
+
+O APK atual fica em:
+
+```text
+mobile/android/dist/hub-rh-1.0.0.apk
+```
+
+Para gerar novamente:
+
+```powershell
+.\mobile\android\build-apk.ps1
+```
+
+Para atualizar nos celulares da equipe, envie o APK novo e instale por cima. Isso funciona enquanto o app mantiver o mesmo package name, a mesma chave de assinatura e um `versionCode` maior.
+
 ## Modulos atuais
 
 - Ocorrencias
