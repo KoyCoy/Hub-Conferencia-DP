@@ -1,5 +1,11 @@
 # Changelog
 
+## Desktop Windows - 2026-04-20
+
+- Adiciona launcher do Hub RH para abrir como aplicativo no Microsoft Edge.
+- Adiciona instalador de atalhos para Area de Trabalho e Menu Iniciar.
+- Adiciona comandos `.cmd` para facilitar instalacao e abertura sem digitar PowerShell.
+
 ## 1.0.6 - 2026-04-20
 
 - Libera rotacao do APK para usar em modo paisagem.

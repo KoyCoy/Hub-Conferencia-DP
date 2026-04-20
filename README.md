@@ -2,7 +2,25 @@
 
 Aplicacao HTML unica para apoiar rotinas de conferencia do Departamento Pessoal.
 
-## Como usar
+## Como usar no PC
+
+Para usar como aplicativo no Windows, instale os atalhos do Hub RH:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ".\desktop\windows\Instalar-HubRH.ps1"
+```
+
+Ou de dois cliques em `desktop/windows/Instalar-HubRH.cmd`.
+
+Isso cria o app `Hub RH` na Area de Trabalho e no Menu Iniciar. Ele abre em uma janela propria do Microsoft Edge, sem barra de endereco.
+
+Tambem da para abrir sem instalar:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ".\desktop\windows\HubRH-Launcher.ps1"
+```
+
+## Como usar no navegador
 
 Abra o arquivo `hub_rh_v7.html` no navegador. O arquivo `index.html` e uma copia do HTML principal para facilitar publicacao no GitHub Pages.
 
