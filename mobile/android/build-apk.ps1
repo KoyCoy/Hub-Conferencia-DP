@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
-$VersionName = "1.0.0"
-$VersionCode = "1"
+$VersionName = "1.0.1"
+$VersionCode = "2"
 $PackageName = "br.com.koycoy.hubrh"
 
 $SourceProjectDir = $PSScriptRoot

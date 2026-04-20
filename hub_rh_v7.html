@@ -396,6 +396,154 @@
   body.dark-mode #lgpdBar svg {
     stroke: #4ade80 !important;
   }
+  /* Mobile shell layout for APK and narrow browsers */
+
+  @media (max-width: 760px) {
+    :root { --sidebar-width: 100%; }
+
+    html,
+    body {
+      width: 100%;
+      min-width: 0;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar {
+      width: 100%;
+      flex: 0 0 auto;
+      max-height: 160px;
+      border-right: none;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-header {
+      height: 48px;
+      padding: 0 12px;
+      gap: 8px;
+    }
+
+    .logo-box {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      flex: 0 0 auto;
+    }
+
+    .sidebar-header h1 {
+      font-size: 0.82rem !important;
+      line-height: 1.1;
+      max-width: calc(100vw - 54px);
+    }
+
+    .sidebar-nav {
+      padding: 8px 10px 10px;
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      flex: 0 0 auto;
+    }
+
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+    .nav-label,
+    .sidebar-footer { display: none; }
+
+    .tab-btn {
+      width: auto;
+      min-width: 128px;
+      flex: 0 0 auto;
+      justify-content: center;
+      padding: 9px 10px;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .tab-btn i {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 auto;
+    }
+
+    .main-wrapper {
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: 44px;
+      padding: 0 12px;
+      gap: 10px;
+    }
+
+    .breadcrumb {
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 0.78rem;
+    }
+
+    .breadcrumb .current {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-actions { gap: 8px; }
+    .topbar-actions .footer-help-btn { display: none; }
+    .icon-btn { width: 34px; height: 34px; }
+
+    .content-container {
+      padding: 8px;
+      padding-bottom: 34px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .iframe-card {
+      border-radius: 10px;
+      min-width: 0;
+    }
+
+    iframe {
+      width: 100%;
+      min-width: 0;
+    }
+
+    #lgpdBar {
+      min-height: 26px !important;
+      padding: 4px 8px !important;
+      gap: 6px !important;
+      justify-content: center !important;
+      overflow: hidden !important;
+    }
+
+    #lgpdBar span {
+      font-size: 9px !important;
+      white-space: nowrap !important;
+    }
+
+    #lgpdBar .footer-version {
+      display: inline !important;
+      font-size: 9px !important;
+    }
+
+    .flow-modal-overlay { padding: 10px; }
+    .flow-modal {
+      max-height: calc(100dvh - 20px);
+      overflow: auto;
+      border-radius: 12px;
+      padding: 18px;
+    }
+  }
+
   @media print {
 
     #lgpdBar {
@@ -7102,6 +7250,177 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       border-radius: 999px !important;
     }
 
+    /* Mobile iframe layout for APK and narrow browsers */
+    @media (max-width: 760px) {
+      html,
+      body {
+        width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+      }
+
+      body {
+        font-size: 13px !important;
+      }
+
+      .container,
+      .wrap {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 12px 10px 18px !important;
+      }
+
+      header,
+      .report-header,
+      .section-header,
+      .card,
+      .panel,
+      .summary-card,
+      .upload-zone,
+      .upload-box,
+      .upload-panel,
+      .ponto-row,
+      .filter-bar,
+      .config-row,
+      .table-wrap,
+      .detail-inner,
+      .freq-card {
+        border-radius: 8px !important;
+        max-width: 100% !important;
+      }
+
+      header,
+      .report-header,
+      .section-header {
+        padding: 14px !important;
+        margin-bottom: 12px !important;
+      }
+
+      h1 {
+        font-size: 1.15rem !important;
+        line-height: 1.22 !important;
+        overflow-wrap: anywhere !important;
+      }
+
+      h2 { font-size: 1rem !important; }
+      h3 { font-size: 0.92rem !important; }
+      p, label, small, span { max-width: 100%; }
+
+      .tabs,
+      .mode-tabs,
+      .view-tabs,
+      .sub-tabs {
+        display: flex !important;
+        overflow-x: auto !important;
+        gap: 8px !important;
+        padding-bottom: 6px !important;
+        scrollbar-width: none !important;
+      }
+
+      .tabs::-webkit-scrollbar,
+      .mode-tabs::-webkit-scrollbar,
+      .view-tabs::-webkit-scrollbar,
+      .sub-tabs::-webkit-scrollbar { display: none; }
+
+      .tab-btn,
+      .mode-tab,
+      .vtab-btn,
+      .stab,
+      .subtab,
+      .btn,
+      button {
+        min-height: 36px !important;
+        white-space: normal !important;
+      }
+
+      .tab-btn,
+      .mode-tab,
+      .vtab-btn,
+      .stab,
+      .subtab {
+        flex: 0 0 auto !important;
+        min-width: 132px !important;
+        font-size: 12px !important;
+      }
+
+      .upload-grid,
+      .upload-grid-2,
+      .summary-grid,
+      .kpi-grid,
+      .metrics-grid,
+      .freq-grid,
+      .cards-grid,
+      .step-flow {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      .step-arrow { display: none !important; }
+
+      .upload-zone,
+      .upload-box,
+      .upload-panel {
+        padding: 18px 12px !important;
+        min-height: 128px !important;
+      }
+
+      .upload-zone .icon,
+      .upload-box .icon,
+      .upload-panel .up-icon {
+        margin-bottom: 8px !important;
+      }
+
+      .filter-bar,
+      .actions,
+      .report-header,
+      .config-row,
+      .ponto-row {
+        flex-wrap: wrap !important;
+      }
+
+      .filter-bar input,
+      .filter-bar select,
+      .config-row input,
+      .config-row select {
+        min-width: min(100%, 160px) !important;
+        max-width: 100% !important;
+      }
+
+      .table-wrap,
+      table {
+        max-width: 100% !important;
+      }
+
+      .table-wrap {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      table {
+        width: max-content !important;
+        min-width: 100% !important;
+      }
+
+      th,
+      td {
+        font-size: 11px !important;
+        white-space: nowrap !important;
+      }
+
+      .td-nome,
+      .td-secao {
+        min-width: 150px !important;
+        max-width: 190px !important;
+        white-space: normal !important;
+      }
+
+      .flow-modal,
+      .modal,
+      .dialog {
+        max-width: calc(100vw - 20px) !important;
+      }
+    }
     /* Print/PDF must always be light, even when the UI is dark */
     @media print {
       :root,
@@ -7611,5 +7930,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 
 </body>
 </html>
+
+
 
 

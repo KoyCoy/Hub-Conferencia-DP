@@ -13,13 +13,13 @@ Na pasta raiz do projeto, execute:
 O APK gerado fica em:
 
 ```text
-mobile/android/dist/hub-rh-1.0.0.apk
+mobile/android/dist/hub-rh-1.0.1.apk
 ```
 
 ## Instalar na equipe
 
 1. Envie o APK para o celular, por OneDrive, WhatsApp, e-mail ou cabo USB.
-2. Toque no arquivo `hub-rh-1.0.0.apk`.
+2. Toque no arquivo `hub-rh-1.0.1.apk`.
 3. Se o Android pedir permissao, permita instalar apps desta fonte.
 4. Abra o app `Hub RH`.
 

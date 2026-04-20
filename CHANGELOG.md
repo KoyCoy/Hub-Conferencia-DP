@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 - 2026-04-20
+
+- Ajuste responsivo para APK/celular: menu no topo, conteudo em largura total e modulos adaptados a telas pequenas.
+
 ## 1.0.0 - 2026-04-19
 
 - Padronizacao visual dos modulos.
