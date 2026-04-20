@@ -173,6 +173,7 @@
     color: var(--text-muted);
     white-space: nowrap;
   }
+  .footer-mobile { display: none; }
   .footer-help-btn {
     border: 1px solid var(--border-subtle);
     background: var(--bg-surface);
@@ -417,7 +418,7 @@
     .sidebar {
       width: 100%;
       flex: 0 0 auto;
-      max-height: 160px;
+      max-height: none;
       border-right: none;
       border-bottom: 1px solid var(--border-subtle);
     }
@@ -443,27 +444,25 @@
 
     .sidebar-nav {
       padding: 8px 10px 10px;
-      display: flex;
-      flex-direction: row;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      scrollbar-width: none;
+      overflow: visible;
       flex: 0 0 auto;
     }
 
-    .sidebar-nav::-webkit-scrollbar { display: none; }
     .nav-label,
     .sidebar-footer { display: none; }
 
     .tab-btn {
-      width: auto;
-      min-width: 128px;
-      flex: 0 0 auto;
+      width: 100%;
+      min-width: 0;
+      flex: none;
       justify-content: center;
       padding: 9px 10px;
-      font-size: 0.78rem;
-      white-space: nowrap;
+      font-size: 0.74rem;
+      line-height: 1.15;
+      white-space: normal;
     }
 
     .tab-btn i {
@@ -502,7 +501,7 @@
 
     .content-container {
       padding: 8px;
-      padding-bottom: 34px;
+      padding-bottom: 52px;
       min-width: 0;
       overflow: hidden;
     }
@@ -518,16 +517,27 @@
     }
 
     #lgpdBar {
-      min-height: 26px !important;
-      padding: 4px 8px !important;
-      gap: 6px !important;
+      height: auto !important;
+      min-height: 32px !important;
+      padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px)) !important;
+      gap: 5px !important;
       justify-content: center !important;
-      overflow: hidden !important;
+      overflow: visible !important;
+      flex-wrap: nowrap !important;
+      bottom: 0 !important;
     }
+
+    #lgpdBar > svg:last-child { display: none !important; }
+    #lgpdBar .footer-help-btn { display: none !important; }
+    #lgpdBar .footer-full { display: none !important; }
+    #lgpdBar .footer-mobile { display: inline !important; }
 
     #lgpdBar span {
       font-size: 9px !important;
+      line-height: 1.25 !important;
       white-space: nowrap !important;
+      text-align: center !important;
+      letter-spacing: 0 !important;
     }
 
     #lgpdBar .footer-version {
@@ -5439,7 +5449,7 @@ function checkTipoA(tipoA64, chapasP5, evtsByChapa, info30){
 // ═══ Salvar Fechamento ═══════════════════════════════════════════════
 
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.0.0'; } catch(e) { return '1.0.0'; }
+  try { return window.parent.HUB_RH_VERSION || '1.0.2'; } catch(e) { return '1.0.2'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -6488,7 +6498,7 @@ function renderRegraDetalhe(){
 
 // ── TAB: COMPETÊNCIA ─────────────────────────────────────────────────────────
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.0.0'; } catch(e) { return '1.0.0'; }
+  try { return window.parent.HUB_RH_VERSION || '1.0.2'; } catch(e) { return '1.0.2'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -7311,16 +7321,11 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       .view-tabs,
       .sub-tabs {
         display: flex !important;
-        overflow-x: auto !important;
+        flex-wrap: wrap !important;
+        overflow: visible !important;
         gap: 8px !important;
         padding-bottom: 6px !important;
-        scrollbar-width: none !important;
       }
-
-      .tabs::-webkit-scrollbar,
-      .mode-tabs::-webkit-scrollbar,
-      .view-tabs::-webkit-scrollbar,
-      .sub-tabs::-webkit-scrollbar { display: none; }
 
       .tab-btn,
       .mode-tab,
@@ -7338,9 +7343,9 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       .vtab-btn,
       .stab,
       .subtab {
-        flex: 0 0 auto !important;
-        min-width: 132px !important;
-        font-size: 12px !important;
+        flex: 1 1 calc(50% - 8px) !important;
+        min-width: min(100%, 132px) !important;
+        font-size: 11.5px !important;
       }
 
       .upload-grid,
@@ -7814,7 +7819,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 </script>
 
   <script>
-    const HUB_RH_VERSION = '1.0.0';
+    const HUB_RH_VERSION = '1.0.2';
     const HUB_RH_VERSION_DATE = '18/04/2026';
     window.HUB_RH_VERSION = HUB_RH_VERSION;
     window.HUB_RH_VERSION_DATE = HUB_RH_VERSION_DATE;
@@ -7867,8 +7872,11 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
     font-family: inherit; pointer-events: auto;
   " id="lgpdBar">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    <span style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Hub RH v1.0.0</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
+    <span class="footer-full" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
+      <span data-hub-version>Hub RH v1.0.2</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
+    </span>
+    <span class="footer-mobile" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
+      <span data-hub-version>Hub RH v1.0.2</span> · Processamento local · LGPD
     </span>
     <button type="button" class="footer-help-btn" onclick="openTeamFlowModal()">Fluxo de equipe</button>
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -7882,7 +7890,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         <div class="flow-step"><div class="num">1</div><div><strong>Centralize os arquivos JSON</strong><span>Crie ou use uma pasta compartilhada no OneDrive, por exemplo: RH / Hub RH / Fechamentos JSON.</span></div></div>
         <div class="flow-step"><div class="num">2</div><div><strong>Antes de uma nova conferencia</strong><span>Na aba Historico &amp; Excecoes, carregue os fechamentos anteriores e o arquivo de excecoes ativo, se existir.</span></div></div>
         <div class="flow-step"><div class="num">3</div><div><strong>Depois de salvar o fechamento</strong><span>Guarde o JSON gerado na mesma pasta do OneDrive e mantenha o nome por competencia, como conferencia_03-2026.json.</span></div></div>
-        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Hub RH v1.0.0</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
+        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Hub RH v1.0.2</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
       </div>
       <div class="flow-note">O navegador nao salva automaticamente direto no OneDrive. Baixe o JSON e mova/salve na pasta compartilhada combinada pela equipe.</div>
       <div class="flow-actions">
@@ -7930,6 +7938,8 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 
 </body>
 </html>
+
+
 
 
 

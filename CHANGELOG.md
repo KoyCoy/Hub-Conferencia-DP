@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 - 2026-04-20
+
+- Menu principal mobile em grade visivel, sem depender de arrastar lateralmente.
+- Sub-abas mobile em quebra de linha para revelar todas as funcionalidades.
+- Rodape mobile compacto para evitar corte na barra inferior do Android.
+
 ## 1.0.1 - 2026-04-20
 
 - Ajuste responsivo para APK/celular: menu no topo, conteudo em largura total e modulos adaptados a telas pequenas.
