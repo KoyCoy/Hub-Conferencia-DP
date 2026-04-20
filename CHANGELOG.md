@@ -1,5 +1,11 @@
 # Changelog
 
+## Desktop EXE - 2026-04-20
+
+- Adiciona app Windows portatil `HubRH.exe` com WebView2.
+- Adiciona script `scripts/build-desktop-exe.ps1` para gerar `dist/desktop/HubRH-Windows.zip`.
+- Atualiza guias do SharePoint/PWA para incluir Google Chrome.
+
 ## SharePoint - 2026-04-20
 
 - Adiciona pacote de publicacao para SharePoint.

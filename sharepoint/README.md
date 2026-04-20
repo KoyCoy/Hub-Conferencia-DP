@@ -4,12 +4,20 @@ Este e o caminho recomendado para usar o Hub RH nos PCs da empresa sem depender 
 
 ## Ideia
 
-Subir os arquivos estaticos do Hub RH em uma pasta do SharePoint e abrir o `index.html` pelo Microsoft Edge.
+Subir os arquivos estaticos do Hub RH em uma pasta do SharePoint e abrir o `index.html` pelo Microsoft Edge ou Google Chrome.
 
-Depois, cada pessoa instala pelo proprio Edge:
+Depois, cada pessoa instala pelo proprio navegador.
+
+No Edge:
 
 ```text
 ... > Apps > Instalar este site como aplicativo
+```
+
+No Chrome:
+
+```text
+⋮ > Transmitir, salvar e compartilhar > Instalar pagina como app
 ```
 
 O Windows cria um app `Hub RH` no Menu Iniciar e ele abre em janela propria.
@@ -33,7 +41,7 @@ Documentos Compartilhados / Hub RH App
 
 2. Envie para essa pasta todo o conteudo do pacote `dist/sharepoint/HubRH-SharePoint.zip`.
 
-3. Abra o arquivo `index.html` pelo Microsoft Edge.
+3. Abra o arquivo `index.html` pelo Microsoft Edge ou Google Chrome.
 
 4. No Edge, use:
 

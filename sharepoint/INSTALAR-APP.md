@@ -1,12 +1,30 @@
 # Como instalar o Hub RH pelo SharePoint
 
-1. Abra o link do Hub RH no Microsoft Edge.
+1. Abra o link do Hub RH no Microsoft Edge ou Google Chrome.
 
-2. No canto superior direito, clique em `...`.
+2. No canto superior direito, clique no menu do navegador.
 
-3. Entre em `Apps`.
+## No Microsoft Edge
 
-4. Clique em `Instalar este site como aplicativo`.
+Use:
+
+```text
+... > Apps > Instalar este site como aplicativo
+```
+
+## No Google Chrome
+
+Use:
+
+```text
+⋮ > Transmitir, salvar e compartilhar > Instalar pagina como app
+```
+
+Dependendo da versao do Chrome, tambem pode aparecer como:
+
+```text
+⋮ > Salvar e compartilhar > Criar atalho > Abrir como janela
+```
 
 5. Confirme o nome:
 
@@ -22,10 +40,11 @@ Hub RH
 
 ## Se nao aparecer a opcao de instalar
 
-Use uma destas opcoes no Edge:
+Use uma destas opcoes:
 
 - `... > Apps > Instalar este site como aplicativo`
 - ou clique no icone de instalacao que pode aparecer na barra de endereco.
+- no Chrome, procure por `Instalar pagina como app` ou `Criar atalho`.
 
 Se ainda nao aparecer, provavelmente o SharePoint esta abrindo o arquivo HTML em modo de visualizacao/download. Nesse caso, acione a TI para publicar a pasta como site interno ou conteudo estatico.
 

@@ -6,10 +6,24 @@ Aplicacao HTML unica para apoiar rotinas de conferencia do Departamento Pessoal.
 
 ### Opcao recomendada na empresa: instalar pelo Edge
 
-Publique o pacote em uma pasta do SharePoint e abra o `index.html` no Microsoft Edge. Depois use:
+Publique o pacote em uma pasta do SharePoint e abra o `index.html` no Microsoft Edge ou Google Chrome.
+
+No Edge:
 
 ```text
 Menu ... > Apps > Instalar este site como aplicativo
+```
+
+No Chrome:
+
+```text
+Menu ⋮ > Transmitir, salvar e compartilhar > Instalar pagina como app
+```
+
+Em algumas versoes do Chrome, a opcao aparece como:
+
+```text
+Menu ⋮ > Salvar e compartilhar > Criar atalho > Abrir como janela
 ```
 
 Essa opcao nao depende de `.cmd`, PowerShell ou instalador. O Windows cria o app no Menu Iniciar pelo proprio navegador.
@@ -25,6 +39,23 @@ O ZIP fica em:
 ```text
 dist/sharepoint/HubRH-SharePoint.zip
 ```
+
+## App desktop EXE portatil
+
+Para gerar uma versao Windows com `HubRH.exe`:
+
+```powershell
+.\scripts\build-desktop-exe.ps1
+```
+
+Saidas:
+
+```text
+dist/desktop/HubRH-Windows/HubRH.exe
+dist/desktop/HubRH-Windows.zip
+```
+
+Essa versao usa WebView2. Ela nao precisa abrir Chrome/Edge manualmente, mas ainda e um pacote portatil, nao um instalador MSI assinado.
 
 ### Opcao local por atalho
 
