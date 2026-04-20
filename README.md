@@ -23,7 +23,7 @@ O projeto tambem possui uma versao Android interna em `mobile/android`.
 O APK atual fica em:
 
 ```text
-mobile/android/dist/hub-rh-1.0.3.apk
+mobile/android/dist/hub-rh-1.0.4.apk
 ```
 
 Para gerar novamente:

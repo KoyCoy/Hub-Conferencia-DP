@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 - 2026-04-20
+
+- Corrige corte de listas e relatorios no APK mobile.
+- Iframes passam a crescer conforme o conteudo no celular, usando rolagem da pagina inteira.
+- Mantem menu e abas recolhiveis sem prender resultados grandes dentro de uma area fixa.
+
 ## 1.0.3 - 2026-04-20
 
 - Menu principal mobile recolhivel para liberar espaco vertical.
