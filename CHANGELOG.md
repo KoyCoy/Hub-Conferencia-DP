@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.6 - 2026-04-20
+
+- Libera rotacao do APK para usar em modo paisagem.
+- Corrige crescimento infinito da rolagem vertical no mobile.
+- Amplia o layout mobile para telas de celular em paisagem.
+
 ## 1.0.5 - 2026-04-20
 
 - Corrige corte lateral de tabelas/listas no APK mobile.

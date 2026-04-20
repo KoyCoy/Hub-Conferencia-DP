@@ -418,7 +418,7 @@
   }
   /* Mobile shell layout for APK and narrow browsers */
 
-  @media (max-width: 760px) {
+  @media (max-width: 960px) {
     :root { --sidebar-width: 100%; }
 
     html,
@@ -5505,7 +5505,7 @@ function checkTipoA(tipoA64, chapasP5, evtsByChapa, info30){
 // ═══ Salvar Fechamento ═══════════════════════════════════════════════
 
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.0.5'; } catch(e) { return '1.0.5'; }
+  try { return window.parent.HUB_RH_VERSION || '1.0.6'; } catch(e) { return '1.0.6'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -6554,7 +6554,7 @@ function renderRegraDetalhe(){
 
 // ── TAB: COMPETÊNCIA ─────────────────────────────────────────────────────────
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.0.5'; } catch(e) { return '1.0.5'; }
+  try { return window.parent.HUB_RH_VERSION || '1.0.6'; } catch(e) { return '1.0.6'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -7321,7 +7321,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
     }
 
     /* Mobile iframe layout for APK and narrow browsers */
-    @media (max-width: 760px) {
+    @media (max-width: 960px) {
       html,
       body {
         width: 100% !important;
@@ -7884,7 +7884,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   }
 
   function isMobileShell() {
-    return window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    return window.matchMedia && window.matchMedia('(max-width: 960px)').matches;
   }
 
   function resizeMobileFrame(frame, doc) {
@@ -7892,16 +7892,24 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       if (frame) frame.style.height = '';
       return;
     }
-    const root = doc.documentElement;
     const body = doc.body;
-    const contentHeight = Math.max(
-      root ? root.scrollHeight : 0,
-      root ? root.offsetHeight : 0,
-      body ? body.scrollHeight : 0,
-      body ? body.offsetHeight : 0,
-      window.innerHeight - 122
-    );
-    frame.style.height = Math.ceil(contentHeight + 24) + 'px';
+    if (!body) return;
+    const minHeight = Math.max(360, window.innerHeight - 122);
+    let contentBottom = 0;
+    Array.from(body.children).forEach(child => {
+      const rect = child.getBoundingClientRect();
+      const style = doc.defaultView.getComputedStyle(child);
+      const marginBottom = parseFloat(style.marginBottom) || 0;
+      contentBottom = Math.max(contentBottom, rect.bottom + marginBottom);
+    });
+    const bodyStyle = doc.defaultView.getComputedStyle(body);
+    const bodyPaddingBottom = parseFloat(bodyStyle.paddingBottom) || 0;
+    const contentHeight = Math.max(minHeight, contentBottom + bodyPaddingBottom + 12);
+    const nextHeight = Math.ceil(contentHeight);
+    const currentHeight = parseFloat(frame.style.height) || 0;
+    if (Math.abs(currentHeight - nextHeight) > 3) {
+      frame.style.height = nextHeight + 'px';
+    }
   }
 
   function enableMobileFrameResize(frame, doc) {
@@ -7979,7 +7987,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
     document.getElementById(id).classList.add('active');
     el.classList.add('active');
     document.getElementById('current-module').textContent = title;
-    if (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) {
+    if (window.matchMedia && window.matchMedia('(max-width: 960px)').matches) {
       setMobileMenuOpen(false);
     }
     setTimeout(syncIframes, 50);
@@ -8041,7 +8049,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 </script>
 
   <script>
-    const HUB_RH_VERSION = '1.0.5';
+    const HUB_RH_VERSION = '1.0.6';
     const HUB_RH_VERSION_DATE = '18/04/2026';
     window.HUB_RH_VERSION = HUB_RH_VERSION;
     window.HUB_RH_VERSION_DATE = HUB_RH_VERSION_DATE;
@@ -8095,10 +8103,10 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   " id="lgpdBar">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     <span class="footer-full" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Hub RH v1.0.5</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
+      <span data-hub-version>Hub RH v1.0.6</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
     </span>
     <span class="footer-mobile" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Hub RH v1.0.5</span> · Processamento local · LGPD
+      <span data-hub-version>Hub RH v1.0.6</span> · Processamento local · LGPD
     </span>
     <button type="button" class="footer-help-btn" onclick="openTeamFlowModal()">Fluxo de equipe</button>
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -8112,7 +8120,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         <div class="flow-step"><div class="num">1</div><div><strong>Centralize os arquivos JSON</strong><span>Crie ou use uma pasta compartilhada no OneDrive, por exemplo: RH / Hub RH / Fechamentos JSON.</span></div></div>
         <div class="flow-step"><div class="num">2</div><div><strong>Antes de uma nova conferencia</strong><span>Na aba Historico &amp; Excecoes, carregue os fechamentos anteriores e o arquivo de excecoes ativo, se existir.</span></div></div>
         <div class="flow-step"><div class="num">3</div><div><strong>Depois de salvar o fechamento</strong><span>Guarde o JSON gerado na mesma pasta do OneDrive e mantenha o nome por competencia, como conferencia_03-2026.json.</span></div></div>
-        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Hub RH v1.0.5</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
+        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Hub RH v1.0.6</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
       </div>
       <div class="flow-note">O navegador nao salva automaticamente direto no OneDrive. Baixe o JSON e mova/salve na pasta compartilhada combinada pela equipe.</div>
       <div class="flow-actions">
