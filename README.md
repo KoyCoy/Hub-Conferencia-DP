@@ -1,4 +1,4 @@
-# Hub RH - Conferencia DP
+﻿# Hub RH - Conferencia DP
 
 Aplicacao HTML unica para apoiar rotinas de conferencia do Departamento Pessoal.
 
@@ -17,13 +17,13 @@ Menu ... > Apps > Instalar este site como aplicativo
 No Chrome:
 
 ```text
-Menu ⋮ > Transmitir, salvar e compartilhar > Instalar pagina como app
+Menu â‹® > Transmitir, salvar e compartilhar > Instalar pagina como app
 ```
 
 Em algumas versoes do Chrome, a opcao aparece como:
 
 ```text
-Menu ⋮ > Salvar e compartilhar > Criar atalho > Abrir como janela
+Menu â‹® > Salvar e compartilhar > Criar atalho > Abrir como janela
 ```
 
 Essa opcao nao depende de `.cmd`, PowerShell ou instalador. O Windows cria o app no Menu Iniciar pelo proprio navegador.
@@ -96,7 +96,7 @@ O projeto tambem possui uma versao Android interna em `mobile/android`.
 O APK atual fica em:
 
 ```text
-mobile/android/dist/hub-rh-1.0.6.apk
+mobile/android/dist/hub-rh-1.1.0.apk
 ```
 
 Para gerar novamente:
@@ -134,4 +134,5 @@ O repositorio ja possui um workflow em `.github/workflows/pages.yml` para public
 1. Abra o repositorio no GitHub.
 2. Va em `Settings` > `Pages`.
 3. Em `Build and deployment`, selecione `GitHub Actions`.
-4. Rode o workflow `Publicar Hub RH` ou faça um novo push na branch `main`.
+4. Rode o workflow `Publicar Hub RH` ou faÃ§a um novo push na branch `main`.
+

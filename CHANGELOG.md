@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0 - 2026-04-20
+
+- Consolida a primeira release multi-plataforma do Hub RH.
+- Atualiza versao geral do hub para `1.1.0`.
+- Atualiza APK Android para `1.1.0` com `versionCode` 8.
+- Inclui app Windows portatil com `HubRH.exe` e icone proprio.
+- Inclui pacote SharePoint para publicacao interna.
+- Inclui suporte PWA, mesmo que o caminho oficial passe a ser SharePoint/EXE.
+
 ## Desktop Icone Janela - 2026-04-20
 
 - Define explicitamente o icone da janela do app desktop.

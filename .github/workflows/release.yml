@@ -1,0 +1,33 @@
+name: Criar Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar metadados
+        id: meta
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "asset_dir=release/$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          echo "notes=RELEASE_NOTES_${GITHUB_REF_NAME}.md" >> "$GITHUB_OUTPUT"
+
+      - name: Criar release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Hub RH ${{ github.ref_name }}
+          body_path: RELEASE_NOTES_${{ github.ref_name }}.md
+          files: release/${{ github.ref_name }}/*
+          fail_on_unmatched_files: true

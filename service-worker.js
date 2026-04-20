@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hub-rh-v1.0.6';
+﻿const CACHE_NAME = 'hub-rh-v1.1.0';
 const APP_ASSETS = [
   './',
   './index.html',
@@ -36,3 +36,4 @@ self.addEventListener('fetch', event => {
       .catch(() => caches.match(request).then(cached => cached || caches.match('./index.html')))
   );
 });
+

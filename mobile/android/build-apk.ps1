@@ -1,7 +1,7 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
-$VersionName = "1.0.6"
-$VersionCode = "7"
+$VersionName = "1.1.0"
+$VersionCode = "8"
 $PackageName = "br.com.koycoy.hubrh"
 
 $SourceProjectDir = $PSScriptRoot
@@ -138,3 +138,4 @@ Invoke-Tool $ApkSigner @(
 Invoke-Tool $ApkSigner @("verify", "--verbose", $FinalApk)
 
 Write-Host "APK gerado em: $FinalApk"
+
