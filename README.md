@@ -4,6 +4,18 @@ Aplicacao HTML unica para apoiar rotinas de conferencia do Departamento Pessoal.
 
 ## Como usar no PC
 
+### Opcao recomendada na empresa: instalar pelo Edge
+
+Depois que o GitHub Pages estiver publicado, abra o link do Hub RH no Microsoft Edge e use:
+
+```text
+Menu ... > Apps > Instalar este site como aplicativo
+```
+
+Essa opcao nao depende de `.cmd`, PowerShell ou instalador. O Windows cria o app no Menu Iniciar pelo proprio navegador.
+
+### Opcao local por atalho
+
 Para usar como aplicativo no Windows, instale os atalhos do Hub RH:
 
 ```powershell

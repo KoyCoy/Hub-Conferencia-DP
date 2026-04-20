@@ -1,5 +1,12 @@
 # Changelog
 
+## PWA Desktop - 2026-04-20
+
+- Adiciona manifesto PWA para instalar o Hub RH pelo Microsoft Edge/Chrome.
+- Adiciona service worker para cache basico da aplicacao publicada.
+- Adiciona icones PNG do Hub RH para instalacao como app.
+- Documenta fluxo sem `.cmd` para ambientes corporativos.
+
 ## Desktop Windows - 2026-04-20
 
 - Adiciona launcher do Hub RH para abrir como aplicativo no Microsoft Edge.

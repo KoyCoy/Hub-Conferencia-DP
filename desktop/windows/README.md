@@ -4,6 +4,17 @@ Esta pasta prepara o Hub RH para uso como aplicativo no PC da empresa.
 
 O app continua usando o mesmo `index.html` do projeto, mas abre em uma janela propria do Microsoft Edge, sem barra de endereco e sem precisar localizar o arquivo HTML manualmente.
 
+## Opcao mais indicada na empresa
+
+Se comandos `.cmd` ou PowerShell forem bloqueados, use a versao PWA pelo Microsoft Edge:
+
+1. Abra o link publicado do Hub RH no Edge.
+2. Clique em `...`.
+3. Va em `Apps`.
+4. Clique em `Instalar este site como aplicativo`.
+
+O proprio Edge cria o app no Windows, normalmente sem permissao de administrador.
+
 ## Instalar no PC
 
 No PowerShell, execute:
