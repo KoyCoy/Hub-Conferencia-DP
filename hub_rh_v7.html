@@ -5505,7 +5505,7 @@ function checkTipoA(tipoA64, chapasP5, evtsByChapa, info30){
 // ═══ Salvar Fechamento ═══════════════════════════════════════════════
 
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.0.4'; } catch(e) { return '1.0.4'; }
+  try { return window.parent.HUB_RH_VERSION || '1.0.5'; } catch(e) { return '1.0.5'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -6554,7 +6554,7 @@ function renderRegraDetalhe(){
 
 // ── TAB: COMPETÊNCIA ─────────────────────────────────────────────────────────
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.0.4'; } catch(e) { return '1.0.4'; }
+  try { return window.parent.HUB_RH_VERSION || '1.0.5'; } catch(e) { return '1.0.5'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -7483,13 +7483,26 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       }
 
       .table-wrap,
-      table {
+      .tw,
+      .table-card,
+      .shell-wide-scroll {
         max-width: 100% !important;
       }
 
-      .table-wrap {
+      .table-wrap,
+      .tw,
+      .table-card.shell-wide-scroll,
+      .shell-wide-scroll {
         overflow-x: auto !important;
+        overflow-y: visible !important;
         -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
+        overscroll-behavior-x: contain !important;
+        scrollbar-width: thin !important;
+      }
+
+      .shell-wide-scroll table {
+        display: table !important;
       }
 
       .results,
@@ -7497,11 +7510,15 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       #resultsSection,
       #reportSection {
         padding-bottom: 48px !important;
+        max-width: 100% !important;
+        overflow-x: visible !important;
       }
 
-      table {
+      table,
+      .shell-wide-table {
         width: max-content !important;
-        min-width: 100% !important;
+        min-width: max(100%, 720px) !important;
+        max-width: none !important;
       }
 
       th,
@@ -7859,6 +7876,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       doc.body.classList.toggle('dark-mode', document.body.classList.contains('dark-mode'));
       enableUploadBoxClicks(doc);
       enableMobileTabToggle(doc);
+      enableMobileWideTables(doc);
       enableMobileFrameResize(frame, doc);
       setTimeout(() => resizeMobileFrame(frame, doc), 80);
       setTimeout(() => resizeMobileFrame(frame, doc), 350);
@@ -7893,7 +7911,12 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
     frame.dataset.mobileResizeBound = '1';
 
     const run = () => resizeMobileFrame(frame, doc);
+    const scanWideTables = () => {
+      enableMobileWideTables(doc);
+      resizeMobileFrame(frame, doc);
+    };
     frame._hubRhResizeTimer = setInterval(run, 700);
+    frame._hubRhWideTableTimer = setInterval(scanWideTables, 1200);
     frame.addEventListener('load', run);
     window.addEventListener('resize', run);
 
@@ -7902,11 +7925,6 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       ro.observe(doc.body);
       if (doc.documentElement) ro.observe(doc.documentElement);
       frame._hubRhResizeObserver = ro;
-    }
-    if (window.MutationObserver) {
-      const mo = new MutationObserver(run);
-      mo.observe(doc.body, { childList: true, subtree: true, attributes: true });
-      frame._hubRhMutationObserver = mo;
     }
   }
 
@@ -7928,6 +7946,27 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       setTimeout(syncIframes, 50);
     });
     tabGroup.parentNode.insertBefore(btn, tabGroup);
+  }
+
+  function enableMobileWideTables(doc) {
+    if (!doc || !doc.body) return;
+    doc.querySelectorAll('table').forEach(table => {
+      table.classList.add('shell-wide-table');
+      let scroller = table.closest('.table-wrap, .tw, .shell-wide-scroll');
+      const card = table.closest('.table-card');
+      if (card) card.classList.add('shell-wide-scroll');
+      if (!scroller && table.parentElement) {
+        const parent = table.parentElement;
+        if (parent.children.length === 1) {
+          parent.classList.add('shell-wide-scroll');
+        } else {
+          const wrap = doc.createElement('div');
+          wrap.className = 'shell-wide-scroll';
+          parent.insertBefore(wrap, table);
+          wrap.appendChild(table);
+        }
+      }
+    });
   }
 
   function syncIframes() {
@@ -8002,7 +8041,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 </script>
 
   <script>
-    const HUB_RH_VERSION = '1.0.4';
+    const HUB_RH_VERSION = '1.0.5';
     const HUB_RH_VERSION_DATE = '18/04/2026';
     window.HUB_RH_VERSION = HUB_RH_VERSION;
     window.HUB_RH_VERSION_DATE = HUB_RH_VERSION_DATE;
@@ -8056,10 +8095,10 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   " id="lgpdBar">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     <span class="footer-full" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Hub RH v1.0.4</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
+      <span data-hub-version>Hub RH v1.0.5</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
     </span>
     <span class="footer-mobile" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Hub RH v1.0.4</span> · Processamento local · LGPD
+      <span data-hub-version>Hub RH v1.0.5</span> · Processamento local · LGPD
     </span>
     <button type="button" class="footer-help-btn" onclick="openTeamFlowModal()">Fluxo de equipe</button>
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -8073,7 +8112,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         <div class="flow-step"><div class="num">1</div><div><strong>Centralize os arquivos JSON</strong><span>Crie ou use uma pasta compartilhada no OneDrive, por exemplo: RH / Hub RH / Fechamentos JSON.</span></div></div>
         <div class="flow-step"><div class="num">2</div><div><strong>Antes de uma nova conferencia</strong><span>Na aba Historico &amp; Excecoes, carregue os fechamentos anteriores e o arquivo de excecoes ativo, se existir.</span></div></div>
         <div class="flow-step"><div class="num">3</div><div><strong>Depois de salvar o fechamento</strong><span>Guarde o JSON gerado na mesma pasta do OneDrive e mantenha o nome por competencia, como conferencia_03-2026.json.</span></div></div>
-        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Hub RH v1.0.4</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
+        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Hub RH v1.0.5</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
       </div>
       <div class="flow-note">O navegador nao salva automaticamente direto no OneDrive. Baixe o JSON e mova/salve na pasta compartilhada combinada pela equipe.</div>
       <div class="flow-actions">

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5 - 2026-04-20
+
+- Corrige corte lateral de tabelas/listas no APK mobile.
+- Tabelas largas passam a ter rolagem horizontal propria no celular.
+- Reforca wrappers dinamicos para tabelas geradas depois da analise.
+
 ## 1.0.4 - 2026-04-20
 
 - Corrige corte de listas e relatorios no APK mobile.
