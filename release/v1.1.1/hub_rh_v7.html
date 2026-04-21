@@ -1904,13 +1904,6 @@ function getAdjustmentType(text) {
   return '';
 }
 
-function getAdjustmentExpected(type) {
-  if (type === 'compensacao') return 'Esperado no corrigido: total com C na coluna Falta ou Atraso, nunca em Extra.';
-  if (type === 'falta') return 'Esperado no corrigido: total com D na coluna Falta.';
-  if (type === 'abono') return 'Esperado no corrigido: horas na coluna Abono, com atestado/declaracao/abono indicado.';
-  return 'Esperado no corrigido: destaque removido ou apontamento tratado.';
-}
-
 function tableCellText(tc) {
   var ts = tc ? tc.getElementsByTagNameNS(NS, 't') : [];
   var out = '';
@@ -2171,8 +2164,7 @@ async function parseDocx(file) {
       employee: emp.name,
       chapa: emp.chapa,
       key: key,
-      actionType: actionType,
-      expected: getAdjustmentExpected(actionType)
+      actionType: actionType
     });
   }
 
@@ -2869,13 +2861,13 @@ function sectionFlagged(flagged, afterData) {
     html += '&lt;div class=&quot;empty-state&quot;&gt;Nenhum registro com formatacao especial&lt;/div&gt;';
   } else {
     html += '&lt;table&gt;&lt;thead&gt;&lt;tr&gt;' + (isComp ? '&lt;th&gt;Status&lt;/th&gt;' : '') +
-      '&lt;th&gt;Funcionario&lt;/th&gt;&lt;th&gt;Chapa&lt;/th&gt;&lt;th&gt;Data&lt;/th&gt;&lt;th&gt;Dia&lt;/th&gt;&lt;th&gt;Trecho&lt;/th&gt;&lt;th&gt;Marcacoes&lt;/th&gt;&lt;th&gt;Conferencia esperada&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;';
+      '&lt;th&gt;Funcionario&lt;/th&gt;&lt;th&gt;Chapa&lt;/th&gt;&lt;th&gt;Data&lt;/th&gt;&lt;th&gt;Dia&lt;/th&gt;&lt;th&gt;Trecho&lt;/th&gt;&lt;th&gt;Marcacoes&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;';
     flagged.forEach(function(r) {
       var ok = isComp &amp;&amp; isResolvedItem(r, afterData);
       html += '&lt;tr&gt;' + (isComp ? '&lt;td&gt;&lt;span class=&quot;' + (ok ? 'status-ok' : 'status-pend') + '&quot;&gt;' + (ok ? 'Feito' : 'Pendente') + '&lt;/span&gt;&lt;/td&gt;' : '') +
         '&lt;td&gt;' + r.employee + '&lt;/td&gt;&lt;td&gt;' + r.chapa + '&lt;/td&gt;&lt;td&gt;' + r.date + '&lt;/td&gt;&lt;td&gt;' + r.day + '&lt;/td&gt;' +
         '&lt;td style=&quot;font-family:monospace;font-size:12px;max-width:180px;word-break:break-all&quot;&gt;' + r.text + '&lt;/td&gt;' +
-        '&lt;td&gt;' + tagHTML(r.reasons) + '&lt;/td&gt;&lt;td style=&quot;font-size:12px;color:#64748b;max-width:260px&quot;&gt;' + (r.expected || getAdjustmentExpected('')) + '&lt;/td&gt;&lt;/tr&gt;';
+        '&lt;td&gt;' + tagHTML(r.reasons) + '&lt;/td&gt;&lt;/tr&gt;';
     });
     html += '&lt;/tbody&gt;&lt;/table&gt;';
   }
@@ -8855,7 +8847,6 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   </script>
 </body>
 </html>
-
 
 
 
