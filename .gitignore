@@ -1,4 +1,6 @@
 hub_rh_v7_backup_*.html
+backups/
+.claude/
 *.tmp
 *.log
 .DS_Store

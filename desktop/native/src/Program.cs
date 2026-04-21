@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
@@ -25,6 +26,7 @@ namespace HubRH
         public MainForm()
         {
             Text = "Hub RH";
+            BackColor = Color.FromArgb(15, 23, 42);
             Width = 1280;
             Height = 820;
             MinimumSize = new Size(960, 640);
@@ -34,11 +36,18 @@ namespace HubRH
             browser = new WebView2
             {
                 Dock = DockStyle.Fill,
-                AllowExternalDrop = true
+                AllowExternalDrop = true,
+                DefaultBackgroundColor = Color.FromArgb(15, 23, 42)
             };
             Controls.Add(browser);
 
             Load += async (sender, args) => await InitializeAsync();
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            EnableDarkTitleBar();
         }
 
         private static Icon LoadAppIcon()
@@ -94,5 +103,19 @@ namespace HubRH
 
             browser.CoreWebView2.Navigate(new Uri(htmlPath).AbsoluteUri);
         }
+
+        private void EnableDarkTitleBar()
+        {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT) return;
+
+            int enabled = 1;
+            if (DwmSetWindowAttribute(Handle, 20, ref enabled, sizeof(int)) != 0)
+            {
+                DwmSetWindowAttribute(Handle, 19, ref enabled, sizeof(int));
+            }
+        }
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
     }
 }

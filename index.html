@@ -216,6 +216,158 @@
     color: var(--brand-primary);
     border-color: var(--brand-primary);
   }
+  .module-help-btn {
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-app);
+    color: var(--text-base);
+    border-radius: 8px;
+    height: 36px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .module-help-btn:hover {
+    color: var(--brand-primary);
+    border-color: rgba(37, 99, 235, 0.35);
+  }
+  .module-help-btn i { width: 16px; height: 16px; }
+  .criteria-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: flex-end;
+    padding: 18px;
+  }
+  .criteria-modal-overlay.open { display: flex; }
+  .criteria-modal {
+    width: min(520px, 100%);
+    max-height: calc(100dvh - 36px);
+    overflow: hidden;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.24);
+    color: var(--text-strong);
+    display: flex;
+    flex-direction: column;
+  }
+  .criteria-head {
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: start;
+  }
+  .criteria-kicker {
+    margin: 0 0 5px;
+    color: var(--brand-primary);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+  .criteria-head h3 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.25;
+    color: var(--text-strong);
+  }
+  .criteria-head p {
+    margin: 7px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .criteria-close {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--bg-app);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .criteria-close:hover { color: var(--text-strong); }
+  .criteria-close i { width: 17px; height: 17px; }
+  .criteria-body {
+    padding: 12px;
+    overflow: auto;
+    display: grid;
+    gap: 9px;
+  }
+  .criteria-group {
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+  .criteria-group summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 20px 1fr 16px;
+    gap: 9px;
+    align-items: center;
+  }
+  .criteria-group summary::-webkit-details-marker { display: none; }
+  .criteria-group summary i {
+    width: 17px;
+    height: 17px;
+    color: var(--brand-primary);
+  }
+  .criteria-group summary strong {
+    display: block;
+    color: var(--text-strong);
+    font-size: 13px;
+    line-height: 1.25;
+  }
+  .criteria-group summary span {
+    display: block;
+    margin-top: 3px;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .criteria-chevron {
+    color: var(--text-muted) !important;
+    transition: transform 0.2s ease;
+  }
+  .criteria-group[open] .criteria-chevron { transform: rotate(180deg); }
+  .criteria-detail {
+    padding: 0 16px 14px 43px;
+    color: var(--text-base);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .criteria-detail ul { margin: 0; padding-left: 17px; }
+  .criteria-detail li + li { margin-top: 5px; }
+  .criteria-note {
+    margin: 0;
+    padding: 11px 12px;
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: 8px;
+    background: rgba(37, 99, 235, 0.06);
+    color: var(--text-base);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  body.dark-mode .criteria-modal { box-shadow: 0 24px 80px rgba(2, 6, 23, 0.55); }
+  body.dark-mode .criteria-note { background: rgba(59, 130, 246, 0.12); }
   .flow-modal-overlay {
     display: none;
     position: fixed;
@@ -402,6 +554,7 @@
 
   /* LGPD footer follows the active theme */
   #lgpdBar {
+    left: var(--sidebar-width) !important;
     background: rgba(255, 255, 255, 0.92) !important;
     border-top: 1px solid var(--border-subtle) !important;
     box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.06) !important;
@@ -538,6 +691,22 @@
     }
 
     .topbar-actions { gap: 8px; }
+    .module-help-btn {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      justify-content: center;
+    }
+    .module-help-btn span { display: none; }
+    .criteria-modal-overlay { padding: 10px; }
+    .criteria-modal {
+      max-height: calc(100dvh - 20px);
+      border-radius: 12px;
+    }
+    .criteria-head { padding: 18px 16px 12px; }
+    .criteria-head h3 { font-size: 17px; }
+    .criteria-body { padding: 10px; }
+    .criteria-detail { padding: 0 14px 14px 42px; }
     .topbar-actions .footer-help-btn { display: none; }
     .icon-btn { width: 34px; height: 34px; }
 
@@ -577,6 +746,7 @@
     }
 
     #lgpdBar {
+      left: 0 !important;
       height: auto !important;
       min-height: 32px !important;
       padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px)) !important;
@@ -742,6 +912,10 @@
     </div>
 
     <div class="topbar-actions">
+      <button class="module-help-btn" onclick="openModuleHelpModal()" title="Ver o que esta tela confere">
+        <i data-lucide="circle-help"></i>
+        <span>Ajuda</span>
+      </button>
       <button class="icon-btn" onclick="toggleDarkMode()" title="Alternar tema (claro/escuro)" id="theme-btn">
         <i data-lucide="sun"></i>
       </button>
@@ -1563,7 +1737,7 @@ tr:hover td { background: #fafafa; }
 
 &lt;header&gt;
   &lt;h1&gt;Conferência de Espelho de Ponto&lt;/h1&gt;
-  &lt;p&gt;Analisa formatações especiais, dias em branco e valida ajustes entre versões&lt;/p&gt;
+  &lt;p&gt;Analisa formatações especiais, dias com falta e valida ajustes entre versões&lt;/p&gt;
 &lt;/header&gt;
 
 &lt;div class=&quot;container&quot;&gt;
@@ -1643,7 +1817,7 @@ var TIME_RE = /^\d{2}:\d{2}(?:\s|$)/;
 
 // Counter pattern: HH:MMC or HH:MMP — totals shown per day (no space, ends with letter).
 // Must be excluded from both time and extra-info checks.
-var COUNTER_RE = /^\d{2}:\d{2}[A-Za-z]/;
+var COUNTER_RE = /^\d{1,3}:\d{2}[A-Za-z]\b/;
 
 // Labels that appear in the header row of each employee card — ignore during blank detection
 var HEADER_LABELS = { Sai1:1,Sai2:1,Sai3:1,Sai4:1,Sai5:1,Ent1:1,Ent2:1,Ent3:1,Ent4:1,Ent5:1,'Ad.Not':1,Atraso:1,Abono:1,Falta:1,Exec:1,Chapa:1 };
@@ -1708,6 +1882,226 @@ function getReasons(p) {
   return r;
 }
 
+function normalizePontoText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isDateDayAt(paragraphs, idx) {
+  return idx &gt;= 0 &amp;&amp; idx + 1 &lt; paragraphs.length &amp;&amp; DATE_RE.test(getText(paragraphs[idx])) &amp;&amp; DAYS[getText(paragraphs[idx + 1])];
+}
+
+function getAdjustmentType(text) {
+  var n = normalizePontoText(text);
+  if (!n) return '';
+  if (/\b(BANCO DE HORAS|BH|COMPENSACAO|COMPENSADO|FALTA COMPENSADA)\b/.test(n)) return 'compensacao';
+  if (/\b(ABONO|ATESTADO|DECLARACAO|DECLARA)\b/.test(n)) return 'abono';
+  if (/\b(FALTA|FALTA INJUSTIFICADA)\b/.test(n)) return 'falta';
+  return '';
+}
+
+function getAdjustmentExpected(type) {
+  if (type === 'compensacao') return 'Esperado no corrigido: total com C na coluna Falta ou Atraso, nunca em Extra.';
+  if (type === 'falta') return 'Esperado no corrigido: total com D na coluna Falta.';
+  if (type === 'abono') return 'Esperado no corrigido: horas na coluna Abono, com atestado/declaracao/abono indicado.';
+  return 'Esperado no corrigido: destaque removido ou apontamento tratado.';
+}
+
+function tableCellText(tc) {
+  var ts = tc ? tc.getElementsByTagNameNS(NS, 't') : [];
+  var out = '';
+  for (var i = 0; i &lt; ts.length; i++) out += (ts[i].textContent || '');
+  return out.trim();
+}
+
+function findColumnIndex(headers, names) {
+  var wanted = names.map(normalizePontoText);
+  for (var i = 0; i &lt; headers.length; i++) {
+    if (wanted.indexOf(normalizePontoText(headers[i])) &gt;= 0) return i;
+  }
+  return -1;
+}
+
+function hasTimeValue(value) {
+  var matches = String(value || '').match(/\d{1,3}:\d{2}/g) || [];
+  return matches.some(function(tok) {
+    var parts = tok.split(':');
+    return (parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10)) &gt; 0;
+  });
+}
+
+function hasCounterType(value, type) {
+  var matches = String(value || '').match(/\b\d{1,3}:\d{2}[A-Za-z]\b/g) || [];
+  return matches.some(function(tok) { return tok.slice(-1).toUpperCase() === String(type || '').toUpperCase(); });
+}
+
+function parsePontoTableRecords(doc) {
+  var rows = Array.from(doc.getElementsByTagNameNS(NS, 'tr'));
+  var cols = null;
+  var records = [];
+  rows.forEach(function(row) {
+    var cells = Array.from(row.getElementsByTagNameNS(NS, 'tc'));
+    var texts = cells.map(tableCellText);
+    if (!texts.length) return;
+
+    var faltaHeader = findColumnIndex(texts, ['Falta']);
+    var atrasoHeader = findColumnIndex(texts, ['Atraso']);
+    if (faltaHeader &gt;= 0 || atrasoHeader &gt;= 0) {
+      cols = {
+        data: findColumnIndex(texts, ['Data']),
+        dia: findColumnIndex(texts, ['Dia']),
+        chapa: findColumnIndex(texts, ['Chapa']),
+        falta: faltaHeader,
+        atraso: atrasoHeader,
+        abono: findColumnIndex(texts, ['Abono'])
+      };
+      if (cols.data &lt; 0) cols.data = 0;
+      return;
+    }
+
+    if (!cols) return;
+    var date = texts[cols.data] || texts[0] || '';
+    if (!DATE_RE.test(date)) return;
+
+    var chapa = cols.chapa &gt;= 0 ? (texts[cols.chapa] || '') : '';
+    var falta = cols.falta &gt;= 0 ? (texts[cols.falta] || '') : '';
+    var atraso = cols.atraso &gt;= 0 ? (texts[cols.atraso] || '') : '';
+    var abono = cols.abono &gt;= 0 ? (texts[cols.abono] || '') : '';
+
+    records.push({
+      key: chapa + '|' + date,
+      chapa: chapa,
+      date: date,
+      day: cols.dia &gt;= 0 ? (texts[cols.dia] || '') : '',
+      falta: falta,
+      atraso: atraso,
+      abono: abono,
+      hasFaltaValue: hasTimeValue(falta),
+      hasFaltaCompCounter: hasCounterType(falta, 'C'),
+      hasAtrasoCompCounter: hasCounterType(atraso, 'C'),
+      hasFaltaDeducaoCounter: hasCounterType(falta, 'D'),
+      hasAtrasoDeducaoCounter: hasCounterType(atraso, 'D'),
+      hasAbonoValue: hasTimeValue(abono)
+    });
+  });
+  return records;
+}
+
+function getFrameNumber(p, attr) {
+  var frame = p && p.getElementsByTagNameNS(NS, 'framePr')[0];
+  if (!frame) return null;
+  var raw = frame.getAttributeNS(NS, attr) || frame.getAttribute('w:' + attr) || frame.getAttribute(attr);
+  if (raw == null || raw === '') return null;
+  var n = parseInt(raw, 10);
+  return isNaN(n) ? null : n;
+}
+
+function getPositionedColumnXs(paragraphs) {
+  var columns = { atraso: 9192, falta: 9999, abono: 10756 };
+  var found = {};
+  for (var i = 0; i &lt; paragraphs.length; i++) {
+    var label = normalizePontoText(getText(paragraphs[i]));
+    if (label !== 'ATRASO' &amp;&amp; label !== 'FALTA' &amp;&amp; label !== 'ABONO') continue;
+    var x = getFrameNumber(paragraphs[i], 'x');
+    if (x == null) continue;
+    if (label === 'ATRASO') { columns.atraso = x; found.atraso = true; }
+    if (label === 'FALTA') { columns.falta = x; found.falta = true; }
+    if (label === 'ABONO') { columns.abono = x; found.abono = true; }
+    if (found.atraso &amp;&amp; found.falta &amp;&amp; found.abono) break;
+  }
+  return columns;
+}
+
+function findPositionedValue(cells, columnX) {
+  var best = null;
+  var bestDistance = Infinity;
+  cells.forEach(function(cell) {
+    if (!cell.text || cell.x == null) return;
+    var distance = Math.abs(cell.x - columnX);
+    if (distance &lt; bestDistance &amp;&amp; distance &lt;= 360) {
+      best = cell.text;
+      bestDistance = distance;
+    }
+  });
+  return best || '';
+}
+
+function parsePositionedPontoRecords(paragraphs) {
+  var columns = getPositionedColumnXs(paragraphs);
+  var records = [];
+  for (var i = 0; i &lt; paragraphs.length - 1; i++) {
+    if (!isDateDayAt(paragraphs, i)) continue;
+    var y = getFrameNumber(paragraphs[i], 'y');
+    if (y == null) continue;
+
+    var cells = [];
+    for (var j = Math.max(0, i - 12); j &lt; Math.min(paragraphs.length, i + 26); j++) {
+      var cy = getFrameNumber(paragraphs[j], 'y');
+      if (cy == null || Math.abs(cy - y) &gt; 8) continue;
+      cells.push({
+        x: getFrameNumber(paragraphs[j], 'x'),
+        text: getText(paragraphs[j])
+      });
+    }
+
+    var emp = getEmployee(paragraphs, i);
+    var date = getText(paragraphs[i]);
+    var falta = findPositionedValue(cells, columns.falta);
+    var atraso = findPositionedValue(cells, columns.atraso);
+    var abono = findPositionedValue(cells, columns.abono);
+
+    records.push({
+      key: emp.chapa + '|' + date,
+      chapa: emp.chapa,
+      date: date,
+      day: getText(paragraphs[i + 1]),
+      falta: falta,
+      atraso: atraso,
+      abono: abono,
+      hasFaltaValue: hasTimeValue(falta),
+      hasFaltaCompCounter: hasCounterType(falta, 'C'),
+      hasAtrasoCompCounter: hasCounterType(atraso, 'C'),
+      hasFaltaDeducaoCounter: hasCounterType(falta, 'D'),
+      hasAtrasoDeducaoCounter: hasCounterType(atraso, 'D'),
+      hasAbonoValue: hasTimeValue(abono)
+    });
+  }
+  return records;
+}
+
+function findTableRecord(records, key) {
+  if (!records || !records.length || !key) return null;
+  for (var i = 0; i &lt; records.length; i++) {
+    if (records[i].key === key) return records[i];
+  }
+  var parts = String(key).split('|');
+  var datePart = parts[1] || '';
+  if (!datePart) return null;
+  var sameDate = records.filter(function(r) { return r.date === datePart; });
+  if (sameDate.length === 1) return sameDate[0];
+  return null;
+}
+
+function buildDayMap(paragraphs, dateRecords, tableRecords) {
+  var map = {};
+  dateRecords.forEach(function(rec) {
+    var emp = getEmployee(paragraphs, rec.idx);
+    var key = emp.chapa + '|' + rec.date;
+    map[key] = {
+      employee: emp.name,
+      chapa: emp.chapa,
+      date: rec.date,
+      day: rec.day,
+      table: findTableRecord(tableRecords, key)
+    };
+  });
+  return map;
+}
+
 // ── findDate: given paragraph index, find the nearest date+day pair ──────────
 // Searches BACKWARD first — in this document format the date appears BEFORE
 // the time-entry paragraph (date → day → pipes → times), so going back gives
@@ -1715,24 +2109,22 @@ function getReasons(p) {
 function findDate(paragraphs, idx) {
   // 1. Search backward (correct direction for this format)
   for (var j = idx - 1; j &gt;= Math.max(0, idx - 20); j--) {
-    var t = getText(paragraphs[j]);
-    if (DATE_RE.test(t) &amp;&amp; j + 1 &lt; paragraphs.length &amp;&amp; DAYS[getText(paragraphs[j + 1])]) {
-      return { date: t, day: getText(paragraphs[j + 1]) };
+    if (isDateDayAt(paragraphs, j)) {
+      return { idx: j, date: getText(paragraphs[j]), day: getText(paragraphs[j + 1]) };
     }
   }
   // 2. Fallback: search forward (handles edge cases at start of section)
   for (var j2 = idx + 1; j2 &lt;= Math.min(paragraphs.length - 2, idx + 20); j2++) {
-    var t2 = getText(paragraphs[j2]);
-    if (DATE_RE.test(t2) &amp;&amp; DAYS[getText(paragraphs[j2 + 1])]) {
-      return { date: t2, day: getText(paragraphs[j2 + 1]) };
+    if (isDateDayAt(paragraphs, j2)) {
+      return { idx: j2, date: getText(paragraphs[j2]), day: getText(paragraphs[j2 + 1]) };
     }
   }
   // 3. Last resort: any date nearby
   for (var j3 = idx - 1; j3 &gt;= Math.max(0, idx - 20); j3--) {
     var t3 = getText(paragraphs[j3]);
-    if (DATE_RE.test(t3)) return { date: t3, day: '' };
+    if (DATE_RE.test(t3)) return { idx: j3, date: t3, day: '' };
   }
-  return { date: '', day: '' };
+  return { idx: -1, date: '', day: '' };
 }
 
 // ── parseDocx ────────────────────────────────────────────────────────────────
@@ -1742,7 +2134,7 @@ async function parseDocx(file) {
   var doc = (new DOMParser()).parseFromString(xml, 'text/xml');
   var paragraphs = Array.from(doc.getElementsByTagNameNS(NS, 'p'));
 
-  // ── 1. Find all date+day pairs (for blank detection) ──────────────────────
+  // ── 1. Find all date+day pairs (for day lookup) ───────────────────────────
   // Only where next paragraph is a valid day abbreviation
   var dateRecords = [];
   for (var i = 0; i &lt; paragraphs.length - 1; i++) {
@@ -1751,6 +2143,10 @@ async function parseDocx(file) {
       dateRecords.push({ idx: i, date: t, day: getText(paragraphs[i + 1]) });
     }
   }
+
+  var tableRecords = parsePontoTableRecords(doc);
+  if (!tableRecords.length) tableRecords = parsePositionedPontoRecords(paragraphs);
+  var dayMap = buildDayMap(paragraphs, dateRecords, tableRecords);
 
   // ── 2. Find flagged paragraphs ────────────────────────────────────────────
   var flagged = [];
@@ -1762,7 +2158,10 @@ async function parseDocx(file) {
 
     var emp = getEmployee(paragraphs, i2);
     var dateInfo = findDate(paragraphs, i2);
+    if (!dateInfo.date) continue;
     var reasons = getReasons(p);
+    var actionType = getAdjustmentType(text);
+    var key = emp.chapa + '|' + dateInfo.date;
 
     flagged.push({
       text: text,
@@ -1771,37 +2170,23 @@ async function parseDocx(file) {
       day: dateInfo.day,
       employee: emp.name,
       chapa: emp.chapa,
-      key: emp.chapa + '|' + dateInfo.date
+      key: key,
+      actionType: actionType,
+      expected: getAdjustmentExpected(actionType)
     });
   }
 
-  // ── 3. Find blank days ────────────────────────────────────────────────────
-  // Structure: [date] → [day] → [pipes] → [times OR description]
-  // So we must look FORWARD after the date+day pair to find content.
-  var blankDays = [];
-  for (var di = 0; di &lt; dateRecords.length; di++) {
-    var rec = dateRecords[di];
-    var timeText = '';
-    var extraInfo = '';
-    // Start looking from idx+2 (skip the day abbreviation at idx+1)
-    for (var bj = rec.idx + 2; bj &lt; Math.min(paragraphs.length, rec.idx + 18); bj++) {
-      var pt = getText(paragraphs[bj]);
-      // Stop when we reach the next date+day record
-      if (DATE_RE.test(pt) &amp;&amp; bj + 1 &lt; paragraphs.length &amp;&amp; DAYS[getText(paragraphs[bj + 1])]) break;
-      if (TIME_RE.test(pt)) { timeText = pt; break; }
-      // Any non-empty, non-separator, non-header, non-counter text = extra info
-      // (DESC, COMP, holiday name, afastamento, etc.)
-      if (pt &amp;&amp; pt !== '|' &amp;&amp; !HEADER_LABELS[pt] &amp;&amp; !/^00:\d{2}/.test(pt) &amp;&amp; !DAYS[pt] &amp;&amp; !DATE_RE.test(pt) &amp;&amp; pt.length &gt; 1 &amp;&amp; !/^\d+$/.test(pt) &amp;&amp; !COUNTER_RE.test(pt)) {
-        extraInfo = pt;
-      }
+  var faltaDays = [];
+  dateRecords.forEach(function(rec) {
+    var emp2 = getEmployee(paragraphs, rec.idx);
+    var key = emp2.chapa + '|' + rec.date;
+    var table = findTableRecord(tableRecords, key);
+    if (table &amp;&amp; table.hasFaltaValue) {
+      faltaDays.push({ date: rec.date, day: rec.day, employee: emp2.name, chapa: emp2.chapa, key: key, falta: table.falta });
     }
-    if (!timeText &amp;&amp; !extraInfo) {
-      var emp2 = getEmployee(paragraphs, rec.idx);
-      blankDays.push({ date: rec.date, day: rec.day, employee: emp2.name, chapa: emp2.chapa, key: emp2.chapa + '|' + rec.date });
-    }
-  }
+  });
 
-  return { flagged: flagged, blankDays: blankDays, totalDays: dateRecords.length };
+  return { flagged: flagged, faltaDays: faltaDays, totalDays: dateRecords.length, dayMap: dayMap, tableRecords: tableRecords };
 }
 
 
@@ -2364,27 +2749,79 @@ async function runAnalysis() {
   }
 }
 
-function isResolved(key, afterData) { return !afterData.flagged.some(function(r) { return r.key === key; }); }
-function isBlankResolved(key, afterData) { return !afterData.blankDays.some(function(r) { return r.key === key; }); }
+function hasSameFlaggedAfter(item, afterData) {
+  if (!afterData || !afterData.flagged) return false;
+  return afterData.flagged.some(function(r) {
+    if (r.key !== item.key) return false;
+    if (item.actionType) return r.actionType === item.actionType;
+    return normalizePontoText(r.text) === normalizePontoText(item.text);
+  });
+}
+
+function findDayInAfterData(afterData, item) {
+  if (!afterData || !afterData.dayMap || !item) return null;
+  var day = afterData.dayMap[item.key];
+  if (day) return day;
+  var parts = String(item.key || '').split('|');
+  var datePart = parts[1] || '';
+  if (!datePart) return null;
+  var keys = Object.keys(afterData.dayMap);
+  var matches = keys.filter(function(k) {
+    return k.split('|')[1] === datePart;
+  }).map(function(k) {
+    return afterData.dayMap[k];
+  });
+  if (matches.length === 1) return matches[0];
+  var empNorm = normalizePontoText(item.employee);
+  if (empNorm) {
+    var byEmployee = matches.filter(function(d) {
+      return normalizePontoText(d.employee) === empNorm;
+    });
+    if (byEmployee.length === 1) return byEmployee[0];
+  }
+  return null;
+}
+
+function isResolvedItem(item, afterData) {
+  if (!afterData) return false;
+  var day = findDayInAfterData(afterData, item);
+  var table = day &amp;&amp; day.table ? day.table : null;
+  if (item.actionType === 'compensacao') {
+    return !!(table &amp;&amp; (table.hasFaltaCompCounter || table.hasAtrasoCompCounter));
+  }
+  if (item.actionType === 'falta') {
+    return !!(table &amp;&amp; table.hasFaltaDeducaoCounter);
+  }
+  if (item.actionType === 'abono') {
+    return !!(table &amp;&amp; table.hasAbonoValue);
+  }
+  return !hasSameFlaggedAfter(item, afterData);
+}
+
+function isFaltaResolved(item, afterData) {
+  if (!afterData) return false;
+  var day = findDayInAfterData(afterData, item);
+  return !(day &amp;&amp; day.table &amp;&amp; day.table.hasFaltaValue);
+}
 
 function renderSingle(fileName, data) {
   var html = fileInfo(fileName, null);
   html += '&lt;div class=&quot;file-actions&quot;&gt;&lt;button class=&quot;btn-export btn-pdf&quot; onclick=&quot;window.print()&quot;&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;polyline points=&quot;6 9 6 2 18 2 18 9&quot;/&gt;&lt;path d=&quot;M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2&quot;/&gt;&lt;rect x=&quot;6&quot; y=&quot;14&quot; width=&quot;12&quot; height=&quot;8&quot;/&gt;&lt;/svg&gt; Exportar PDF&lt;/button&gt;&lt;/div&gt;';
   html += summary([
     { label: 'Com formatacao', value: data.flagged.length, cls: data.flagged.length === 0 ? 'ok' : 'warn' },
-    { label: 'Dias em branco', value: data.blankDays.length, cls: data.blankDays.length === 0 ? 'ok' : 'warn' },
+    { label: 'Dias com Falta', value: data.faltaDays.length, cls: data.faltaDays.length === 0 ? 'ok' : 'warn' },
     { label: 'Total de dias', value: data.totalDays, cls: 'info' }
   ]);
-  if (data.flagged.length === 0 &amp;&amp; data.blankDays.length === 0) html += '&lt;div class=&quot;tip-ok&quot;&gt;Nenhuma pendencia encontrada!&lt;/div&gt;';
-  html += sectionFlagged(data.flagged, null) + sectionBlank(data.blankDays, null);
+  if (data.flagged.length === 0 &amp;&amp; data.faltaDays.length === 0) html += '&lt;div class=&quot;tip-ok&quot;&gt;Nenhuma pendencia encontrada!&lt;/div&gt;';
+  html += sectionFlagged(data.flagged, null) + sectionFalta(data.faltaDays, null);
   show(html);
 }
 
 function renderCompare(bName, aName, before, after) {
-  var fPend = before.flagged.filter(function(r) { return !isResolved(r.key, after); });
-  var bPend = before.blankDays.filter(function(r) { return !isBlankResolved(r.key, after); });
+  var fPend = before.flagged.filter(function(r) { return !isResolvedItem(r, after); });
+  var bPend = before.faltaDays.filter(function(r) { return !isFaltaResolved(r, after); });
   var totPend = fPend.length + bPend.length;
-  var total = before.flagged.length + before.blankDays.length;
+  var total = before.flagged.length + before.faltaDays.length;
   var totAdj = total - totPend;
   var html = fileInfo(bName, aName);
   html += '&lt;div class=&quot;file-actions&quot;&gt;&lt;button class=&quot;btn-export btn-pdf&quot; onclick=&quot;window.print()&quot;&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;&lt;polyline points=&quot;6 9 6 2 18 2 18 9&quot;/&gt;&lt;path d=&quot;M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2&quot;/&gt;&lt;rect x=&quot;6&quot; y=&quot;14&quot; width=&quot;12&quot; height=&quot;8&quot;/&gt;&lt;/svg&gt; Exportar PDF&lt;/button&gt;&lt;/div&gt;';
@@ -2396,7 +2833,7 @@ function renderCompare(bName, aName, before, after) {
   ]);
   if (totPend === 0 &amp;&amp; total &gt; 0) html += '&lt;div class=&quot;tip-ok&quot;&gt;Todos os ' + total + ' apontamentos foram ajustados com sucesso!&lt;/div&gt;';
   else if (total === 0) html += '&lt;div class=&quot;tip&quot;&gt;O arquivo original nao tinha apontamentos de formatacao.&lt;/div&gt;';
-  html += sectionFlagged(before.flagged, after) + sectionBlank(before.blankDays, after);
+  html += sectionFlagged(before.flagged, after) + sectionFalta(before.faltaDays, after);
   show(html);
 }
 
@@ -2423,7 +2860,7 @@ function tagHTML(reasons) {
 
 function sectionFlagged(flagged, afterData) {
   var isComp = afterData !== null;
-  var pending = isComp ? flagged.filter(function(r) { return !isResolved(r.key, afterData); }) : flagged;
+  var pending = isComp ? flagged.filter(function(r) { return !isResolvedItem(r, afterData); }) : flagged;
   var html = '&lt;div class=&quot;section&quot;&gt;&lt;div class=&quot;section-header&quot; onclick=&quot;toggle(this)&quot;&gt;' +
     '&lt;span class=&quot;section-title&quot;&gt;Registros com formatacao especial&lt;/span&gt;' +
     '&lt;span class=&quot;badge ' + (pending.length &gt; 0 ? 'badge-warn' : 'badge-ok') + '&quot;&gt;' + flagged.length + ' registro' + (flagged.length !== 1 ? 's' : '') + '&lt;/span&gt;' +
@@ -2432,35 +2869,35 @@ function sectionFlagged(flagged, afterData) {
     html += '&lt;div class=&quot;empty-state&quot;&gt;Nenhum registro com formatacao especial&lt;/div&gt;';
   } else {
     html += '&lt;table&gt;&lt;thead&gt;&lt;tr&gt;' + (isComp ? '&lt;th&gt;Status&lt;/th&gt;' : '') +
-      '&lt;th&gt;Funcionario&lt;/th&gt;&lt;th&gt;Chapa&lt;/th&gt;&lt;th&gt;Data&lt;/th&gt;&lt;th&gt;Dia&lt;/th&gt;&lt;th&gt;Trecho&lt;/th&gt;&lt;th&gt;Marcacoes&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;';
+      '&lt;th&gt;Funcionario&lt;/th&gt;&lt;th&gt;Chapa&lt;/th&gt;&lt;th&gt;Data&lt;/th&gt;&lt;th&gt;Dia&lt;/th&gt;&lt;th&gt;Trecho&lt;/th&gt;&lt;th&gt;Marcacoes&lt;/th&gt;&lt;th&gt;Conferencia esperada&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;';
     flagged.forEach(function(r) {
-      var ok = isComp &amp;&amp; isResolved(r.key, afterData);
+      var ok = isComp &amp;&amp; isResolvedItem(r, afterData);
       html += '&lt;tr&gt;' + (isComp ? '&lt;td&gt;&lt;span class=&quot;' + (ok ? 'status-ok' : 'status-pend') + '&quot;&gt;' + (ok ? 'Feito' : 'Pendente') + '&lt;/span&gt;&lt;/td&gt;' : '') +
         '&lt;td&gt;' + r.employee + '&lt;/td&gt;&lt;td&gt;' + r.chapa + '&lt;/td&gt;&lt;td&gt;' + r.date + '&lt;/td&gt;&lt;td&gt;' + r.day + '&lt;/td&gt;' +
         '&lt;td style=&quot;font-family:monospace;font-size:12px;max-width:180px;word-break:break-all&quot;&gt;' + r.text + '&lt;/td&gt;' +
-        '&lt;td&gt;' + tagHTML(r.reasons) + '&lt;/td&gt;&lt;/tr&gt;';
+        '&lt;td&gt;' + tagHTML(r.reasons) + '&lt;/td&gt;&lt;td style=&quot;font-size:12px;color:#64748b;max-width:260px&quot;&gt;' + (r.expected || getAdjustmentExpected('')) + '&lt;/td&gt;&lt;/tr&gt;';
     });
     html += '&lt;/tbody&gt;&lt;/table&gt;';
   }
   return html + '&lt;/div&gt;&lt;/div&gt;';
 }
 
-function sectionBlank(blankDays, afterData) {
+function sectionFalta(faltaDays, afterData) {
   var isComp = afterData !== null;
-  var pending = isComp ? blankDays.filter(function(r) { return !isBlankResolved(r.key, afterData); }) : blankDays;
+  var pending = isComp ? faltaDays.filter(function(r) { return !isFaltaResolved(r, afterData); }) : faltaDays;
   var html = '&lt;div class=&quot;section&quot;&gt;&lt;div class=&quot;section-header&quot; onclick=&quot;toggle(this)&quot;&gt;' +
-    '&lt;span class=&quot;section-title&quot;&gt;Dias em branco (sem batida registrada)&lt;/span&gt;' +
-    '&lt;span class=&quot;badge ' + (pending.length &gt; 0 ? 'badge-warn' : 'badge-ok') + '&quot;&gt;' + blankDays.length + ' dia' + (blankDays.length !== 1 ? 's' : '') + '&lt;/span&gt;' +
+    '&lt;span class=&quot;section-title&quot;&gt;Dias com Falta&lt;/span&gt;' +
+    '&lt;span class=&quot;badge ' + (pending.length &gt; 0 ? 'badge-warn' : 'badge-ok') + '&quot;&gt;' + faltaDays.length + ' dia' + (faltaDays.length !== 1 ? 's' : '') + '&lt;/span&gt;' +
     '&lt;span class=&quot;chevron open&quot;&gt;v&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;section-body&quot;&gt;';
-  if (blankDays.length === 0) {
-    html += '&lt;div class=&quot;empty-state&quot;&gt;Nenhum dia em branco encontrado&lt;/div&gt;';
+  if (faltaDays.length === 0) {
+    html += '&lt;div class=&quot;empty-state&quot;&gt;Nenhum dia com falta encontrado&lt;/div&gt;';
   } else {
     html += '&lt;table&gt;&lt;thead&gt;&lt;tr&gt;' + (isComp ? '&lt;th&gt;Status&lt;/th&gt;' : '') +
-      '&lt;th&gt;Funcionario&lt;/th&gt;&lt;th&gt;Chapa&lt;/th&gt;&lt;th&gt;Data&lt;/th&gt;&lt;th&gt;Dia&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;';
-    blankDays.forEach(function(r) {
-      var ok = isComp &amp;&amp; isBlankResolved(r.key, afterData);
+      '&lt;th&gt;Funcionario&lt;/th&gt;&lt;th&gt;Chapa&lt;/th&gt;&lt;th&gt;Data&lt;/th&gt;&lt;th&gt;Dia&lt;/th&gt;&lt;th&gt;Valor em Falta&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;';
+    faltaDays.forEach(function(r) {
+      var ok = isComp &amp;&amp; isFaltaResolved(r, afterData);
       html += '&lt;tr&gt;' + (isComp ? '&lt;td&gt;&lt;span class=&quot;' + (ok ? 'status-ok' : 'status-pend') + '&quot;&gt;' + (ok ? 'Feito' : 'Pendente') + '&lt;/span&gt;&lt;/td&gt;' : '') +
-        '&lt;td&gt;' + r.employee + '&lt;/td&gt;&lt;td&gt;' + r.chapa + '&lt;/td&gt;&lt;td&gt;' + r.date + '&lt;/td&gt;&lt;td&gt;' + r.day + '&lt;/td&gt;&lt;/tr&gt;';
+        '&lt;td&gt;' + r.employee + '&lt;/td&gt;&lt;td&gt;' + r.chapa + '&lt;/td&gt;&lt;td&gt;' + r.date + '&lt;/td&gt;&lt;td&gt;' + r.day + '&lt;/td&gt;&lt;td&gt;' + (r.falta || '') + '&lt;/td&gt;&lt;/tr&gt;';
     });
     html += '&lt;/tbody&gt;&lt;/table&gt;';
   }
@@ -8056,8 +8493,8 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 </script>
 
   <script>
-    const HUB_RH_VERSION = '1.1.0';
-    const HUB_RH_VERSION_DATE = '18/04/2026';
+    const HUB_RH_VERSION = '1.1.1';
+    const HUB_RH_VERSION_DATE = '21/04/2026';
     window.HUB_RH_VERSION = HUB_RH_VERSION;
     window.HUB_RH_VERSION_DATE = HUB_RH_VERSION_DATE;
 
@@ -8079,6 +8516,226 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
       if (markSeen) {
         try { localStorage.setItem('hubRh.teamFlowSeen.' + HUB_RH_VERSION, '1'); } catch (e) {}
       }
+    }
+
+    const MODULE_HELP = {
+      'ocorrencias:tab1': {
+        kicker: 'Ocorrências > Conferência vs Aba 30',
+        title: 'O que esta sub-aba confere',
+        intro: 'Compara a planilha de ocorrências com a aba da folha escolhida no seletor.',
+        note: 'Esta sub-aba não valida nome. Ela valida existência e valor usando Chapa + Evento.',
+        groups: [
+          { icon: 'key-round', title: 'Chave usada', summary: 'Chapa + Evento.', details: ['Monta uma chave com a chapa e o código do evento da ocorrência.', 'Procura a mesma chave na aba 30/65/Todos selecionada da planilha de folha.'] },
+          { icon: 'search-x', title: 'Não encontrado', summary: 'Existe na ocorrência, mas não existe na folha.', details: ['Sinaliza quando a chapa/evento aparece na planilha de ocorrências e não aparece na aba de folha.', 'Serve para achar lançamento enviado que não entrou na folha.'] },
+          { icon: 'scale', title: 'Valor divergente', summary: 'A contrapartida existe, mas o valor não bate.', details: ['Quando a chave Chapa + Evento é encontrada nos dois arquivos, compara o valor da ocorrência com o valor da folha.', 'Mostra valor da ocorrência e valor encontrado na planilha 30.'] },
+          { icon: 'file-spreadsheet', title: 'Arquivos esperados', summary: 'Ocorrências + planilha 30/65/Todos.', details: ['Ocorrências precisa trazer EVENTO, CHAPA, NOME e VALOR.', 'A folha precisa ter uma aba selecionável com os eventos calculados.'] }
+        ]
+      },
+      'ocorrencias:tab2': {
+        kicker: 'Ocorrências > Chapa x Nome',
+        title: 'O que esta sub-aba confere',
+        intro: 'Compara o nome da ocorrência com o cadastro 64, usando a chapa como referência.',
+        note: 'Esta sub-aba não compara valores nem eventos. Ela valida identidade do colaborador.',
+        groups: [
+          { icon: 'key-round', title: 'Chave usada', summary: 'Chapa.', details: ['Busca cada chapa da planilha de ocorrencias dentro da planilha 64 Cadastro.', 'A planilha 64 e tratada como a referencia de nome correto.'] },
+          { icon: 'user-x', title: 'Chapa não cadastrada', summary: 'A chapa existe na ocorrência, mas não existe no cadastro 64.', details: ['Aponta colaboradores que aparecem no arquivo de ocorrências sem correspondente no cadastro.', 'Ajuda a identificar chapa digitada errada ou cadastro desatualizado.'] },
+          { icon: 'spell-check', title: 'Nome divergente', summary: 'A mesma chapa tem nomes diferentes nos dois arquivos.', details: ['Normaliza os nomes para comparar com menos ruído de acento/maiúsculas.', 'Mostra o nome vindo da ocorrência e o nome correto vindo da planilha 64.'] }
+        ]
+      },
+      'ponto:single': {
+        kicker: 'Espelho de Ponto > Análise simples',
+        title: 'O que esta sub-aba confere',
+        intro: 'Lê um único DOCX de espelho e lista pendências visuais ou dias com valor na coluna Falta.',
+        note: 'Atraso e Extra não são tratados como Falta. A lista de Dias com Falta considera somente a coluna Falta da tabela.',
+        groups: [
+          { icon: 'highlighter', title: 'Marcações destacadas', summary: 'Highlight, cor diferente ou asterisco.', details: ['Captura linhas do espelho com destaque visual, cor diferente de preto/automático ou asterisco.', 'Esses sinais viram apontamentos para conferência.'] },
+          { icon: 'calendar-x', title: 'Dias com Falta', summary: 'Valor encontrado na coluna Falta.', details: ['Lê as células da tabela do Word e considera somente a coluna Falta.', 'Não usa valores da coluna Atraso nem da coluna Extra para contar falta.', 'Valores zerados, como 00:00, não entram como falta.'] }
+        ]
+      },
+      'ponto:compare': {
+        kicker: 'Espelho de Ponto > Comparativo de ajustes',
+        title: 'O que esta sub-aba confere',
+        intro: 'Compara um DOCX original com outro após ajustes e valida se os apontamentos foram tratados.',
+        note: 'A validação é conservadora: C/D em Extra não resolve falta. Falta usa a coluna Falta; compensação pode usar Falta ou Atraso.',
+        groups: [
+          { icon: 'git-compare', title: 'Antes x depois', summary: 'Valida se os apontamentos foram resolvidos.', details: ['Extrai os apontamentos do arquivo original e do arquivo ajustado.', 'Classifica o que foi resolvido e o que continua pendente.', 'Quando a chapa não bate, só usa fallback por data se não houver ambiguidade.'] },
+          { icon: 'file-check-2', title: 'Critério por ajuste', summary: 'Cada tipo espera uma evidência diferente.', details: ['BH/compensação: C na coluna Falta ou Atraso.', 'Falta: D na coluna Falta.', 'Abono/atestado/declaração: valor na coluna Abono.', 'C ou D na coluna Extra não resolve falta.'] }
+        ]
+      },
+      'ponto:consistency': {
+        kicker: 'Espelho de Ponto > Jornadas Ímpares',
+        title: 'O que esta sub-aba confere',
+        intro: 'Procura padrões de marcação que indicam inconsistência de jornada.',
+        groups: [
+          { icon: 'list-checks', title: 'Critérios sinalizados', summary: 'Ímpar, duas marcações, jornada de referência (-) e extra acima de 24h.', details: ['Aponta dias com quantidade ímpar de marcações.', 'Aponta dias com apenas 2 marcações.', 'Aponta marcação com jornada de referência (-).', 'Aponta extra acima de 24 horas.'] }
+        ]
+      },
+      'banco:default': {
+        kicker: 'Banco de Horas',
+        title: 'O que este modulo confere',
+        intro: 'Lê DOCX de banco de horas e organiza o saldo atual de cada colaborador.',
+        groups: [
+          { icon: 'clock-3', title: 'Saldo de Horas Atual', summary: 'Extrai o saldo informado no espelho.', details: ['Procura o campo "Saldo de Horas Atual".', 'Converte o saldo para leitura em horas e decimal.'] },
+          { icon: 'arrow-left-right', title: 'A compensar, a pagar ou zero', summary: 'Classifica o sentido do saldo.', details: ['Saldo A COMPENSAR fica como positivo.', 'Saldo A PAGAR fica como negativo.', 'Saldo 000:00 e separado como saldo zero.'] },
+          { icon: 'id-card', title: 'Dados capturados', summary: 'Chapa, nome, função, período, arquivo e saldo.', details: ['Esses campos alimentam filtros, resumo e exportação.'] }
+        ]
+      },
+      'marcacoes:resumo': {
+        kicker: 'Relatório de Marcações > Resumo por Colaborador',
+        title: 'O que esta sub-aba mostra',
+        intro: 'Consolida as marcações por colaborador para identificar volume e padrão de digitadas.',
+        groups: [
+          { icon: 'calculator', title: 'Digitadas x coletadas', summary: 'Conta status D e C.', details: ['Status D entra como marcação digitada.', 'Status C entra como marcação coletada.', 'Calcula total e percentual de digitadas por colaborador.'] },
+          { icon: 'activity', title: 'Indício de extra', summary: 'Resume dias com padrão de extensão de jornada.', details: ['Considera marcações depois da quarta marcação do dia.', 'Prioriza a leitura quando há digitadas relacionadas a esses dias.'] },
+          { icon: 'calendar-days', title: 'Folga configurada', summary: 'Usa o critério de folga selecionado no topo.', details: ['Quando a unidade tem folga padrão configurada, ocorrências nesses dias entram na leitura executiva.'] }
+        ]
+      },
+      'marcacoes:ranking': {
+        kicker: 'Relatório de Marcações > Ranking de Digitadas',
+        title: 'O que esta sub-aba mostra',
+        intro: 'Ordena colaboradores por métricas de marcação e aderência a extra.',
+        groups: [
+          { icon: 'trophy', title: 'Métricas de ranking', summary: 'Aderência, dias com indício, digitadas, percentual ou total.', details: ['A métrica escolhida no seletor define a ordem.', 'Permite limitar Top 10, 20, 30, 50 ou todos.'] },
+          { icon: 'filter', title: 'Filtro por seção', summary: 'O ranking pode ser restringido por seção.', details: ['Ajuda a comparar pessoas dentro da mesma área/unidade.'] }
+        ]
+      },
+      'marcacoes:frequencia': {
+        kicker: 'Relatório de Marcações > Frequências',
+        title: 'O que esta sub-aba mostra',
+        intro: 'Mostra a frequência dos padrões encontrados depois do processamento.',
+        groups: [
+          { icon: 'bar-chart-3', title: 'Distribuição das ocorrências', summary: 'Agrupa os sinais recorrentes do relatório.', details: ['Ajuda a enxergar concentração de marcações digitadas e dias com indício.', 'É uma visão de volume, não uma nova regra de conferência.'] }
+        ]
+      },
+      'marcacoes:detalhes': {
+        kicker: 'Relatório de Marcações > Detalhes por Registro',
+        title: 'O que esta sub-aba mostra',
+        intro: 'Abre a lista registro a registro para auditoria fina.',
+        groups: [
+          { icon: 'search', title: 'Campos exibidos', summary: 'Chapa, nome, secao, data, hora, status e analise do dia.', details: ['Permite filtrar por status D, status C ou somente dias com indicio.', 'Tambem filtra por secao e periodo de datas.'] },
+          { icon: 'list-filter', title: 'Status E no filtro', summary: 'Não é uma coluna original; é o filtro de dias com indício.', details: ['Mostra registros que pertencem a dias classificados com indício pela análise.'] }
+        ]
+      },
+      'folha:default': {
+        kicker: 'Conferencia de Folha',
+        title: 'O que este modulo confere',
+        intro: 'Cruza planilha 64 Cadastro e planilha 30/Todos da folha.',
+        note: 'As regras gerais ignoram Tipo Func A e Tipo Recebimento H quando o código faz essa exclusão, mas Tipo Func A tem uma validação própria.',
+        groups: [
+          { icon: 'user-minus', title: 'Regra 3 - Situação D', summary: 'Demitido com folha no período 5.', details: ['Procura Cod Situação D na planilha 30, período 5.', 'Sinaliza demitido com folha calculada no período normal.'] },
+          { icon: 'receipt', title: 'Regra 4 - Adiantamento', summary: 'Evento 0034 (Adiantamento) período 2 x evento 0019 (Desconto de Adiantamento) período 5.', details: ['Aponta 0034 (Adiantamento) sem desconto 0019 (Desconto de Adiantamento).', 'Aponta valor divergente entre adiantamento e desconto.', 'Aponta 0019 (Desconto de Adiantamento) sem 0034 (Adiantamento) correspondente.'] },
+          { icon: 'file-x-2', title: 'Regra 5 - Sem folha calculada', summary: 'Ativo na 64 sem folha no período 5.', details: ['Cruza ativos da planilha 64 com chapas da folha período 5.', 'Ignora admitidos após a competência da planilha.'] },
+          { icon: 'badge-dollar-sign', title: 'Regras 6 e 8', summary: 'Prêmio Permanência e PLR/Taxa.', details: ['Regra 6: GYN, coligada 10, filial 3 ou 6 deve ter evento 2000 (Prêmio Permanência).', 'Regra 8: evento 0516 (Participação nos Lucros) deve ter 8121 (Contr.Taxa s/ PLR); também aponta 8121 (Contr.Taxa s/ PLR) sem 0516 (Participação nos Lucros).'] },
+          { icon: 'briefcase-business', title: 'Regras 13, 14 e Tipo Func A', summary: 'Diretoria e tipo A.', details: ['Tipo Func D ativo com folha deve ter evento 0046 (Pro-Labore) e não deve ter 0002 (Dias Trabalhados).', 'Tipo Func D ativo sem folha entra na Regra 14.', 'Tipo Func A ativo com folha não deve ter evento 0002 (Dias Trabalhados).'] }
+        ]
+      },
+      'historico:colaborador': {
+        kicker: 'Histórico & Exceções > Por Colaborador',
+        title: 'O que esta sub-aba mostra',
+        intro: 'Consulta o histórico de cada colaborador nos fechamentos JSON carregados.',
+        groups: [
+          { icon: 'user-round-search', title: 'Linha do colaborador', summary: 'Mostra competências e regras em que apareceu.', details: ['Permite buscar por nome ou chapa.', 'Filtra por competência e por regra.'] },
+          { icon: 'history', title: 'Reincidência', summary: 'Ajuda a ver se o mesmo colaborador voltou a cair em regra.', details: ['A base vem dos JSONs de fechamento carregados no início do módulo.'] }
+        ]
+      },
+      'historico:regra': {
+        kicker: 'Histórico & Exceções > Por Regra',
+        title: 'O que esta sub-aba mostra',
+        intro: 'Agrupa os fechamentos por regra de inconsistência.',
+        groups: [
+          { icon: 'list-checks', title: 'Concentração por regra', summary: 'Mostra quais regras aparecem mais.', details: ['Ajuda a identificar regra recorrente entre competências.', 'A leitura depende dos fechamentos JSON já carregados.'] }
+        ]
+      },
+      'historico:competencia': {
+        kicker: 'Histórico & Exceções > Por Competência',
+        title: 'O que esta sub-aba mostra',
+        intro: 'Compara competências carregadas para ver evolução dos apontamentos.',
+        groups: [
+          { icon: 'calendar-range', title: 'Comparação temporal', summary: 'Mostra o que persistiu, apareceu ou deixou de aparecer.', details: ['Usa a competência gravada nos JSONs de fechamento.', 'Ajuda a acompanhar recorrência entre meses.'] }
+        ]
+      },
+      'historico:excecoes': {
+        kicker: 'Histórico & Exceções > Exceções',
+        title: 'O que esta sub-aba faz',
+        intro: 'Gerencia casos justificados para não aparecerem como pendência nova na folha.',
+        groups: [
+          { icon: 'shield-check', title: 'Exceção ativa', summary: 'Justifica uma chapa/regra conhecida.', details: ['Pode ser carregada por JSON ou removida da lista.', 'A Conferência de Folha usa essas exceções para suprimir casos justificados.'] },
+          { icon: 'save', title: 'Arquivo de exceções', summary: 'Gera JSON para reaproveitar depois.', details: ['O navegador baixa o arquivo; ele não grava sozinho no OneDrive.'] }
+        ]
+      }
+    };
+
+    function getActiveIframeDoc(activeModule) {
+      const frame = activeModule && activeModule.querySelector('iframe');
+      try { return frame && (frame.contentDocument || frame.contentWindow.document); } catch (e) { return null; }
+    }
+
+    function getContextualHelpKey() {
+      const activeModule = document.querySelector('.content-container .tab.active') || document.querySelector('.tab.active');
+      const moduleId = activeModule ? activeModule.id : 'ocorrencias';
+      const doc = getActiveIframeDoc(activeModule);
+      let subKey = 'default';
+
+      if (doc) {
+        if (moduleId === 'ocorrencias') {
+          const panel = doc.querySelector('.tab-panel.active');
+          subKey = panel && panel.id ? panel.id : 'tab1';
+        } else if (moduleId === 'ponto') {
+          const modeTab = doc.querySelector('.mode-tab.active');
+          subKey = modeTab && modeTab.id ? modeTab.id.replace('tab-', '') : 'single';
+        } else if (moduleId === 'marcacoes') {
+          const view = doc.querySelector('.view-panel.active');
+          subKey = view && view.id ? view.id.replace('view-', '') : 'resumo';
+        } else if (moduleId === 'historico') {
+          const panel = doc.querySelector('.sub-panel.active');
+          subKey = panel && panel.id ? panel.id.replace('tab-', '') : 'colaborador';
+        }
+      }
+
+      return moduleId + ':' + subKey;
+    }
+
+    function escapeHelpHtml(value) {
+      const div = document.createElement('div');
+      div.textContent = value == null ? '' : String(value);
+      return div.innerHTML;
+    }
+
+    function renderHelpGroup(group, index) {
+      const details = (group.details || []).map(item => '<li>' + escapeHelpHtml(item) + '</li>').join('');
+      return [
+        '<details class="criteria-group"' + (index === 0 ? ' open' : '') + '>',
+          '<summary>',
+            '<i data-lucide="' + escapeHelpHtml(group.icon || 'check-circle-2') + '"></i>',
+            '<span><strong>' + escapeHelpHtml(group.title) + '</strong><span>' + escapeHelpHtml(group.summary || '') + '</span></span>',
+            '<i class="criteria-chevron" data-lucide="chevron-down"></i>',
+          '</summary>',
+          '<div class="criteria-detail"><ul>' + details + '</ul></div>',
+        '</details>'
+      ].join('');
+    }
+
+    function openModuleHelpModal() {
+      const modal = document.getElementById('moduleHelpModal');
+      if (!modal) return;
+      const key = getContextualHelpKey();
+      const moduleId = key.split(':')[0];
+      const data = MODULE_HELP[key] || MODULE_HELP[moduleId + ':default'] || MODULE_HELP['ocorrencias:tab1'];
+
+      document.getElementById('criteriaModalKicker').textContent = data.kicker || 'Ajuda';
+      document.getElementById('criteriaModalTitle').textContent = data.title || 'O que esta tela confere';
+      document.getElementById('criteriaModalIntro').textContent = data.intro || '';
+      document.getElementById('criteriaModalBody').innerHTML =
+        (data.note ? '<p class="criteria-note">' + escapeHelpHtml(data.note) + '</p>' : '') +
+        (data.groups || []).map(renderHelpGroup).join('');
+
+      modal.classList.add('open');
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function closeModuleHelpModal() {
+      const modal = document.getElementById('moduleHelpModal');
+      if (modal) modal.classList.remove('open');
     }
 
     function maybeShowTeamFlowModal() {
@@ -8137,6 +8794,22 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
     </div>
   </div>
 
+  <div class="criteria-modal-overlay" id="moduleHelpModal" onclick="if(event.target===this) closeModuleHelpModal()">
+    <div class="criteria-modal" role="dialog" aria-modal="true" aria-labelledby="criteriaModalTitle">
+      <div class="criteria-head">
+        <div>
+          <p class="criteria-kicker" id="criteriaModalKicker">Ajuda</p>
+          <h3 id="criteriaModalTitle">O que esta tela confere</h3>
+          <p id="criteriaModalIntro"></p>
+        </div>
+        <button type="button" class="criteria-close" onclick="closeModuleHelpModal()" aria-label="Fechar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="criteria-body" id="criteriaModalBody"></div>
+    </div>
+  </div>
+
   <!-- Global Error Modal -->
   <div id="globalErrorModal" style="
     display:none; position:fixed; inset:0; z-index:9999;
@@ -8182,9 +8855,6 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   </script>
 </body>
 </html>
-
-
-
 
 
 

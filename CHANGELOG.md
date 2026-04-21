@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.1 - 2026-04-21
+
+- Melhora a Conferencia de Espelho de Ponto com leitura da coluna Falta no DOCX.
+- Substitui a antiga leitura de Dias em branco por Dias com Falta.
+- Mantem Atraso e Extra fora da contagem de falta; Extra tambem nao resolve falta no comparativo.
+- Adiciona ajuda contextual por modulo e sub-aba.
+- Alinha o rodape LGPD com a area principal no desktop.
+- Ajusta o app Windows para abrir com fundo inicial e barra de titulo escuros.
+- Atualiza APK Android para `1.1.1` com `versionCode` 9.
+
 ## 1.1.0 - 2026-04-20
 
 - Consolida a primeira release multi-plataforma do Hub RH.
