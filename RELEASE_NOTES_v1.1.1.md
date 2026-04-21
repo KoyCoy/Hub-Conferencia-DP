@@ -10,6 +10,7 @@ Atualizacao focada na Conferencia de Espelho de Ponto e nos pacotes internos.
 - Ajuda contextual explica cada modulo e sub-aba.
 - Rodape LGPD fica alinhado com a area do modulo no desktop.
 - App Windows abre com fundo inicial e barra de titulo escuros.
+- Icone oficial atualizado para web, Windows e Android.
 - APK Android atualizado para `versionCode` 9.
 
 ## Arquivos
