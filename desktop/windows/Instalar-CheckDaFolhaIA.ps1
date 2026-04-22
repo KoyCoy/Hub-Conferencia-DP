@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Launcher = Join-Path $ScriptDir "CheckFolha-Launcher.ps1"
+$Launcher = Join-Path $ScriptDir "CheckDaFolhaIA-Launcher.ps1"
 
 if (-not (Test-Path -LiteralPath $Launcher)) {
   throw "Launcher nao encontrado: $Launcher"
@@ -27,7 +27,7 @@ function New-HubShortcut {
   $Shortcut.TargetPath = $ShortcutTarget
   $Shortcut.Arguments = $ShortcutArgs
   $Shortcut.WorkingDirectory = $ScriptDir
-  $Shortcut.Description = "Check Folha - Check Folha"
+  $Shortcut.Description = "Check da Folha IA - Check da Folha IA"
   if ($EdgeIcon) {
     $Shortcut.IconLocation = "$EdgeIcon,0"
   }
@@ -35,11 +35,11 @@ function New-HubShortcut {
 }
 
 $Desktop = [Environment]::GetFolderPath("Desktop")
-$StartMenu = Join-Path ([Environment]::GetFolderPath("Programs")) "Check Folha"
+$StartMenu = Join-Path ([Environment]::GetFolderPath("Programs")) "Check da Folha IA"
 New-Item -ItemType Directory -Force -Path $StartMenu | Out-Null
 
-New-HubShortcut -Path (Join-Path $Desktop "Check Folha.lnk")
-New-HubShortcut -Path (Join-Path $StartMenu "Check Folha.lnk")
+New-HubShortcut -Path (Join-Path $Desktop "Check da Folha IA.lnk")
+New-HubShortcut -Path (Join-Path $StartMenu "Check da Folha IA.lnk")
 
-Write-Host "Check Folha instalado com sucesso."
+Write-Host "Check da Folha IA instalado com sucesso."
 Write-Host "Atalhos criados no Desktop e no Menu Iniciar."

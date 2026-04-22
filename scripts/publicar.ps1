@@ -16,7 +16,7 @@ if (-not (Test-Path $Git)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($Mensagem)) {
-  $Mensagem = "Atualiza Check Folha"
+  $Mensagem = "Atualiza Check da Folha IA"
 }
 
 Set-Location $Root

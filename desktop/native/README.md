@@ -13,16 +13,16 @@ Na raiz do projeto, execute:
 Saidas:
 
 ```text
-dist/desktop/CheckFolha-Windows/CheckFolha.exe
-dist/desktop/CheckFolha-Windows.zip
+dist/desktop/CheckDaFolhaIA-Windows/CheckDaFolhaIA.exe
+dist/desktop/CheckDaFolhaIA-Windows.zip
 ```
 
-O ZIP pode ser distribuido internamente. A pessoa extrai a pasta e abre `CheckFolha.exe`.
+O ZIP pode ser distribuido internamente. A pessoa extrai a pasta e abre `CheckDaFolhaIA.exe`.
 
 O executavel e compilado com o icone:
 
 ```text
-assets/icons/check-folha.ico
+assets/icons/check-da-folha-ia.ico
 ```
 
 ## Requisitos no PC

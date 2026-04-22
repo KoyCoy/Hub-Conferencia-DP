@@ -1,6 +1,6 @@
-# Check Folha Desktop Windows
+# Check da Folha IA Desktop Windows
 
-Esta pasta prepara o Check Folha para uso como aplicativo no PC da empresa.
+Esta pasta prepara o Check da Folha IA para uso como aplicativo no PC da empresa.
 
 O app continua usando o mesmo `index.html` do projeto, mas abre em uma janela propria do Microsoft Edge, sem barra de endereco e sem precisar localizar o arquivo HTML manualmente.
 
@@ -8,7 +8,7 @@ O app continua usando o mesmo `index.html` do projeto, mas abre em uma janela pr
 
 Se comandos `.cmd` ou PowerShell forem bloqueados, use a versao PWA pelo Microsoft Edge:
 
-1. Abra o link publicado do Check Folha no Edge.
+1. Abra o link publicado do Check da Folha IA no Edge.
 2. Clique em `...`.
 3. Va em `Apps`.
 4. Clique em `Instalar este site como aplicativo`.
@@ -20,30 +20,30 @@ O proprio Edge cria o app no Windows, normalmente sem permissao de administrador
 No PowerShell, execute:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File ".\desktop\windows\Instalar-CheckFolha.ps1"
+powershell -ExecutionPolicy Bypass -File ".\desktop\windows\Instalar-CheckDaFolhaIA.ps1"
 ```
 
 Ou de dois cliques em:
 
 ```text
-desktop/windows/Instalar-CheckFolha.cmd
+desktop/windows/Instalar-CheckDaFolhaIA.cmd
 ```
 
 O instalador cria atalhos:
 
-- `Check Folha` na Area de Trabalho.
-- `Check Folha` no Menu Iniciar.
+- `Check da Folha IA` na Area de Trabalho.
+- `Check da Folha IA` no Menu Iniciar.
 
 ## Abrir sem instalar
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File ".\desktop\windows\CheckFolha-Launcher.ps1"
+powershell -ExecutionPolicy Bypass -File ".\desktop\windows\CheckDaFolhaIA-Launcher.ps1"
 ```
 
 Ou de dois cliques em:
 
 ```text
-desktop/windows/Abrir-CheckFolha.cmd
+desktop/windows/Abrir-CheckDaFolhaIA.cmd
 ```
 
 ## Observacoes

@@ -1,4 +1,4 @@
-# Check Folha v1.1.1
+# Check da Folha IA v1.1.1
 
 Atualizacao focada na Conferencia de Espelho de Ponto e nos pacotes internos.
 
@@ -16,7 +16,7 @@ Atualizacao focada na Conferencia de Espelho de Ponto e nos pacotes internos.
 
 ## Arquivos
 
-- `CheckFolha-Windows.zip`: app Windows portatil.
-- `check-folha-1.1.1.apk`: app Android interno.
-- `CheckFolha-SharePoint.zip`: pacote para publicacao no SharePoint.
+- `CheckDaFolhaIA-Windows.zip`: app Windows portatil.
+- `check-da-folha-ia-1.1.1.apk`: app Android interno.
+- `CheckDaFolhaIA-SharePoint.zip`: pacote para publicacao no SharePoint.
 - `hub_rh_v7.html`: arquivo HTML principal.

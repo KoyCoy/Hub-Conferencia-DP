@@ -1,6 +1,6 @@
-# Como instalar o Check Folha pelo SharePoint
+# Como instalar o Check da Folha IA pelo SharePoint
 
-1. Abra o link do Check Folha no Microsoft Edge ou Google Chrome.
+1. Abra o link do Check da Folha IA no Microsoft Edge ou Google Chrome.
 
 2. No canto superior direito, clique no menu do navegador.
 
@@ -29,13 +29,13 @@ Dependendo da versao do Chrome, tambem pode aparecer como:
 5. Confirme o nome:
 
 ```text
-Check Folha
+Check da Folha IA
 ```
 
 6. Depois disso, abra pelo Menu Iniciar do Windows procurando por:
 
 ```text
-Check Folha
+Check da Folha IA
 ```
 
 ## Se nao aparecer a opcao de instalar
@@ -53,7 +53,7 @@ Se ainda nao aparecer, provavelmente o SharePoint esta abrindo o arquivo HTML em
 Use a pasta combinada pela equipe no OneDrive/SharePoint, por exemplo:
 
 ```text
-RH / Check Folha / Fechamentos JSON
+RH / Check da Folha IA / Fechamentos JSON
 ```
 
 Os arquivos continuam sendo processados localmente no navegador.

@@ -2,8 +2,8 @@ $ErrorActionPreference = "Stop"
 
 $ScriptDir = $PSScriptRoot
 $RepoRoot = Split-Path -Parent $ScriptDir
-$PackageRoot = Join-Path $RepoRoot "dist\sharepoint\CheckFolha-SharePoint"
-$ZipPath = Join-Path $RepoRoot "dist\sharepoint\CheckFolha-SharePoint.zip"
+$PackageRoot = Join-Path $RepoRoot "dist\sharepoint\CheckDaFolhaIA-SharePoint"
+$ZipPath = Join-Path $RepoRoot "dist\sharepoint\CheckDaFolhaIA-SharePoint.zip"
 
 if (Test-Path -LiteralPath $PackageRoot) {
   Remove-Item -LiteralPath $PackageRoot -Recurse -Force
@@ -30,8 +30,8 @@ foreach ($File in $Files) {
   Copy-Item -LiteralPath $Source -Destination $Destination -Force
 }
 
-Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\check-folha-192.png") -Destination (Join-Path $PackageRoot "assets\icons\check-folha-192.png") -Force
-Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\check-folha-512.png") -Destination (Join-Path $PackageRoot "assets\icons\check-folha-512.png") -Force
+Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\check-da-folha-ia-192.png") -Destination (Join-Path $PackageRoot "assets\icons\check-da-folha-ia-192.png") -Force
+Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\check-da-folha-ia-512.png") -Destination (Join-Path $PackageRoot "assets\icons\check-da-folha-ia-512.png") -Force
 
 if (Test-Path -LiteralPath $ZipPath) {
   Remove-Item -LiteralPath $ZipPath -Force

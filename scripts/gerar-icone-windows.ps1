@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $ScriptDir = $PSScriptRoot
 $RepoRoot = Split-Path -Parent $ScriptDir
 $IconDir = Join-Path $RepoRoot "assets\icons"
-$IcoPath = Join-Path $IconDir "check-folha.ico"
+$IcoPath = Join-Path $IconDir "check-da-folha-ia.ico"
 
 New-Item -ItemType Directory -Force -Path $IconDir | Out-Null
 Add-Type -AssemblyName System.Drawing

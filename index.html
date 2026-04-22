@@ -4,14 +4,14 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0f172a">
-<meta name="application-name" content="Check Folha">
-<meta name="apple-mobile-web-app-title" content="Check Folha">
+<meta name="application-name" content="Check da Folha IA">
+<meta name="apple-mobile-web-app-title" content="Check da Folha IA">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Check Folha</title>
+<title>Check da Folha IA</title>
 
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/check-folha-192.png">
-<link rel="apple-touch-icon" href="assets/icons/check-folha-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/check-da-folha-ia-192.png">
+<link rel="apple-touch-icon" href="assets/icons/check-da-folha-ia-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -876,7 +876,7 @@
 <aside class="sidebar">
   <div class="sidebar-header">
     <div class="logo-box"><i data-lucide="check-circle"></i></div>
-    <h1 style="font-size: 0.9rem;">Check Folha</h1>
+    <h1 style="font-size: 0.9rem;">Check da Folha IA</h1>
     <button class="mobile-menu-toggle" type="button" onclick="toggleMobileMenu()" aria-label="Mostrar módulos" aria-expanded="false">
       <i data-lucide="menu"></i>
     </button>
@@ -8603,7 +8603,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 
     function setHubVersionLabels() {
       document.querySelectorAll('[data-hub-version]').forEach(function(el) {
-        el.textContent = 'Check Folha v' + HUB_RH_VERSION;
+        el.textContent = 'Check da Folha IA v' + HUB_RH_VERSION;
       });
       document.querySelectorAll('[data-hub-version-date]').forEach(function(el) {
         el.textContent = HUB_RH_VERSION_DATE;
@@ -8870,10 +8870,10 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   " id="lgpdBar">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     <span class="footer-full" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Check Folha v1.1.0</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
+      <span data-hub-version>Check da Folha IA v1.1.0</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
     </span>
     <span class="footer-mobile" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Check Folha v1.1.0</span> · Processamento local · LGPD
+      <span data-hub-version>Check da Folha IA v1.1.0</span> · Processamento local · LGPD
     </span>
     <button type="button" class="footer-help-btn" onclick="openTeamFlowModal()">Fluxo de equipe</button>
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -8881,13 +8881,13 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 
   <div class="flow-modal-overlay" id="teamFlowModal" onclick="if(event.target===this) closeTeamFlowModal(true)">
     <div class="flow-modal" role="dialog" aria-modal="true" aria-labelledby="teamFlowTitle">
-      <h3 id="teamFlowTitle">Fluxo de equipe do Check Folha</h3>
+      <h3 id="teamFlowTitle">Fluxo de equipe do Check da Folha IA</h3>
       <p class="flow-sub">Use este padrao para manter todos trabalhando com o mesmo historico e com as mesmas excecoes no OneDrive.</p>
       <div class="flow-steps">
-        <div class="flow-step"><div class="num">1</div><div><strong>Centralize os arquivos JSON</strong><span>Crie ou use uma pasta compartilhada no OneDrive, por exemplo: RH / Check Folha / Fechamentos JSON.</span></div></div>
+        <div class="flow-step"><div class="num">1</div><div><strong>Centralize os arquivos JSON</strong><span>Crie ou use uma pasta compartilhada no OneDrive, por exemplo: RH / Check da Folha IA / Fechamentos JSON.</span></div></div>
         <div class="flow-step"><div class="num">2</div><div><strong>Antes de uma nova conferencia</strong><span>Na aba Historico &amp; Excecoes, carregue os fechamentos anteriores e o arquivo de excecoes ativo, se existir.</span></div></div>
         <div class="flow-step"><div class="num">3</div><div><strong>Depois de salvar o fechamento</strong><span>Guarde o JSON gerado na mesma pasta do OneDrive e mantenha o nome por competencia, como conferencia_03-2026.json.</span></div></div>
-        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Check Folha v1.1.0</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
+        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Check da Folha IA v1.1.0</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
       </div>
       <div class="flow-note">O navegador nao salva automaticamente direto no OneDrive. Baixe o JSON e mova/salve na pasta compartilhada combinada pela equipe.</div>
       <div class="flow-actions">

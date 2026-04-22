@@ -8,7 +8,7 @@ if (-not (Test-Path -LiteralPath $HtmlPath)) {
   $HtmlPath = Join-Path $RepoRoot "hub_rh_v7.html"
 }
 if (-not (Test-Path -LiteralPath $HtmlPath)) {
-  throw "Arquivo do Check Folha nao encontrado em: $RepoRoot"
+  throw "Arquivo do Check da Folha IA nao encontrado em: $RepoRoot"
 }
 
 $EdgeCandidates = @(
@@ -23,7 +23,7 @@ if (-not $EdgeCandidates -or $EdgeCandidates.Count -eq 0) {
 }
 
 $EdgeExe = $EdgeCandidates | Select-Object -First 1
-$ProfileDir = Join-Path $env:LOCALAPPDATA "CheckFolha\DesktopProfile"
+$ProfileDir = Join-Path $env:LOCALAPPDATA "CheckDaFolhaIA\DesktopProfile"
 New-Item -ItemType Directory -Force -Path $ProfileDir | Out-Null
 
 $HtmlUri = (New-Object System.Uri($HtmlPath)).AbsoluteUri

@@ -1,6 +1,6 @@
 {
-  "name": "Check Folha",
-  "short_name": "Check Folha",
+  "name": "Check da Folha IA",
+  "short_name": "Check da Folha IA",
   "description": "Ferramenta interna para rotinas de conferencia do Departamento Pessoal.",
   "start_url": "./index.html",
   "scope": "./",
@@ -11,13 +11,13 @@
   "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
-      "src": "assets/icons/check-folha-192.png",
+      "src": "assets/icons/check-da-folha-ia-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "assets/icons/check-folha-512.png",
+      "src": "assets/icons/check-da-folha-ia-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

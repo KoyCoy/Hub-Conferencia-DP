@@ -25,7 +25,7 @@ namespace HubRH
 
         public MainForm()
         {
-            Text = "Check Folha";
+            Text = "Check da Folha IA";
             BackColor = Color.FromArgb(15, 23, 42);
             Width = 1280;
             Height = 820;
@@ -52,7 +52,7 @@ namespace HubRH
 
         private static Icon LoadAppIcon()
         {
-            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "check-folha.ico");
+            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "check-da-folha-ia.ico");
             if (File.Exists(iconPath))
             {
                 return new Icon(iconPath);
@@ -72,7 +72,7 @@ namespace HubRH
             {
                 MessageBox.Show(
                     "Nao foi possivel encontrar o arquivo index.html na pasta app.",
-                    "Check Folha",
+                    "Check da Folha IA",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
