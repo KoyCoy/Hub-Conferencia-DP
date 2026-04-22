@@ -1,4 +1,4 @@
-﻿# APK interno do Hub RH
+﻿# APK interno do Check Folha
 
 Este app Android empacota o `hub_rh_v7.html` em uma WebView.
 
@@ -13,15 +13,15 @@ Na pasta raiz do projeto, execute:
 O APK gerado fica em:
 
 ```text
-mobile/android/dist/hub-rh-1.1.0.apk
+mobile/android/dist/check-folha-1.1.1.apk
 ```
 
 ## Instalar na equipe
 
 1. Envie o APK para o celular, por OneDrive, WhatsApp, e-mail ou cabo USB.
-2. Toque no arquivo `hub-rh-1.1.0.apk`.
+2. Toque no arquivo `check-folha-1.1.1.apk`.
 3. Se o Android pedir permissao, permita instalar apps desta fonte.
-4. Abra o app `Hub RH`.
+4. Abra o app `Check Folha`.
 
 ## Atualizacoes
 

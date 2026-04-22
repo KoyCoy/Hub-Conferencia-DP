@@ -16,7 +16,7 @@ if (-not (Test-Path $Git)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($Mensagem)) {
-  $Mensagem = "Atualiza Hub RH"
+  $Mensagem = "Atualiza Check Folha"
 }
 
 Set-Location $Root

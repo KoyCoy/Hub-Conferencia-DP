@@ -1,4 +1,4 @@
-# Hub RH v1.1.1
+# Check Folha v1.1.1
 
 Atualizacao focada na Conferencia de Espelho de Ponto e nos pacotes internos.
 
@@ -16,7 +16,7 @@ Atualizacao focada na Conferencia de Espelho de Ponto e nos pacotes internos.
 
 ## Arquivos
 
-- `HubRH-Windows.zip`: app Windows portatil.
-- `hub-rh-1.1.1.apk`: app Android interno.
-- `HubRH-SharePoint.zip`: pacote para publicacao no SharePoint.
+- `CheckFolha-Windows.zip`: app Windows portatil.
+- `check-folha-1.1.1.apk`: app Android interno.
+- `CheckFolha-SharePoint.zip`: pacote para publicacao no SharePoint.
 - `hub_rh_v7.html`: arquivo HTML principal.

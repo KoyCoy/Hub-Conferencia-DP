@@ -1,11 +1,11 @@
-﻿const CACHE_NAME = 'hub-rh-v1.1.0';
+﻿const CACHE_NAME = 'check-folha-v1.1.1';
 const APP_ASSETS = [
   './',
   './index.html',
   './hub_rh_v7.html',
   './manifest.webmanifest',
-  './assets/icons/hub-rh-192.png',
-  './assets/icons/hub-rh-512.png'
+  './assets/icons/check-folha-192.png',
+  './assets/icons/check-folha-512.png'
 ];
 
 self.addEventListener('install', event => {

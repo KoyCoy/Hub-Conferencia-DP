@@ -8,10 +8,10 @@ $PackageDir = Join-Path $NativeRoot "packages\Microsoft.Web.WebView2.$PackageVer
 $PackageFile = Join-Path $NativeRoot "packages\Microsoft.Web.WebView2.$PackageVersion.nupkg"
 $PackageUrl = "https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/$PackageVersion"
 $DistRoot = Join-Path $RepoRoot "dist\desktop"
-$AppDist = Join-Path $DistRoot "HubRH-Windows"
-$ZipPath = Join-Path $DistRoot "HubRH-Windows.zip"
+$AppDist = Join-Path $DistRoot "CheckFolha-Windows"
+$ZipPath = Join-Path $DistRoot "CheckFolha-Windows.zip"
 $Csc = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
-$IconPath = Join-Path $RepoRoot "assets\icons\hub-rh.ico"
+$IconPath = Join-Path $RepoRoot "assets\icons\check-folha.ico"
 
 if (-not (Test-Path -LiteralPath $Csc)) {
   throw "Compilador C# nao encontrado: $Csc"
@@ -56,7 +56,7 @@ if (Test-Path -LiteralPath $AppDist) {
 New-Item -ItemType Directory -Force -Path $AppDist | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $AppDist "app\assets\icons") | Out-Null
 
-$ExePath = Join-Path $AppDist "HubRH.exe"
+$ExePath = Join-Path $AppDist "CheckFolha.exe"
 
 & $Csc `
   /nologo `
@@ -73,13 +73,13 @@ $ExePath = Join-Path $AppDist "HubRH.exe"
   $Source
 
 if ($LASTEXITCODE -ne 0) {
-  throw "Falha ao compilar HubRH.exe"
+  throw "Falha ao compilar CheckFolha.exe"
 }
 
 Copy-Item -LiteralPath (Join-Path $WebViewLib "Microsoft.Web.WebView2.Core.dll") -Destination $AppDist -Force
 Copy-Item -LiteralPath (Join-Path $WebViewLib "Microsoft.Web.WebView2.WinForms.dll") -Destination $AppDist -Force
 Copy-Item -LiteralPath $WebViewNative -Destination $AppDist -Force
-Copy-Item -LiteralPath $IconPath -Destination (Join-Path $AppDist "hub-rh.ico") -Force
+Copy-Item -LiteralPath $IconPath -Destination (Join-Path $AppDist "check-folha.ico") -Force
 
 $AppFiles = @(
   "index.html",
@@ -91,8 +91,8 @@ $AppFiles = @(
 foreach ($File in $AppFiles) {
   Copy-Item -LiteralPath (Join-Path $RepoRoot $File) -Destination (Join-Path $AppDist "app\$File") -Force
 }
-Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\hub-rh-192.png") -Destination (Join-Path $AppDist "app\assets\icons\hub-rh-192.png") -Force
-Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\hub-rh-512.png") -Destination (Join-Path $AppDist "app\assets\icons\hub-rh-512.png") -Force
+Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\check-folha-192.png") -Destination (Join-Path $AppDist "app\assets\icons\check-folha-192.png") -Force
+Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\check-folha-512.png") -Destination (Join-Path $AppDist "app\assets\icons\check-folha-512.png") -Force
 
 if (Test-Path -LiteralPath $ZipPath) {
   Remove-Item -LiteralPath $ZipPath -Force

@@ -1,10 +1,10 @@
 # Publicacao no SharePoint
 
-Este e o caminho recomendado para usar o Hub RH nos PCs da empresa sem depender de `.cmd`, PowerShell, GitHub Pages publico ou instalador com permissao de administrador.
+Este e o caminho recomendado para usar o Check Folha nos PCs da empresa sem depender de `.cmd`, PowerShell, GitHub Pages publico ou instalador com permissao de administrador.
 
 ## Ideia
 
-Subir os arquivos estaticos do Hub RH em uma pasta do SharePoint e abrir o `index.html` pelo Microsoft Edge ou Google Chrome.
+Subir os arquivos estaticos do Check Folha em uma pasta do SharePoint e abrir o `index.html` pelo Microsoft Edge ou Google Chrome.
 
 Depois, cada pessoa instala pelo proprio navegador.
 
@@ -20,7 +20,7 @@ No Chrome:
 ⋮ > Transmitir, salvar e compartilhar > Instalar pagina como app
 ```
 
-O Windows cria um app `Hub RH` no Menu Iniciar e ele abre em janela propria.
+O Windows cria um app `Check Folha` no Menu Iniciar e ele abre em janela propria.
 
 ## Arquivos que precisam ir juntos
 
@@ -28,18 +28,18 @@ O Windows cria um app `Hub RH` no Menu Iniciar e ele abre em janela propria.
 - `hub_rh_v7.html`
 - `manifest.webmanifest`
 - `service-worker.js`
-- `assets/icons/hub-rh-192.png`
-- `assets/icons/hub-rh-512.png`
+- `assets/icons/check-folha-192.png`
+- `assets/icons/check-folha-512.png`
 
 ## Como publicar
 
 1. Crie uma pasta no SharePoint, por exemplo:
 
 ```text
-Documentos Compartilhados / Hub RH App
+Documentos Compartilhados / Check Folha App
 ```
 
-2. Envie para essa pasta todo o conteudo do pacote `dist/sharepoint/HubRH-SharePoint.zip`.
+2. Envie para essa pasta todo o conteudo do pacote `dist/sharepoint/CheckFolha-SharePoint.zip`.
 
 3. Abra o arquivo `index.html` pelo Microsoft Edge ou Google Chrome.
 
@@ -52,7 +52,7 @@ Documentos Compartilhados / Hub RH App
 5. Nome sugerido:
 
 ```text
-Hub RH
+Check Folha
 ```
 
 ## Atualizacao

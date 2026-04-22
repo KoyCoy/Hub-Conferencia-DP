@@ -13,16 +13,16 @@ Na raiz do projeto, execute:
 Saidas:
 
 ```text
-dist/desktop/HubRH-Windows/HubRH.exe
-dist/desktop/HubRH-Windows.zip
+dist/desktop/CheckFolha-Windows/CheckFolha.exe
+dist/desktop/CheckFolha-Windows.zip
 ```
 
-O ZIP pode ser distribuido internamente. A pessoa extrai a pasta e abre `HubRH.exe`.
+O ZIP pode ser distribuido internamente. A pessoa extrai a pasta e abre `CheckFolha.exe`.
 
 O executavel e compilado com o icone:
 
 ```text
-assets/icons/hub-rh.ico
+assets/icons/check-folha.ico
 ```
 
 ## Requisitos no PC

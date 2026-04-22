@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Launcher = Join-Path $ScriptDir "HubRH-Launcher.ps1"
+$Launcher = Join-Path $ScriptDir "CheckFolha-Launcher.ps1"
 
 if (-not (Test-Path -LiteralPath $Launcher)) {
   throw "Launcher nao encontrado: $Launcher"
@@ -27,7 +27,7 @@ function New-HubShortcut {
   $Shortcut.TargetPath = $ShortcutTarget
   $Shortcut.Arguments = $ShortcutArgs
   $Shortcut.WorkingDirectory = $ScriptDir
-  $Shortcut.Description = "Hub RH - Validador de Lancamentos Manuais"
+  $Shortcut.Description = "Check Folha - Check Folha"
   if ($EdgeIcon) {
     $Shortcut.IconLocation = "$EdgeIcon,0"
   }
@@ -35,11 +35,11 @@ function New-HubShortcut {
 }
 
 $Desktop = [Environment]::GetFolderPath("Desktop")
-$StartMenu = Join-Path ([Environment]::GetFolderPath("Programs")) "Hub RH"
+$StartMenu = Join-Path ([Environment]::GetFolderPath("Programs")) "Check Folha"
 New-Item -ItemType Directory -Force -Path $StartMenu | Out-Null
 
-New-HubShortcut -Path (Join-Path $Desktop "Hub RH.lnk")
-New-HubShortcut -Path (Join-Path $StartMenu "Hub RH.lnk")
+New-HubShortcut -Path (Join-Path $Desktop "Check Folha.lnk")
+New-HubShortcut -Path (Join-Path $StartMenu "Check Folha.lnk")
 
-Write-Host "Hub RH instalado com sucesso."
+Write-Host "Check Folha instalado com sucesso."
 Write-Host "Atalhos criados no Desktop e no Menu Iniciar."

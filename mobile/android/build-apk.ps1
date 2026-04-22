@@ -77,7 +77,7 @@ $Dex = Join-Path $BuildDir "dex"
 $ClassesJar = Join-Path $BuildDir "classes.jar"
 $UnsignedApk = Join-Path $BuildDir "hub-rh-unsigned.apk"
 $AlignedApk = Join-Path $BuildDir "hub-rh-aligned.apk"
-$FinalApk = Join-Path $DistDir "hub-rh-$VersionName.apk"
+$FinalApk = Join-Path $DistDir "check-folha-$VersionName.apk"
 
 New-Item -ItemType Directory -Force -Path $Gen, $Classes, $Dex | Out-Null
 
@@ -120,7 +120,7 @@ if (-not (Test-Path $Keystore)) {
     "-keyalg", "RSA",
     "-keysize", "2048",
     "-validity", "10000",
-    "-dname", "CN=Hub RH Internal, OU=DP, O=KoyCoy, L=Sao Paulo, ST=SP, C=BR"
+    "-dname", "CN=Check Folha Internal, OU=DP, O=KoyCoy, L=Sao Paulo, ST=SP, C=BR"
   )
   Copy-Item -LiteralPath $Keystore -Destination $SourceKeystore -Force
 }
