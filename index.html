@@ -885,7 +885,11 @@
   <nav class="sidebar-nav">
     <div class="nav-label">Módulos de Validação</div>
     
-    <button class="tab-btn active" onclick="openTab('ocorrencias', this, 'Ocorrências')">
+    <button class="tab-btn active" onclick="openTab('dashboardFolha', this, 'Dashboard Folha')">
+      <i data-lucide="layout-dashboard"></i> Dashboard Folha
+    </button>
+    
+    <button class="tab-btn" onclick="openTab('ocorrencias', this, 'Ocorrências')">
       <i data-lucide="file-warning"></i> Ocorrências
     </button>
     
@@ -903,6 +907,9 @@
     
     <button class="tab-btn" onclick="openTab('folha', this, 'Conferência de Folha')">
       <i data-lucide="file-check"></i> Conf. de Folha
+    </button>
+    <button class="tab-btn" onclick="openTab('rescisao', this, 'Simulador de Rescisão')">
+      <i data-lucide="calculator"></i> Sim. de Rescisão
     </button>
     <button class="tab-btn" onclick="openTab('historico', this, 'Histórico & Exceções')">
       <i data-lucide="history"></i> Histórico & Exceções
@@ -923,7 +930,7 @@
   <header class="topbar">
     <div class="breadcrumb">
       Auditoria <i data-lucide="chevron-right" style="width: 14px;"></i> 
-      <span class="current" id="current-module">Ocorrências</span>
+      <span class="current" id="current-module">Dashboard Folha</span>
     </div>
 
     <div class="topbar-actions">
@@ -940,7 +947,11 @@
   <main class="content-container">
     <div class="iframe-card">
       
-      <div class="tab active" id="ocorrencias">
+      <div class="tab active" id="dashboardFolha">
+        <iframe id="dashboard-folha-frame" title="Dashboard Comparativo da Folha"></iframe>
+      </div>
+
+      <div class="tab" id="ocorrencias">
         <iframe srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;pt-BR&quot;&gt;
 &lt;head&gt;
@@ -5956,7 +5967,7 @@ function checkTipoA(tipoA64, chapasP5, evtsByChapa, info30){
 // ═══ Salvar Fechamento ═══════════════════════════════════════════════
 
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.1.0'; } catch(e) { return '1.1.0'; }
+try { return window.parent.HUB_RH_VERSION || '1.2.0'; } catch(e) { return '1.2.0'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -7005,7 +7016,7 @@ function renderRegraDetalhe(){
 
 // ── TAB: COMPETÊNCIA ─────────────────────────────────────────────────────────
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.1.0'; } catch(e) { return '1.1.0'; }
+try { return window.parent.HUB_RH_VERSION || '1.2.0'; } catch(e) { return '1.2.0'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -7199,12 +7210,3716 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 "></iframe>
       </div>
 
+      <div class="tab" id="rescisao">
+        <iframe id="rescisao-frame" title="Simulador de Rescisão"></iframe>
+      </div>
+
     </div>
   </main>
 
 </div>
 
 <script>
+  const DASHBOARD_FOLHA_SCRIPT_CLOSE = '</' + 'script>';
+  const DASHBOARD_FOLHA_SRCDOC = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Comparativo da Folha</title>
+${'<scr' + 'ipt src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></scr' + 'ipt>'}
+<style>
+  :root {
+    --bg: #eef2ff;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --border: #d9e2ec;
+    --text: #0f172a;
+    --muted: #64748b;
+    --brand: #2563eb;
+    --brand-soft: rgba(37, 99, 235, 0.10);
+    --good: #15803d;
+    --good-soft: rgba(22, 163, 74, 0.12);
+    --warn: #b45309;
+    --warn-soft: rgba(245, 158, 11, 0.14);
+    --danger: #b91c1c;
+    --danger-soft: rgba(239, 68, 68, 0.12);
+    --neutral-soft: #f1f5f9;
+  }
+  body.dark-mode {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-soft: #0f172a;
+    --border: #334155;
+    --text: #f8fafc;
+    --muted: #cbd5e1;
+    --brand: #60a5fa;
+    --brand-soft: rgba(59, 130, 246, 0.18);
+    --good: #4ade80;
+    --good-soft: rgba(34, 197, 94, 0.18);
+    --warn: #fbbf24;
+    --warn-soft: rgba(245, 158, 11, 0.18);
+    --danger: #f87171;
+    --danger-soft: rgba(239, 68, 68, 0.18);
+    --neutral-soft: rgba(148, 163, 184, 0.10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(180deg, var(--surface-soft) 0%, var(--bg) 100%);
+    color: var(--text);
+  }
+  header {
+    padding: 26px 30px;
+    background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+    color: #fff;
+  }
+  header h1 { margin: 0; font-size: 24px; }
+  header p { margin: 8px 0 0; max-width: 920px; line-height: 1.6; opacity: .88; font-size: 14px; }
+  .container { max-width: 1320px; margin: 0 auto; padding: 22px; }
+  .note {
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: var(--brand-soft);
+    border: 1px solid rgba(37, 99, 235, 0.16);
+    line-height: 1.6;
+    font-size: 13px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 16px 18px 10px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  }
+  .card-head h2 { margin: 0; font-size: 17px; }
+  .card-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+  .card-body { padding: 18px; }
+  .hidden { display: none; }
+  .upload-row {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    border: none;
+    border-radius: 12px;
+    padding: 11px 16px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-secondary { background: var(--neutral-soft); color: var(--text); border: 1px solid rgba(148, 163, 184, 0.18); }
+  .meta-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: var(--neutral-soft);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .pill.good { background: var(--good-soft); color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.danger { background: var(--danger-soft); color: var(--danger); }
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px 16px;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field input,
+  .field select {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    background: #fff;
+    color: var(--text);
+    padding: 10px 12px;
+    min-height: 42px;
+    font: inherit;
+  }
+  body.dark-mode .field input,
+  body.dark-mode .field select {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f8fafc;
+  }
+  .field small { color: var(--muted); font-size: 11px; line-height: 1.5; }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 15px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+  }
+  .kpi-card .kicker {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+  .kpi-card strong {
+    display: block;
+    font-size: 22px;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  .kpi-card .sub { font-size: 11px; color: var(--muted); line-height: 1.45; }
+  .kpi-card.good { background: var(--good-soft); border-color: rgba(34, 197, 94, 0.22); }
+  .kpi-card.warn { background: var(--warn-soft); border-color: rgba(245, 158, 11, 0.20); }
+  .kpi-card.danger { background: var(--danger-soft); border-color: rgba(239, 68, 68, 0.20); }
+  .kpi-card.brand { background: var(--brand-soft); border-color: rgba(37, 99, 235, 0.18); }
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  .dashboard-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chart-note { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    min-height: 220px;
+    padding-top: 16px;
+  }
+  .chart-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .chart-col .bar {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
+    position: relative;
+    min-height: 10px;
+  }
+  .chart-col .bar .tip {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #020617;
+    color: #f8fafc;
+    padding: 4px 7px;
+    border-radius: 6px;
+    font-size: 10px;
+    white-space: nowrap;
+    display: none;
+  }
+  .chart-col .bar:hover .tip { display: block; }
+  .chart-col .bar-label { font-size: 10px; color: var(--muted); text-align: center; }
+  .chart-col .bar-val { font-size: 11px; font-weight: 700; text-align: center; }
+  .h-bars { display: grid; gap: 10px; }
+  .h-item { display: grid; gap: 5px; }
+  .h-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .h-meta .label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .h-track {
+    height: 12px;
+    background: rgba(148, 163, 184, 0.14);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .h-fill {
+    height: 100%;
+    border-radius: 999px;
+  }
+  .h-fill.pos { background: linear-gradient(90deg, #93c5fd 0%, #2563eb 100%); }
+  .h-fill.neg { background: linear-gradient(90deg, #fca5a5 0%, #dc2626 100%); }
+  .stack {
+    display: flex;
+    height: 20px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(148, 163, 184, 0.14);
+    margin-bottom: 14px;
+  }
+  .stack span { display: block; height: 100%; }
+  .legend { display: grid; gap: 10px; }
+  .legend-item {
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .legend-dot { width: 12px; height: 12px; border-radius: 999px; }
+  .ranking-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .ranking-col h3 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .rank-list { display: grid; gap: 9px; }
+  .rank-item {
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 14px;
+    padding: 10px 12px;
+    background: var(--surface-soft);
+  }
+  .rank-item strong { display: block; font-size: 13px; margin-bottom: 4px; }
+  .rank-item span { font-size: 11px; color: var(--muted); line-height: 1.45; }
+  .rank-item.up { border-color: rgba(37, 99, 235, 0.18); }
+  .rank-item.down { border-color: rgba(239, 68, 68, 0.18); }
+  .table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .table-toolbar .summary { font-size: 12px; color: var(--muted); }
+  .table-wrap { overflow: auto; border: 1px solid rgba(148, 163, 184, 0.18); border-radius: 16px; }
+  table { width: 100%; border-collapse: collapse; min-width: 980px; }
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #eff6ff;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #334155;
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.20);
+  }
+  tbody td {
+    padding: 11px 10px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    vertical-align: top;
+    font-size: 12px;
+  }
+  tbody tr:hover td { background: rgba(37, 99, 235, 0.05); }
+  td.money, th.money { text-align: right; white-space: nowrap; }
+  .delta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .delta-pill.up { background: var(--brand-soft); color: var(--brand); }
+  .delta-pill.down { background: var(--danger-soft); color: var(--danger); }
+  .delta-pill.flat { background: var(--neutral-soft); color: var(--muted); }
+  .alerts { display: grid; gap: 12px; }
+  .alert-item {
+    border-radius: 14px;
+    padding: 12px 14px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: var(--surface-soft);
+  }
+  .alert-item strong { display: block; margin-bottom: 5px; font-size: 13px; }
+  .alert-item span { display: block; font-size: 12px; color: var(--muted); line-height: 1.55; }
+  .alert-item.good { background: var(--good-soft); border-color: rgba(34, 197, 94, 0.18); }
+  .alert-item.warn { background: var(--warn-soft); border-color: rgba(245, 158, 11, 0.18); }
+  .alert-item.danger { background: var(--danger-soft); border-color: rgba(239, 68, 68, 0.18); }
+  .validation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .validation-box {
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 14px;
+    padding: 12px;
+    background: var(--surface-soft);
+  }
+  .validation-box .label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .validation-box strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .empty-state {
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+  @media (max-width: 1120px) {
+    .filters-grid,
+    .kpi-grid,
+    .dashboard-grid,
+    .dashboard-grid.two,
+    .validation-grid,
+    .ranking-block {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 760px) {
+    .filters-grid,
+    .kpi-grid,
+    .dashboard-grid,
+    .dashboard-grid.two,
+    .validation-grid,
+    .ranking-block {
+      grid-template-columns: 1fr;
+    }
+    .chart-bars { min-height: 170px; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Dashboard Comparativo da Folha</h1>
+    <p>Painel gerencial mês a mês a partir da PLANILHA 30, com visão macro por competência, setor, centro de custo, rubrica e categoria. A leitura é agregada: colaborador entra apenas como base técnica para consolidar pessoas e valores.</p>
+  </header>
+
+  <div class="container">
+    <div class="note"><strong>Leitura do módulo:</strong> o custo total considera <strong>Proventos + Encargos + Benefícios</strong>. Rubricas identificadas como <strong>Base de cálculo</strong> ficam separadas para não inflar o comparativo gerencial. Quando o mês anterior é zero e o atual tem valor, a variação aparece como <strong>Novo valor</strong>.</div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Fonte de dados</h2>
+        <p>Carregue a PLANILHA 30 para montar o comparativo mês a mês. O módulo detecta automaticamente a aba mais aderente e tenta sugerir a competência mais recente com volume consistente.</p>
+      </div>
+      <div class="card-body">
+        <div class="upload-row">
+          <button class="btn btn-primary" type="button" id="btnSelectFile">Selecionar PLANILHA 30</button>
+          <button class="btn btn-secondary hidden" type="button" id="btnReloadFile">Trocar arquivo</button>
+          <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
+          <div id="loadStatus" class="summary">Nenhum arquivo carregado.</div>
+        </div>
+        <div class="meta-pills" id="sourceMeta">
+          <span class="pill">Esperando arquivo</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="filtersCard">
+      <div class="card-head">
+        <h2>Filtros e sensibilidade</h2>
+        <p>Setor é lido da coluna <strong>Desc Seção</strong>. Como a base não traz uma coluna explícita de centro de custo, o painel usa a coluna <strong>Seção</strong> como identificador operacional do centro.</p>
+      </div>
+      <div class="card-body">
+        <div class="filters-grid">
+          <div class="field">
+            <label for="competenciaAtual">Competência atual</label>
+            <select id="competenciaAtual"></select>
+          </div>
+          <div class="field">
+            <label for="competenciaAnterior">Competência anterior</label>
+            <input id="competenciaAnterior" type="text" readonly>
+          </div>
+          <div class="field">
+            <label for="filtroSetor">Setor</label>
+            <select id="filtroSetor"><option value="">Todos</option></select>
+          </div>
+          <div class="field">
+            <label for="filtroCentro">Centro de custo</label>
+            <select id="filtroCentro"><option value="">Todos</option></select>
+          </div>
+          <div class="field">
+            <label for="filtroRubrica">Tipo de verba</label>
+            <select id="filtroRubrica"><option value="">Todas</option></select>
+          </div>
+          <div class="field">
+            <label for="filtroCategoria">Categoria de custo</label>
+            <select id="filtroCategoria"><option value="">Todas</option></select>
+          </div>
+          <div class="field">
+            <label for="visaoTabela">Visão da tabela</label>
+            <select id="visaoTabela">
+              <option value="setor">Por setor</option>
+              <option value="centro">Por centro de custo</option>
+              <option value="tipo">Por tipo de verba</option>
+              <option value="categoria">Por categoria de custo</option>
+              <option value="competencia">Por competência</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="limiteFolha">Alerta folha total (%)</label>
+            <input id="limiteFolha" type="number" min="0" step="1" value="10">
+          </div>
+          <div class="field">
+            <label for="limiteGrupo">Alerta setor/centro (%)</label>
+            <input id="limiteGrupo" type="number" min="0" step="1" value="15">
+          </div>
+          <div class="field">
+            <label for="limiteRubrica">Alerta rubrica (%)</label>
+            <input id="limiteRubrica" type="number" min="0" step="1" value="25">
+          </div>
+          <div class="field">
+            <label for="limiteBeneficio">Alerta benefícios (%)</label>
+            <input id="limiteBeneficio" type="number" min="0" step="1" value="12">
+          </div>
+          <div class="field">
+            <label for="limiteColaboradores">Alerta headcount (%)</label>
+            <input id="limiteColaboradores" type="number" min="0" step="1" value="10">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="kpi-grid hidden" id="kpiGrid"></div>
+
+    <div class="dashboard-grid hidden" id="chartGrid">
+      <section class="card">
+        <div class="card-head">
+          <h2>Evolução mensal da folha</h2>
+          <p>Mostra o custo total consolidado por competência dentro do filtro atual.</p>
+        </div>
+        <div class="card-body">
+          <div class="chart-bars" id="evolutionChart"></div>
+          <div class="chart-note">A competência destacada como padrão pode recuar automaticamente um mês quando o arquivo mais recente estiver com volume muito abaixo da competência anterior.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Composição da folha por categoria</h2>
+          <p>Separa custo total, descontos e bases para leitura executiva.</p>
+        </div>
+        <div class="card-body">
+          <div class="stack" id="compositionStack"></div>
+          <div class="legend" id="compositionLegend"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Variação por setor</h2>
+          <p>Top cortes agregados por <strong>Desc Seção</strong>.</p>
+        </div>
+        <div class="card-body">
+          <div class="h-bars" id="sectorChart"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Variação por centro de custo</h2>
+          <p>Leitura agregada usando a coluna <strong>Seção</strong> como centro operacional.</p>
+        </div>
+        <div class="card-body">
+          <div class="h-bars" id="centerChart"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="dashboard-grid two hidden" id="rankingGrid">
+      <section class="card">
+        <div class="card-head">
+          <h2>Ranking de setores</h2>
+          <p>Áreas com maior aumento e maior redução no recorte atual.</p>
+        </div>
+        <div class="card-body">
+          <div class="ranking-block" id="sectorRanking"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Ranking de centros de custo</h2>
+          <p>Identifica movimentos mais relevantes pelo código de seção.</p>
+        </div>
+        <div class="card-body">
+          <div class="ranking-block" id="centerRanking"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card hidden" id="tableCard">
+      <div class="card-head">
+        <h2>Tabela comparativa agregada</h2>
+        <p>Sem foco individual: a tabela trabalha apenas com agrupamentos gerenciais.</p>
+      </div>
+      <div class="card-body">
+        <div class="table-toolbar">
+          <div class="summary" id="tableSummary">Sem dados carregados.</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Categoria / Agrupamento</th>
+                <th class="money">Valor mês anterior</th>
+                <th class="money">Valor mês atual</th>
+                <th class="money">Diferença</th>
+                <th class="money">Variação %</th>
+                <th class="money">Participação</th>
+                <th>Tipo de alteração</th>
+                <th>Observação gerencial</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr><td colspan="8" class="empty-state">Carregue a PLANILHA 30 para visualizar a tabela agregada.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="alertsCard">
+      <div class="card-head">
+        <h2>Alertas gerenciais de anomalias</h2>
+        <p>Os alertas usam os limites percentuais configurados acima e sempre trabalham em nível agregado.</p>
+      </div>
+      <div class="card-body">
+        <div class="alerts" id="alertsList"></div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="validationCard">
+      <div class="card-head">
+        <h2>Validação da PLANILHA 30</h2>
+        <p>Resumo da leitura aplicada no arquivo para facilitar teste e auditoria do novo módulo.</p>
+      </div>
+      <div class="card-body">
+        <div class="validation-grid" id="validationMeta"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+  (function(){
+    if (window.__dashboardFolhaRuntimeStarted) return;
+    window.__dashboardFolhaRuntimeStarted = true;
+
+    var state = {
+      rows: [],
+      rawRows: 0,
+      validRows: 0,
+      sheetName: '',
+      headerRow: 0,
+      fileName: '',
+      months: [],
+      countsByMonth: {},
+      currentKey: '',
+      previousKey: ''
+    };
+
+    var categoryColors = {
+      'Proventos': '#2563eb',
+      'Descontos': '#dc2626',
+      'Encargos': '#7c3aed',
+      'Benefícios': '#059669',
+      'Base de cálculo': '#f59e0b',
+      'Outros': '#64748b',
+      'Salário bruto consolidado': '#2563eb',
+      'Salário líquido consolidado': '#0f766e',
+      'Custo total consolidado': '#1d4ed8'
+    };
+
+    var categoryOrder = ['Proventos', 'Descontos', 'Encargos', 'Benefícios', 'Base de cálculo', 'Outros'];
+    var requiredHeaders = ['CHAPA', 'NOME', 'SECAO', 'DESC SECAO', 'MES COMP', 'ANO COMP', 'EVENTO', 'DESC EVENTO', 'TIPO', 'VALOR'];
+
+    function byId(id){ return document.getElementById(id); }
+    function syncParentHeight() {
+      try {
+        if (window.parent && typeof window.parent.syncIframes === 'function') {
+          setTimeout(function(){ window.parent.syncIframes(); }, 50);
+        }
+      } catch (e) {}
+    }
+    function toStr(v){ return v == null ? '' : String(v).trim(); }
+    function parseMoney(v){
+      if (v == null || v === '') return 0;
+      if (typeof v === 'number') return isFinite(v) ? v : 0;
+      var s = String(v).trim().replace(/\\s/g, '');
+      if (!s) return 0;
+      s = s.replace(/[^\\d,.-]/g, '');
+      if (s.indexOf(',') > -1) s = s.replace(/\\./g, '').replace(',', '.');
+      var n = parseFloat(s);
+      return isNaN(n) ? 0 : n;
+    }
+    function fmtMoney(v){
+      return 'R$ ' + (Number(v || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function fmtInt(v){
+      return Number(v || 0).toLocaleString('pt-BR');
+    }
+    function fmtPct(v){
+      if (v == null || !isFinite(v)) return 'Novo valor';
+      return (v >= 0 ? '+' : '') + v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+    }
+    function normalizeHeader(v){
+      return String(v || '')
+        .normalize('NFD')
+        .replace(/[\\u0300-\\u036f]/g, '')
+        .toUpperCase()
+        .replace(/\\s+/g, ' ')
+        .trim();
+    }
+    function monthKey(month, year){
+      var mm = String(parseInt(month, 10) || 0).padStart(2, '0');
+      var yy = String(parseInt(year, 10) || 0);
+      return yy + '-' + mm;
+    }
+    function monthLabel(key){
+      if (!key || key.indexOf('-') < 0) return 'Sem base anterior';
+      var parts = key.split('-');
+      return parts[1] + '/' + parts[0];
+    }
+    function parseMonthFromDate(value){
+      var s = toStr(value);
+      if (!s) return '';
+      var match = s.match(/(\\d{4})-(\\d{2})/);
+      if (match) return match[1] + '-' + match[2];
+      return '';
+    }
+    function escHtml(value){
+      var div = document.createElement('div');
+      div.textContent = value == null ? '' : String(value);
+      return div.innerHTML;
+    }
+    function safeLabel(value, fallback){
+      var s = toStr(value);
+      return s || fallback;
+    }
+    function calcVariation(previous, current){
+      previous = Number(previous || 0);
+      current = Number(current || 0);
+      var diff = current - previous;
+      if (previous === 0 && current > 0) {
+        return { diff: diff, pct: null, label: 'Novo valor', type: 'new' };
+      }
+      if (previous === 0 && current === 0) {
+        return { diff: 0, pct: 0, label: '0,0%', type: 'flat' };
+      }
+      var pct = previous === 0 ? 0 : (diff / previous) * 100;
+      return {
+        diff: diff,
+        pct: pct,
+        label: fmtPct(pct),
+        type: diff > 0 ? 'up' : (diff < 0 ? 'down' : 'flat')
+      };
+    }
+    function classifyCategory(desc, tipo){
+      var t = toStr(tipo).toUpperCase();
+      var d = normalizeHeader(desc);
+      if (!d && !t) return 'Outros';
+      if (d.indexOf('BASE ') === 0 || d.indexOf('REMUNERACAO BASE') >= 0 || d.indexOf('BASE TRIBUTADA') >= 0) return 'Base de cálculo';
+      if (/(FGTS|I\\.N\\.S\\.S|INSS|PATRONAL|RAT|TERCEIROS|FAP|SEST|SENAT)/.test(d)) return 'Encargos';
+      if (/(VALE|UNIMED|PLANO|SEGURO|ASSISTENCIA MEDICA|BENEFICIO|FRETADO|REFEICAO|ALIMENTAC|ALIMENTAÇ|TRANSPORTE|COMBUSTIVEL|COMBUSTI|FARMACIA|ODONTO|DASA|BRADESCO)/.test(d)) return 'Benefícios';
+      if (t === 'D') return 'Descontos';
+      if (t === 'P') return 'Proventos';
+      if (t === 'B') return 'Outros';
+      return 'Outros';
+    }
+    function classifyNature(desc, category){
+      var d = normalizeHeader(desc);
+      if (category === 'Base de cálculo') return 'Base técnica';
+      if (/(FERIAS|13O|13º|PLR|PARTICIPACAO|PARTICIPAÇÃO|ABONO|PROVISAO|RESCISAO|RESCISAO|INDEN|DIFERENCA|PERNOITE|DIARIA|MATERNIDADE|HONORARIOS|SERVICOS PRESTADOS|SERVIÇOS PRESTADOS|EMPRESTIMO|EMPRÉSTIMO|BONUS|BÔNUS)/.test(d)) return 'Eventual';
+      return 'Recorrente';
+    }
+    function metricValueForRow(row, activeCategory){
+      if (activeCategory) return row.valor;
+      return row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0;
+    }
+    function getXlsxLib(){
+      return window.XLSX || (window.parent && window.parent.XLSX) || null;
+    }
+    function decodePreviewRows(ws, maxRows, maxCols){
+      var XLSX = getXlsxLib();
+      var range = ws && ws['!ref'] && XLSX ? XLSX.utils.decode_range(ws['!ref']) : null;
+      if (!range) return [];
+      var rows = [];
+      var endRow = Math.min(range.e.r, maxRows - 1);
+      var endCol = Math.min(range.e.c, maxCols - 1);
+      for (var r = range.s.r; r <= endRow; r++) {
+        var row = [];
+        for (var c = range.s.c; c <= endCol; c++) {
+          var cell = ws[XLSX.utils.encode_cell({ r: r, c: c })];
+          row.push(cell ? cell.v : '');
+        }
+        rows.push(row);
+      }
+      return rows;
+    }
+    function detectHeaderRow(raw){
+      var bestIndex = -1;
+      var bestScore = -1;
+      for (var i = 0; i < Math.min(raw.length, 18); i++) {
+        var headers = (raw[i] || []).map(normalizeHeader);
+        var score = 0;
+        requiredHeaders.forEach(function(name){
+          if (headers.indexOf(name) >= 0) score += 1;
+        });
+        if (score > bestScore) {
+          bestScore = score;
+          bestIndex = i;
+        }
+      }
+      return bestScore >= 7 ? bestIndex : -1;
+    }
+    function scoreSheet(ws){
+      var preview = decodePreviewRows(ws, 18, 24);
+      var best = -1;
+      for (var i = 0; i < preview.length; i++) {
+        var headers = (preview[i] || []).map(normalizeHeader);
+        var score = 0;
+        requiredHeaders.forEach(function(name){
+          if (headers.indexOf(name) >= 0) score += 4;
+        });
+        if (headers.indexOf('VALOR') >= 0) score += 6;
+        if (headers.indexOf('TIPO') >= 0) score += 6;
+        if (headers.indexOf('DESC EVENTO') >= 0) score += 8;
+        best = Math.max(best, score);
+      }
+      return best;
+    }
+    function pickBestSheet(wb){
+      var bestName = wb.SheetNames[0];
+      var bestScore = -1;
+      wb.SheetNames.forEach(function(name){
+        var score = scoreSheet(wb.Sheets[name]);
+        if (score > bestScore) {
+          bestScore = score;
+          bestName = name;
+        }
+      });
+      return bestName;
+    }
+    function updateSourceMeta(items){
+      byId('sourceMeta').innerHTML = items.map(function(item){
+        return '<span class="pill ' + escHtml(item.cls || '') + '">' + escHtml(item.label) + '</span>';
+      }).join('');
+      syncParentHeight();
+    }
+    function showDashboardSections(show){
+      ['filtersCard', 'kpiGrid', 'chartGrid', 'rankingGrid', 'tableCard', 'alertsCard', 'validationCard'].forEach(function(id){
+        byId(id).classList.toggle('hidden', !show);
+      });
+      byId('btnReloadFile').classList.toggle('hidden', !show);
+    }
+    function loadWorkbook(file){
+      var reader = new FileReader();
+      byId('loadStatus').textContent = 'Lendo arquivo e identificando a base da folha...';
+      updateSourceMeta([{ label: 'Processando arquivo...', cls: 'warn' }]);
+      reader.onload = function(ev){
+        try {
+          var XLSX = getXlsxLib();
+          if (!XLSX) throw new Error('Biblioteca XLSX não foi carregada no módulo.');
+          var wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array', cellDates: true });
+          var sheetName = pickBestSheet(wb);
+          var ws = wb.Sheets[sheetName];
+          var raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          var headerRow = detectHeaderRow(raw);
+          if (headerRow < 0) throw new Error('Não foi possível localizar os cabeçalhos esperados da PLANILHA 30.');
+          var headers = (raw[headerRow] || []).map(normalizeHeader);
+          var rows = [];
+          var countsByMonth = {};
+          for (var i = headerRow + 1; i < raw.length; i++) {
+            var source = raw[i];
+            if (!source || !source.length) continue;
+            var hasValue = false;
+            for (var z = 0; z < source.length; z++) {
+              if (source[z] !== '' && source[z] != null) { hasValue = true; break; }
+            }
+            if (!hasValue) continue;
+            var obj = {};
+            for (var c = 0; c < headers.length; c++) obj[headers[c]] = source[c];
+            var month = toStr(obj['MES COMP']);
+            var year = toStr(obj['ANO COMP']);
+            var tipo = toStr(obj['TIPO']).toUpperCase();
+            var period = toStr(obj['NRO PERIODO']);
+            var valor = parseMoney(obj['VALOR']);
+            var descEvento = safeLabel(obj['DESC EVENTO'], 'Sem rubrica');
+            if (!month || !year || !tipo || (tipo !== 'P' && tipo !== 'D' && tipo !== 'B')) continue;
+            if (period && period !== '5') continue;
+            if (!isFinite(valor)) continue;
+            var key = monthKey(month, year);
+            var category = classifyCategory(descEvento, tipo);
+            var sector = safeLabel(obj['DESC SECAO'], 'Sem setor');
+            var centerCode = safeLabel(obj['SECAO'], 'Sem centro');
+            var entry = {
+              competenceKey: key,
+              competenceLabel: monthLabel(key),
+              year: parseInt(year, 10) || 0,
+              month: parseInt(month, 10) || 0,
+              chapa: toStr(obj['CHAPA']),
+              sector: sector,
+              center: centerCode,
+              centerLabel: centerCode + ' · ' + sector,
+              eventCode: toStr(obj['EVENTO']),
+              eventDesc: descEvento,
+              tipo: tipo,
+              valor: valor,
+              category: category,
+              nature: classifyNature(descEvento, category),
+              admissionMonth: parseMonthFromDate(obj['ADMISSAO']),
+              desligamentoMonth: parseMonthFromDate(obj['DESLIGAMENTO'])
+            };
+            rows.push(entry);
+            countsByMonth[key] = (countsByMonth[key] || 0) + 1;
+          }
+          var months = Object.keys(countsByMonth).sort();
+          if (!months.length) throw new Error('O arquivo não trouxe linhas válidas com competência, tipo e valor no período 5.');
+          state.rows = rows;
+          state.rawRows = raw.length - (headerRow + 1);
+          state.validRows = rows.length;
+          state.sheetName = sheetName;
+          state.headerRow = headerRow + 1;
+          state.fileName = file.name;
+          state.months = months;
+          state.countsByMonth = countsByMonth;
+          state.currentKey = suggestCurrentMonth(months, countsByMonth);
+          state.previousKey = findPreviousMonth(state.currentKey);
+          byId('loadStatus').textContent = file.name + ' carregado com sucesso.';
+          updateSourceMeta([
+            { label: 'Aba detectada: ' + sheetName, cls: 'good' },
+            { label: 'Competências: ' + months.map(monthLabel).join(', ') },
+            { label: 'Linhas válidas: ' + fmtInt(rows.length), cls: 'good' }
+          ]);
+          populateFilters();
+          showDashboardSections(true);
+          renderAll();
+        } catch (err) {
+          showDashboardSections(false);
+          updateSourceMeta([{ label: 'Falha ao ler o arquivo', cls: 'danger' }]);
+          byId('loadStatus').textContent = 'Erro ao processar a PLANILHA 30.';
+          if (window.parent && typeof window.parent.showErrorModal === 'function') {
+            window.parent.showErrorModal('Falha ao montar o Dashboard Folha.', String(err && err.message ? err.message : err), 'Valide se o arquivo é a PLANILHA 30 e se contém as colunas padrão de folha.');
+          } else {
+            alert('Falha ao montar o Dashboard Folha: ' + String(err && err.message ? err.message : err));
+          }
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+    var pickerLock = false;
+    var pickerOpenedAt = 0;
+    function openFilePicker(){
+      var now = Date.now();
+      if (pickerLock && (now - pickerOpenedAt) < 900) return;
+      pickerLock = true;
+      pickerOpenedAt = now;
+      byId('fileInput').click();
+      setTimeout(function(){ pickerLock = false; }, 900);
+    }
+    function suggestCurrentMonth(months, countsByMonth){
+      if (months.length === 1) return months[0];
+      var latest = months[months.length - 1];
+      var prev = months[months.length - 2];
+      var latestCount = countsByMonth[latest] || 0;
+      var prevCount = countsByMonth[prev] || 0;
+      if (prevCount > 0 && latestCount < prevCount * 0.35) return prev;
+      return latest;
+    }
+    function findPreviousMonth(key){
+      var idx = state.months.indexOf(key);
+      if (idx <= 0) return '';
+      return state.months[idx - 1];
+    }
+    function uniqueSorted(rows, field){
+      var map = {};
+      rows.forEach(function(row){ map[row[field]] = 1; });
+      return Object.keys(map).sort(function(a, b){ return a.localeCompare(b, 'pt-BR'); });
+    }
+    function populateFilters(){
+      var compSel = byId('competenciaAtual');
+      compSel.innerHTML = state.months.map(function(key){
+        return '<option value="' + escHtml(key) + '">' + escHtml(monthLabel(key)) + '</option>';
+      }).join('');
+      compSel.value = state.currentKey;
+      byId('competenciaAnterior').value = state.previousKey ? monthLabel(state.previousKey) : 'Sem base anterior';
+
+      var setorSel = byId('filtroSetor');
+      setorSel.innerHTML = '<option value="">Todos</option>' + uniqueSorted(state.rows, 'sector').map(function(value){
+        return '<option value="' + escHtml(value) + '">' + escHtml(value) + '</option>';
+      }).join('');
+
+      var centroSel = byId('filtroCentro');
+      centroSel.innerHTML = '<option value="">Todos</option>' + uniqueSorted(state.rows, 'centerLabel').map(function(value){
+        return '<option value="' + escHtml(value) + '">' + escHtml(value) + '</option>';
+      }).join('');
+
+      var rubricaSel = byId('filtroRubrica');
+      rubricaSel.innerHTML = '<option value="">Todas</option>' + uniqueSorted(state.rows, 'eventDesc').map(function(value){
+        return '<option value="' + escHtml(value) + '">' + escHtml(value) + '</option>';
+      }).join('');
+
+      var categoriaSel = byId('filtroCategoria');
+      categoriaSel.innerHTML = '<option value="">Todas</option>' + categoryOrder.filter(function(cat){
+        return state.rows.some(function(row){ return row.category === cat; });
+      }).map(function(cat){
+        return '<option value="' + escHtml(cat) + '">' + escHtml(cat) + '</option>';
+      }).join('');
+    }
+    function buildMapComparison(prevMap, currMap, totalCurrent, labels){
+      var map = {};
+      (labels || []).forEach(function(label){ map[label] = 1; });
+      Object.keys(prevMap).forEach(function(label){ map[label] = 1; });
+      Object.keys(currMap).forEach(function(label){ map[label] = 1; });
+      return Object.keys(map).map(function(label){
+        var previous = Number(prevMap[label] || 0);
+        var current = Number(currMap[label] || 0);
+        var variation = calcVariation(previous, current);
+        return {
+          label: label,
+          previous: previous,
+          current: current,
+          diff: variation.diff,
+          pct: variation.pct,
+          pctLabel: variation.label,
+          type: variation.type,
+          participation: totalCurrent > 0 ? (current / totalCurrent) * 100 : 0
+        };
+      });
+    }
+    function renderAll(){
+      state.currentKey = byId('competenciaAtual').value || state.currentKey;
+      state.previousKey = findPreviousMonth(state.currentKey);
+      byId('competenciaAnterior').value = state.previousKey ? monthLabel(state.previousKey) : 'Sem base anterior';
+      var dashboard = computeDashboard();
+      renderKpis(dashboard);
+      renderEvolutionChart(dashboard.evolution);
+      renderComposition(dashboard.categorySummary);
+      renderHorizontalChart('sectorChart', dashboard.topSectorChart, 'setor');
+      renderHorizontalChart('centerChart', dashboard.topCenterChart, 'centro');
+      renderRanking('sectorRanking', dashboard.sectorComparisons, 'setor');
+      renderRanking('centerRanking', dashboard.centerComparisons, 'centro');
+      renderTable(dashboard);
+      renderAlerts(dashboard.alerts);
+      renderValidation(dashboard);
+      syncParentHeight();
+    }
+    function computeDashboard(){
+      var filtroSetor = byId('filtroSetor').value;
+      var filtroCentro = byId('filtroCentro').value;
+      var filtroRubrica = byId('filtroRubrica').value;
+      var filtroCategoria = byId('filtroCategoria').value;
+      var currentKey = state.currentKey;
+      var previousKey = state.previousKey;
+      var currentEmployees = {};
+      var previousEmployees = {};
+      var entryCandidates = {};
+      var exitCandidates = {};
+      var monthly = {};
+      var currentSector = {}, previousSector = {};
+      var currentCenter = {}, previousCenter = {};
+      var currentEvent = {}, previousEvent = {};
+      var currentCategory = {}, previousCategory = {};
+
+      function add(map, key, value){
+        if (!key) return;
+        map[key] = (map[key] || 0) + value;
+      }
+      function ensureMonth(key){
+        if (!monthly[key]) monthly[key] = { proventos: 0, descontos: 0, encargos: 0, beneficios: 0, bases: 0, outros: 0, bruto: 0, liquido: 0, custo: 0 };
+        return monthly[key];
+      }
+
+      state.rows.forEach(function(row){
+        if (filtroSetor && row.sector !== filtroSetor) return;
+        if (filtroCentro && row.centerLabel !== filtroCentro) return;
+        if (filtroRubrica && row.eventDesc !== filtroRubrica) return;
+        if (filtroCategoria && row.category !== filtroCategoria) return;
+
+        var bucket = ensureMonth(row.competenceKey);
+        if (row.category === 'Proventos') bucket.proventos += row.valor;
+        else if (row.category === 'Descontos') bucket.descontos += row.valor;
+        else if (row.category === 'Encargos') bucket.encargos += row.valor;
+        else if (row.category === 'Benefícios') bucket.beneficios += row.valor;
+        else if (row.category === 'Base de cálculo') bucket.bases += row.valor;
+        else bucket.outros += row.valor;
+        bucket.bruto = bucket.proventos;
+        bucket.liquido = bucket.proventos - bucket.descontos;
+        bucket.custo = bucket.proventos + bucket.encargos + bucket.beneficios;
+
+        var groupValue = metricValueForRow(row, filtroCategoria);
+        if (row.competenceKey === currentKey) {
+          currentEmployees[row.chapa || ('sem-chapa-' + row.eventCode + '-' + row.eventDesc)] = 1;
+          if (row.admissionMonth === currentKey) entryCandidates[row.chapa || ('adm-' + row.eventCode)] = 1;
+          if (row.desligamentoMonth === currentKey) exitCandidates[row.chapa || ('des-' + row.eventCode)] = 1;
+          add(currentSector, row.sector, groupValue);
+          add(currentCenter, row.centerLabel, groupValue);
+          add(currentEvent, row.eventDesc, row.valor);
+          add(currentCategory, row.category, row.valor);
+        } else if (row.competenceKey === previousKey) {
+          previousEmployees[row.chapa || ('sem-chapa-' + row.eventCode + '-' + row.eventDesc)] = 1;
+          add(previousSector, row.sector, groupValue);
+          add(previousCenter, row.centerLabel, groupValue);
+          add(previousEvent, row.eventDesc, row.valor);
+          add(previousCategory, row.category, row.valor);
+        }
+      });
+
+      Object.keys(currentEmployees).forEach(function(chapa){
+        if (!previousEmployees[chapa]) entryCandidates[chapa] = 1;
+      });
+      Object.keys(previousEmployees).forEach(function(chapa){
+        if (!currentEmployees[chapa]) exitCandidates[chapa] = 1;
+      });
+
+      var currentMonth = monthly[currentKey] || { proventos: 0, descontos: 0, encargos: 0, beneficios: 0, bases: 0, outros: 0, bruto: 0, liquido: 0, custo: 0 };
+      var previousMonth = monthly[previousKey] || { proventos: 0, descontos: 0, encargos: 0, beneficios: 0, bases: 0, outros: 0, bruto: 0, liquido: 0, custo: 0 };
+      var folhaVariation = calcVariation(previousMonth.custo, currentMonth.custo);
+      var colaboradoresAtual = Object.keys(currentEmployees).length;
+      var colaboradoresAnterior = Object.keys(previousEmployees).length;
+      var headcountVariation = calcVariation(colaboradoresAnterior, colaboradoresAtual);
+      var avgPerEmployee = colaboradoresAtual ? currentMonth.custo / colaboradoresAtual : 0;
+
+      var sectorComparisons = buildMapComparison(previousSector, currentSector, currentMonth.custo);
+      var centerComparisons = buildMapComparison(previousCenter, currentCenter, currentMonth.custo);
+      var eventComparisons = buildMapComparison(previousEvent, currentEvent, currentMonth.custo);
+      var categoryComparisons = buildMapComparison(previousCategory, currentCategory, currentMonth.custo, categoryOrder);
+
+      categoryComparisons.push({
+        label: 'Salário bruto consolidado',
+        previous: previousMonth.bruto,
+        current: currentMonth.bruto,
+        diff: currentMonth.bruto - previousMonth.bruto,
+        pct: calcVariation(previousMonth.bruto, currentMonth.bruto).pct,
+        pctLabel: calcVariation(previousMonth.bruto, currentMonth.bruto).label,
+        type: calcVariation(previousMonth.bruto, currentMonth.bruto).type,
+        participation: currentMonth.custo > 0 ? (currentMonth.bruto / currentMonth.custo) * 100 : 0
+      });
+      categoryComparisons.push({
+        label: 'Salário líquido consolidado',
+        previous: previousMonth.liquido,
+        current: currentMonth.liquido,
+        diff: currentMonth.liquido - previousMonth.liquido,
+        pct: calcVariation(previousMonth.liquido, currentMonth.liquido).pct,
+        pctLabel: calcVariation(previousMonth.liquido, currentMonth.liquido).label,
+        type: calcVariation(previousMonth.liquido, currentMonth.liquido).type,
+        participation: currentMonth.custo > 0 ? (currentMonth.liquido / currentMonth.custo) * 100 : 0
+      });
+      categoryComparisons.push({
+        label: 'Custo total consolidado',
+        previous: previousMonth.custo,
+        current: currentMonth.custo,
+        diff: currentMonth.custo - previousMonth.custo,
+        pct: folhaVariation.pct,
+        pctLabel: folhaVariation.label,
+        type: folhaVariation.type,
+        participation: 100
+      });
+
+      var topSector = sectorComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0] || null;
+      var topCenter = centerComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0] || null;
+      var topEvent = eventComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0] || null;
+
+      var evolution = state.months.map(function(key){
+        var bucket = monthly[key] || { custo: 0, proventos: 0, descontos: 0, encargos: 0, beneficios: 0, liquido: 0 };
+        return {
+          key: key,
+          label: monthLabel(key),
+          value: bucket.custo,
+          bruto: bucket.proventos,
+          liquido: bucket.liquido,
+          descontos: bucket.descontos
+        };
+      });
+
+      var categorySummary = [
+        { label: 'Proventos', value: currentMonth.proventos },
+        { label: 'Encargos', value: currentMonth.encargos },
+        { label: 'Benefícios', value: currentMonth.beneficios },
+        { label: 'Descontos', value: currentMonth.descontos },
+        { label: 'Base de cálculo', value: currentMonth.bases },
+        { label: 'Outros', value: currentMonth.outros }
+      ];
+
+      return {
+        currentKey: currentKey,
+        previousKey: previousKey,
+        currentMonth: currentMonth,
+        previousMonth: previousMonth,
+        folhaVariation: folhaVariation,
+        colaboradoresAtual: colaboradoresAtual,
+        colaboradoresAnterior: colaboradoresAnterior,
+        headcountVariation: headcountVariation,
+        entries: Object.keys(entryCandidates).length,
+        exits: Object.keys(exitCandidates).length,
+        avgPerEmployee: avgPerEmployee,
+        topSector: topSector,
+        topCenter: topCenter,
+        topEvent: topEvent,
+        categorySummary: categorySummary,
+        evolution: evolution,
+        sectorComparisons: sectorComparisons,
+        centerComparisons: centerComparisons,
+        eventComparisons: eventComparisons,
+        categoryComparisons: categoryComparisons,
+        topSectorChart: sectorComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 8),
+        topCenterChart: centerComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 8),
+        alerts: buildAlerts(currentMonth, previousMonth, folhaVariation, sectorComparisons, centerComparisons, eventComparisons, colaboradoresAtual, colaboradoresAnterior, Object.keys(entryCandidates).length, Object.keys(exitCandidates).length),
+        tableRows: buildTableRows(categoryComparisons, sectorComparisons, centerComparisons, eventComparisons, evolution, currentMonth),
+        validation: buildValidation(currentMonth, previousMonth),
+        activeFilters: {
+          setor: filtroSetor,
+          centro: filtroCentro,
+          rubrica: filtroRubrica,
+          categoria: filtroCategoria
+        }
+      };
+    }
+    function buildAlerts(currentMonth, previousMonth, folhaVariation, sectorComparisons, centerComparisons, eventComparisons, colaboradoresAtual, colaboradoresAnterior, entries, exits){
+      var limiteFolha = parseFloat(byId('limiteFolha').value || '10');
+      var limiteGrupo = parseFloat(byId('limiteGrupo').value || '15');
+      var limiteRubrica = parseFloat(byId('limiteRubrica').value || '25');
+      var limiteBeneficio = parseFloat(byId('limiteBeneficio').value || '12');
+      var limiteColaboradores = parseFloat(byId('limiteColaboradores').value || '10');
+      var alerts = [];
+      function push(cls, title, text){ alerts.push({ cls: cls, title: title, text: text }); }
+
+      if (!state.previousKey) {
+        push('warn', 'Sem mês anterior para comparação', 'A competência selecionada não possui base anterior no arquivo atual. O dashboard mantém os totais do mês, mas as variações ficam limitadas.');
+      } else if (folhaVariation.pct != null && Math.abs(folhaVariation.pct) >= limiteFolha) {
+        push(folhaVariation.pct > 0 ? 'danger' : 'warn', 'Folha total fora do limite', 'O custo total variou ' + fmtPct(folhaVariation.pct) + ' entre ' + monthLabel(state.previousKey) + ' e ' + monthLabel(state.currentKey) + '.');
+      }
+
+      var topSector = sectorComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0];
+      if (topSector && topSector.pct != null && Math.abs(topSector.pct) >= limiteGrupo) {
+        push(topSector.pct > 0 ? 'danger' : 'warn', 'Setor com variação relevante', topSector.label + ' mudou ' + fmtPct(topSector.pct) + ' (' + fmtMoney(topSector.diff) + ').');
+      }
+
+      var topCenter = centerComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0];
+      if (topCenter && topCenter.pct != null && Math.abs(topCenter.pct) >= limiteGrupo) {
+        push(topCenter.pct > 0 ? 'danger' : 'warn', 'Centro de custo com variação relevante', topCenter.label + ' mudou ' + fmtPct(topCenter.pct) + ' (' + fmtMoney(topCenter.diff) + ').');
+      }
+
+      var topEvent = eventComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0];
+      if (topEvent && topEvent.pct != null && Math.abs(topEvent.pct) >= limiteRubrica) {
+        push(topEvent.pct > 0 ? 'danger' : 'warn', 'Rubrica com crescimento incomum', topEvent.label + ' variou ' + fmtPct(topEvent.pct) + ' em comparação com o mês anterior.');
+      } else if (topEvent && topEvent.type === 'new' && topEvent.current > 0) {
+        push('warn', 'Rubrica nova com impacto', topEvent.label + ' surgiu como novo valor em ' + monthLabel(state.currentKey) + ' com total de ' + fmtMoney(topEvent.current) + '.');
+      }
+
+      var beneficioVar = calcVariation(previousMonth.beneficios, currentMonth.beneficios);
+      if (beneficioVar.pct != null && Math.abs(beneficioVar.pct) >= limiteBeneficio) {
+        push(beneficioVar.pct > 0 ? 'danger' : 'warn', 'Benefícios fora do padrão', 'Benefícios variaram ' + fmtPct(beneficioVar.pct) + ' no recorte atual.');
+      }
+
+      var descontoVar = calcVariation(previousMonth.descontos, currentMonth.descontos);
+      if (descontoVar.pct != null && Math.abs(descontoVar.pct) >= limiteGrupo) {
+        push(descontoVar.pct > 0 ? 'warn' : 'good', 'Descontos com oscilação relevante', 'Descontos consolidados variaram ' + fmtPct(descontoVar.pct) + '.');
+      }
+
+      var encargoVar = calcVariation(previousMonth.encargos, currentMonth.encargos);
+      if (encargoVar.pct != null && Math.abs(encargoVar.pct) >= limiteGrupo) {
+        push(encargoVar.pct > 0 ? 'warn' : 'good', 'Encargos fora do padrão', 'Encargos consolidados variaram ' + fmtPct(encargoVar.pct) + '.');
+      }
+
+      var liquidoVar = calcVariation(previousMonth.liquido, currentMonth.liquido);
+      if (liquidoVar.pct != null && Math.abs(liquidoVar.pct) >= limiteFolha) {
+        push(liquidoVar.pct > 0 ? 'danger' : 'warn', 'Líquido total a pagar com diferença relevante', 'O líquido consolidado variou ' + fmtPct(liquidoVar.pct) + ' no mês atual.');
+      }
+
+      var headcountVar = calcVariation(colaboradoresAnterior, colaboradoresAtual);
+      if (headcountVar.pct != null && Math.abs(headcountVar.pct) >= limiteColaboradores) {
+        push(headcountVar.pct > 0 ? 'warn' : 'warn', 'Quantidade total de colaboradores variou acima do limite', 'A base mudou ' + fmtPct(headcountVar.pct) + ' com ' + fmtInt(entries) + ' entradas e ' + fmtInt(exits) + ' saídas agregadas.');
+      }
+
+      if (!alerts.length) {
+        push('good', 'Sem anomalias críticas no recorte atual', 'Os principais indicadores ficaram dentro dos limites configurados para o filtro selecionado.');
+      }
+      return alerts;
+    }
+    function buildTableRows(categoryComparisons, sectorComparisons, centerComparisons, eventComparisons, evolution, currentMonth){
+      var view = byId('visaoTabela').value;
+      if (view === 'setor') return sectorComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 80);
+      if (view === 'centro') return centerComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 80);
+      if (view === 'tipo') return eventComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 120);
+      if (view === 'competencia') {
+        return evolution.map(function(item, idx){
+          var previous = idx > 0 ? evolution[idx - 1].value : 0;
+          var variation = calcVariation(previous, item.value);
+          return {
+            label: item.label,
+            previous: previous,
+            current: item.value,
+            diff: variation.diff,
+            pct: variation.pct,
+            pctLabel: variation.label,
+            type: variation.type,
+            participation: currentMonth.custo > 0 ? (item.value / currentMonth.custo) * 100 : 0,
+            note: idx === evolution.length - 1 ? 'Competência corrente do filtro.' : 'Histórico mensal consolidado.'
+          };
+        });
+      }
+      return categoryComparisons;
+    }
+    function pickKpiClass(type){
+      if (type === 'up') return 'danger';
+      if (type === 'down') return 'good';
+      if (type === 'new') return 'warn';
+      return 'brand';
+    }
+    function renderKpis(dashboard){
+      var cards = [
+        { kicker: 'Total da folha atual', value: fmtMoney(dashboard.currentMonth.custo), sub: monthLabel(dashboard.currentKey), cls: 'brand' },
+        { kicker: 'Total da folha anterior', value: fmtMoney(dashboard.previousMonth.custo), sub: dashboard.previousKey ? monthLabel(dashboard.previousKey) : 'Sem base anterior', cls: 'brand' },
+        { kicker: 'Diferença absoluta', value: fmtMoney(dashboard.folhaVariation.diff), sub: 'Atual - anterior', cls: pickKpiClass(dashboard.folhaVariation.type) },
+        { kicker: 'Variação percentual', value: dashboard.folhaVariation.label, sub: 'Comparação mês a mês', cls: pickKpiClass(dashboard.folhaVariation.type) },
+        { kicker: 'Total agregado de colaboradores', value: fmtInt(dashboard.colaboradoresAtual), sub: dashboard.colaboradoresAnterior ? 'Anterior: ' + fmtInt(dashboard.colaboradoresAnterior) : 'Sem base anterior', cls: 'brand' },
+        { kicker: 'Entradas no mês', value: fmtInt(dashboard.entries), sub: 'Admissões novas ou presença nova', cls: 'good' },
+        { kicker: 'Saídas no mês', value: fmtInt(dashboard.exits), sub: 'Desligamentos ou ausência frente ao mês anterior', cls: 'warn' },
+        { kicker: 'Média por colaborador', value: fmtMoney(dashboard.avgPerEmployee), sub: 'Custo total / quantidade agregada', cls: 'brand' },
+        { kicker: 'Setor com maior variação', value: dashboard.topSector ? dashboard.topSector.label : '—', sub: dashboard.topSector ? dashboard.topSector.pctLabel + ' · ' + fmtMoney(dashboard.topSector.diff) : 'Sem destaque', cls: dashboard.topSector ? pickKpiClass(dashboard.topSector.type) : 'brand' },
+        { kicker: 'Centro com maior variação', value: dashboard.topCenter ? dashboard.topCenter.label : '—', sub: dashboard.topCenter ? dashboard.topCenter.pctLabel + ' · ' + fmtMoney(dashboard.topCenter.diff) : 'Sem destaque', cls: dashboard.topCenter ? pickKpiClass(dashboard.topCenter.type) : 'brand' },
+        { kicker: 'Tipo de verba com maior impacto', value: dashboard.topEvent ? dashboard.topEvent.label : '—', sub: dashboard.topEvent ? dashboard.topEvent.pctLabel + ' · ' + fmtMoney(dashboard.topEvent.diff) : 'Sem destaque', cls: dashboard.topEvent ? pickKpiClass(dashboard.topEvent.type) : 'brand' },
+        { kicker: 'Total de proventos', value: fmtMoney(dashboard.currentMonth.proventos), sub: 'Salário bruto consolidado', cls: 'brand' },
+        { kicker: 'Total de descontos', value: fmtMoney(dashboard.currentMonth.descontos), sub: 'Descontos consolidados', cls: 'warn' },
+        { kicker: 'Total de encargos', value: fmtMoney(dashboard.currentMonth.encargos), sub: 'Encargos consolidados', cls: 'brand' },
+        { kicker: 'Total de benefícios', value: fmtMoney(dashboard.currentMonth.beneficios), sub: 'Benefícios consolidados', cls: 'good' },
+        { kicker: 'Custo total consolidado', value: fmtMoney(dashboard.currentMonth.custo), sub: 'Proventos + Encargos + Benefícios', cls: 'brand' }
+      ];
+      byId('kpiGrid').innerHTML = cards.map(function(card){
+        return '<div class="kpi-card ' + escHtml(card.cls || '') + '"><span class="kicker">' + escHtml(card.kicker) + '</span><strong>' + escHtml(card.value) + '</strong><div class="sub">' + escHtml(card.sub) + '</div></div>';
+      }).join('');
+    }
+    function renderEvolutionChart(items){
+      var chart = byId('evolutionChart');
+      if (!items.length) {
+        chart.innerHTML = '<div class="empty-state">Sem competências suficientes para o gráfico.</div>';
+        return;
+      }
+      var max = Math.max.apply(null, items.map(function(item){ return item.value; }).concat([1]));
+      chart.innerHTML = items.map(function(item){
+        var height = max > 0 ? Math.max((item.value / max) * 160, item.value > 0 ? 10 : 2) : 2;
+        var cls = item.key === state.currentKey ? ' style="background:linear-gradient(180deg,#93c5fd 0%,#1d4ed8 100%);box-shadow:0 0 0 2px rgba(37,99,235,0.18)"' : '';
+        return '<div class="chart-col"><div class="bar"' + cls + ' style="height:' + height.toFixed(1) + 'px"><span class="tip">' + escHtml(item.label) + ' · ' + escHtml(fmtMoney(item.value)) + '</span></div><div class="bar-val">' + escHtml(fmtMoney(item.value)) + '</div><div class="bar-label">' + escHtml(item.label) + '</div></div>';
+      }).join('');
+    }
+    function renderComposition(items){
+      var total = items.reduce(function(sum, item){ return sum + item.value; }, 0);
+      var stack = byId('compositionStack');
+      var legend = byId('compositionLegend');
+      if (!total) {
+        stack.innerHTML = '<span style="width:100%;background:#cbd5e1"></span>';
+        legend.innerHTML = '<div class="empty-state">Sem valores para montar a composição no recorte atual.</div>';
+        return;
+      }
+      stack.innerHTML = items.filter(function(item){ return item.value > 0; }).map(function(item){
+        var pct = (item.value / total) * 100;
+        return '<span style="width:' + pct.toFixed(4) + '%;background:' + escHtml(categoryColors[item.label] || '#64748b') + '"></span>';
+      }).join('');
+      legend.innerHTML = items.filter(function(item){ return item.value > 0; }).map(function(item){
+        var pct = total > 0 ? (item.value / total) * 100 : 0;
+        return '<div class="legend-item"><span class="legend-dot" style="background:' + escHtml(categoryColors[item.label] || '#64748b') + '"></span><span>' + escHtml(item.label) + '</span><strong>' + escHtml(fmtMoney(item.value)) + ' · ' + escHtml(pct.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })) + '%</strong></div>';
+      }).join('');
+    }
+    function renderHorizontalChart(targetId, items, kind){
+      var wrap = byId(targetId);
+      if (!items.length) {
+        wrap.innerHTML = '<div class="empty-state">Sem variações suficientes para exibir este gráfico.</div>';
+        return;
+      }
+      var max = Math.max.apply(null, items.map(function(item){ return Math.abs(item.diff); }).concat([1]));
+      wrap.innerHTML = items.map(function(item){
+        var width = Math.max((Math.abs(item.diff) / max) * 100, Math.abs(item.diff) > 0 ? 6 : 2);
+        return '<div class="h-item"><div class="h-meta"><span class="label">' + escHtml(item.label) + '</span><span>' + escHtml(fmtMoney(item.diff)) + ' · ' + escHtml(item.pctLabel) + '</span></div><div class="h-track"><div class="h-fill ' + (item.diff >= 0 ? 'pos' : 'neg') + '" style="width:' + width.toFixed(2) + '%"></div></div></div>';
+      }).join('');
+    }
+    function renderRanking(targetId, items, label){
+      var positives = items.filter(function(item){ return item.diff > 0; }).sort(function(a, b){ return b.diff - a.diff; }).slice(0, 5);
+      var negatives = items.filter(function(item){ return item.diff < 0; }).sort(function(a, b){ return a.diff - b.diff; }).slice(0, 5);
+      function renderCol(title, list, cls, emptyText){
+        if (!list.length) {
+          return '<div class="ranking-col"><h3>' + escHtml(title) + '</h3><div class="empty-state">' + escHtml(emptyText) + '</div></div>';
+        }
+        return '<div class="ranking-col"><h3>' + escHtml(title) + '</h3><div class="rank-list">' + list.map(function(item){
+          return '<div class="rank-item ' + cls + '"><strong>' + escHtml(item.label) + '</strong><span>' + escHtml(fmtMoney(item.diff)) + ' · ' + escHtml(item.pctLabel) + '<br>Atual: ' + escHtml(fmtMoney(item.current)) + ' | Anterior: ' + escHtml(fmtMoney(item.previous)) + '</span></div>';
+        }).join('') + '</div></div>';
+      }
+      byId(targetId).innerHTML =
+        renderCol('Maiores aumentos por ' + label, positives, 'up', 'Nenhum aumento relevante no recorte.') +
+        renderCol('Maiores reduções por ' + label, negatives, 'down', 'Nenhuma redução relevante no recorte.');
+    }
+    function alterationType(row){
+      if (row.type === 'new') return 'Novo valor';
+      if (row.diff > 0) return 'Aumento';
+      if (row.diff < 0) return 'Redução';
+      return 'Estável';
+    }
+    function observationForRow(row){
+      if (row.label === 'Base de cálculo') return 'Base segregada; não entra no custo total.';
+      if (row.label === 'Custo total consolidado') return 'Síntese executiva do recorte atual.';
+      if (row.type === 'new') return 'Sem base anterior para percentual.';
+      if (row.current === 0 && row.previous > 0) return 'Valor zerado frente ao mês anterior.';
+      if (row.pct != null && Math.abs(row.pct) >= parseFloat(byId('limiteGrupo').value || '15')) return 'Variação acima da sensibilidade configurada.';
+      if (row.pct != null && Math.abs(row.pct) < 1) return 'Oscilação residual.';
+      return 'Comportamento dentro do esperado no recorte.';
+    }
+    function renderTable(dashboard){
+      var rows = dashboard.tableRows || [];
+      var view = byId('visaoTabela').value;
+      byId('tableSummary').textContent = rows.length + ' linhas na visão ' + view + ' · competência atual ' + monthLabel(dashboard.currentKey) + (dashboard.previousKey ? ' comparada com ' + monthLabel(dashboard.previousKey) : '');
+      if (!rows.length) {
+        byId('tableBody').innerHTML = '<tr><td colspan="8" class="empty-state">Nenhum agrupamento encontrado para o filtro atual.</td></tr>';
+        return;
+      }
+      byId('tableBody').innerHTML = rows.map(function(row){
+        var badgeCls = row.type === 'up' ? 'up' : (row.type === 'down' ? 'down' : 'flat');
+        var part = isFinite(row.participation) ? row.participation.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%' : '—';
+        return '<tr>' +
+          '<td><strong>' + escHtml(row.label) + '</strong></td>' +
+          '<td class="money">' + escHtml(fmtMoney(row.previous)) + '</td>' +
+          '<td class="money">' + escHtml(fmtMoney(row.current)) + '</td>' +
+          '<td class="money">' + escHtml(fmtMoney(row.diff)) + '</td>' +
+          '<td class="money">' + escHtml(row.pctLabel) + '</td>' +
+          '<td class="money">' + escHtml(part) + '</td>' +
+          '<td><span class="delta-pill ' + badgeCls + '">' + escHtml(alterationType(row)) + '</span></td>' +
+          '<td>' + escHtml(row.note || observationForRow(row)) + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+    function renderAlerts(alerts){
+      byId('alertsList').innerHTML = alerts.map(function(alert){
+        return '<div class="alert-item ' + escHtml(alert.cls) + '"><strong>' + escHtml(alert.title) + '</strong><span>' + escHtml(alert.text) + '</span></div>';
+      }).join('');
+    }
+    function buildValidation(currentMonth, previousMonth){
+      return [
+        { label: 'Arquivo', value: state.fileName || '—' },
+        { label: 'Aba detectada', value: state.sheetName + ' · cabeçalho na linha ' + state.headerRow },
+        { label: 'Linhas válidas', value: fmtInt(state.validRows) + ' de ' + fmtInt(state.rawRows) + ' linhas lidas' },
+        { label: 'Competências', value: state.months.map(monthLabel).join(', ') },
+        { label: 'Competência padrão', value: monthLabel(state.currentKey) + (state.previousKey ? ' comparada com ' + monthLabel(state.previousKey) : '') },
+        { label: 'Mapeamento operacional', value: 'Setor = Desc Seção | Centro = Seção' },
+        { label: 'Custo total atual', value: fmtMoney(currentMonth.custo) + ' (proventos + encargos + benefícios)' },
+        { label: 'Líquido consolidado', value: fmtMoney(currentMonth.liquido) + ' | anterior ' + fmtMoney(previousMonth.liquido) },
+        { label: 'Bases segregadas', value: fmtMoney(currentMonth.bases) + ' fora do custo total gerencial' }
+      ];
+    }
+    function renderValidation(dashboard){
+      byId('validationMeta').innerHTML = dashboard.validation.map(function(item){
+        return '<div class="validation-box"><span class="label">' + escHtml(item.label) + '</span><strong>' + escHtml(item.value) + '</strong></div>';
+      }).join('');
+    }
+
+    byId('btnSelectFile').addEventListener('click', function(){ openFilePicker(); });
+    byId('btnReloadFile').addEventListener('click', function(){ openFilePicker(); });
+    byId('fileInput').addEventListener('change', function(ev){
+      if (ev.target.files && ev.target.files[0]) loadWorkbook(ev.target.files[0]);
+      ev.target.value = '';
+    });
+    ['competenciaAtual', 'filtroSetor', 'filtroCentro', 'filtroRubrica', 'filtroCategoria', 'visaoTabela', 'limiteFolha', 'limiteGrupo', 'limiteRubrica', 'limiteBeneficio', 'limiteColaboradores'].forEach(function(id){
+      byId(id).addEventListener('change', renderAll);
+      byId(id).addEventListener('input', renderAll);
+    });
+    syncParentHeight();
+  })();
+  ${DASHBOARD_FOLHA_SCRIPT_CLOSE}
+</body>
+</html>`;
+
+  const RESCISAO_SCRIPT_CLOSE = '</' + 'script>';
+  const RESCISAO_SRCDOC = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Rescisão</title>
+<style>
+  :root {
+    --bg: #eef2ff;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --surface-card: #ffffff;
+    --surface-alt: #f8fafc;
+    --border: #d9e2ec;
+    --text: #0f172a;
+    --muted: #64748b;
+    --label: #334155;
+    --brand: #2563eb;
+    --brand-soft: #dbeafe;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --danger: #b91c1c;
+    --danger-soft: #fee2e2;
+  }
+  body.dark-mode {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-soft: #0f172a;
+    --surface-card: #1e293b;
+    --surface-alt: #172036;
+    --border: #334155;
+    --text: #f8fafc;
+    --muted: #cbd5e1;
+    --label: #e2e8f0;
+    --brand: #60a5fa;
+    --brand-soft: rgba(59, 130, 246, 0.18);
+    --good: #4ade80;
+    --good-soft: rgba(34, 197, 94, 0.16);
+    --warn: #fbbf24;
+    --warn-soft: rgba(245, 158, 11, 0.18);
+    --danger: #f87171;
+    --danger-soft: rgba(239, 68, 68, 0.18);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--surface-alt) 0%, var(--bg) 100%);
+    color: var(--text);
+  }
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: white;
+    padding: 28px 32px;
+  }
+  header h1 { margin: 0; font-size: 26px; }
+  header p { margin: 8px 0 0; opacity: 0.82; max-width: 820px; line-height: 1.55; }
+  .container { max-width: 1240px; margin: 0 auto; padding: 24px; }
+  .hero-note, .legal-note, .helper-note {
+    border-radius: 16px;
+    padding: 16px 18px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+    border: 1px solid transparent;
+  }
+  .hero-note {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.18);
+    color: #1e3a8a;
+  }
+  .legal-note {
+    background: var(--warn-soft);
+    border-color: rgba(180, 83, 9, 0.2);
+    color: #92400e;
+  }
+  .helper-note {
+    background: #f1f5f9;
+    border-color: #dbe4f0;
+    color: #334155;
+    font-size: 13px;
+  }
+  body.dark-mode .hero-note {
+    background: rgba(59, 130, 246, 0.18);
+    border-color: rgba(96, 165, 250, 0.24);
+    color: #dbeafe;
+  }
+  body.dark-mode .legal-note {
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(251, 191, 36, 0.24);
+    color: #fde68a;
+  }
+  body.dark-mode .helper-note {
+    background: rgba(148, 163, 184, 0.12);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #e2e8f0;
+  }
+  .grid {
+    display: grid;
+    gap: 18px;
+  }
+  .grid.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .card {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 18px 20px 12px;
+    border-bottom: 1px solid #edf2f7;
+  }
+  .card-head h2 {
+    margin: 0;
+    font-size: 17px;
+  }
+  .card-head p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .card-body {
+    padding: 18px 20px 20px;
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+  }
+  .field-grid.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field.full { grid-column: 1 / -1; }
+  label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--label);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    min-height: 32px;
+    display: flex;
+    align-items: flex-end;
+  }
+  input, select, textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 11px 12px;
+    font: inherit;
+    background: white;
+    color: var(--text);
+    min-height: 44px;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.16);
+  }
+  textarea { min-height: 92px; resize: vertical; }
+  body.dark-mode input,
+  body.dark-mode select,
+  body.dark-mode textarea {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f8fafc;
+  }
+  body.dark-mode input::placeholder,
+  body.dark-mode textarea::placeholder {
+    color: #94a3b8;
+  }
+  .field small {
+    color: var(--muted);
+    line-height: 1.45;
+    font-size: 12px;
+  }
+  .calc-config-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .calc-table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface-alt);
+  }
+  .calc-table-wrap h3 {
+    margin: 0;
+    padding: 12px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .calc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .calc-table th,
+  .calc-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .calc-table tr:last-child td { border-bottom: none; }
+  .calc-table input {
+    min-height: 34px;
+    padding: 7px 8px;
+    border-radius: 8px;
+  }
+  .calc-config-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .calc-config-status {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.62);
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-backdrop.hidden { display: none; }
+  .config-modal {
+    width: min(980px, 96vw);
+    max-height: min(780px, 92vh);
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(2, 6, 23, 0.38);
+    display: flex;
+    flex-direction: column;
+  }
+  .config-modal-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-alt);
+  }
+  .config-modal-head h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+  .config-modal-head p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    line-height: 1.45;
+    font-size: 13px;
+  }
+  .config-modal-body {
+    overflow: auto;
+    padding: 18px 20px 20px;
+  }
+  .toggle-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface-alt);
+  }
+  .toggle-row input[type="checkbox"] {
+    width: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--brand);
+  }
+  .toggle-copy strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .toggle-copy span {
+    display: block;
+    color: var(--muted);
+    line-height: 1.5;
+    font-size: 12px;
+  }
+  body.dark-mode .toggle-row {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(148, 163, 184, 0.24);
+  }
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 22px 0 24px;
+  }
+  button {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: white;
+  }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-secondary {
+    background: white;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+  }
+  .btn-secondary:hover { background: #f8fafc; }
+  .btn-ghost {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+  }
+  .btn-ghost:hover { background: #dbeafe; }
+  .result-shell {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+  .result-head {
+    padding: 22px 24px;
+    border-bottom: 1px solid #e5edf6;
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  }
+  .result-head h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+  .result-head p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .result-body {
+    padding: 24px;
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .summary-card {
+    border-radius: 18px;
+    padding: 16px 18px;
+    border: 1px solid #dbe4f0;
+    background: #f8fafc;
+  }
+  .summary-card .kicker {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .summary-card strong {
+    display: block;
+    font-size: 24px;
+    line-height: 1.15;
+  }
+  .summary-card.good { background: var(--good-soft); border-color: #bbf7d0; }
+  .summary-card.good strong { color: var(--good); }
+  .summary-card.danger { background: var(--danger-soft); border-color: #fecaca; }
+  .summary-card.danger strong { color: var(--danger); }
+  .summary-card.brand { background: var(--brand-soft); border-color: #bfdbfe; }
+  .summary-card.brand strong { color: #1d4ed8; }
+  .summary-card.neutral strong { color: #0f172a; }
+  body.dark-mode .summary-card.neutral strong { color: #f8fafc; }
+  .trct-stack {
+    display: grid;
+    gap: 18px;
+  }
+  .sheet,
+  .trct-document {
+    border: 1px solid #dbe4f0;
+    border-radius: 18px;
+    background: white;
+    overflow: hidden;
+  }
+  .trct-document {
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  }
+  .sheet-head,
+  .trct-head {
+    padding: 14px 18px;
+    background: #eff6ff;
+    border-bottom: 1px solid #dbeafe;
+  }
+  .sheet-head h3,
+  .trct-head h3 {
+    margin: 0;
+    font-size: 15px;
+  }
+  .sheet-head p,
+  .trct-head p {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: #475569;
+  }
+  body.dark-mode .card,
+  body.dark-mode .result-shell,
+  body.dark-mode .sheet,
+  body.dark-mode .trct-document {
+    background: var(--surface-card);
+    border-color: var(--border);
+    box-shadow: 0 18px 40px rgba(2, 6, 23, 0.35);
+  }
+  body.dark-mode .card-head,
+  body.dark-mode .result-head {
+    border-bottom-color: var(--border);
+  }
+  body.dark-mode .result-head,
+  body.dark-mode .sheet-head,
+  body.dark-mode .trct-head {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.92) 0%, rgba(23, 32, 54, 0.92) 100%);
+    border-bottom-color: rgba(96, 165, 250, 0.18);
+  }
+  body.dark-mode .sheet-head p,
+  body.dark-mode .trct-head p,
+  body.dark-mode .result-head p {
+    color: #cbd5e1;
+  }
+  .sheet-body {
+    padding: 18px;
+  }
+  .trct-body {
+    padding: 18px;
+    display: grid;
+    gap: 16px;
+  }
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+    margin-bottom: 18px;
+  }
+  .doc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .mini-item {
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+  }
+  .mini-item span {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+  }
+  .mini-item strong {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  body.dark-mode .mini-item {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(148, 163, 184, 0.22);
+  }
+  body.dark-mode .mini-item strong { color: #f8fafc; }
+  body.dark-mode .mini-item span { color: #cbd5e1; }
+  .doc-section {
+    border: 1px solid #dbe4f0;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .doc-section h4 {
+    margin: 0;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #334155;
+  }
+  .doc-section .doc-grid {
+    padding: 14px;
+  }
+  .doc-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #ffffff;
+    min-height: 72px;
+  }
+  .doc-item span {
+    display: block;
+    margin-bottom: 6px;
+    color: #64748b;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .doc-item strong {
+    display: block;
+    color: #0f172a;
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  body.dark-mode .doc-section {
+    border-color: rgba(148, 163, 184, 0.22);
+  }
+  body.dark-mode .doc-section h4 {
+    background: rgba(15, 23, 42, 0.72);
+    border-bottom-color: rgba(148, 163, 184, 0.22);
+    color: #e2e8f0;
+  }
+  body.dark-mode .doc-item {
+    background: rgba(15, 23, 42, 0.5);
+    border-color: rgba(148, 163, 184, 0.18);
+  }
+  body.dark-mode .doc-item span { color: #cbd5e1; }
+  body.dark-mode .doc-item strong { color: #f8fafc; }
+  .doc-table-wrap {
+    border: 1px solid #dbe4f0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .doc-table-title {
+    margin: 0;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    color: #334155;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  body.dark-mode .doc-table-wrap {
+    border-color: rgba(148, 163, 184, 0.22);
+    background: rgba(15, 23, 42, 0.44);
+  }
+  body.dark-mode .doc-table-title {
+    background: rgba(15, 23, 42, 0.72);
+    border-bottom-color: rgba(148, 163, 184, 0.22);
+    color: #e2e8f0;
+  }
+  .doc-footnote {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #475569;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 14px 16px;
+    background: #fcfdff;
+  }
+  body.dark-mode .doc-footnote {
+    color: #cbd5e1;
+    border-color: rgba(148, 163, 184, 0.24);
+    background: rgba(15, 23, 42, 0.5);
+  }
+  .doc-footnote strong { color: #0f172a; }
+  body.dark-mode .doc-footnote strong { color: #f8fafc; }
+  .row-note {
+    color: #64748b;
+    font-size: 12px;
+  }
+  body.dark-mode .row-note { color: #cbd5e1; }
+  .highlight-row td {
+    background: #f8fafc;
+    font-weight: 700;
+  }
+  body.dark-mode .highlight-row td {
+    background: rgba(148, 163, 184, 0.12);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #f8fafc;
+    color: #475569;
+    border-bottom: 1px solid #e5edf6;
+  }
+  tbody td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #edf2f7;
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.money, th.money { text-align: right; white-space: nowrap; }
+  .code-col {
+    width: 76px;
+    white-space: nowrap;
+    color: #334155;
+    font-weight: 700;
+  }
+  body.dark-mode .code-col { color: #e2e8f0; }
+  .total-row td {
+    font-weight: 700;
+    background: #f8fafc;
+    color: #0f172a;
+  }
+  body.dark-mode .total-row td {
+    background: #f8fafc;
+    color: #0f172a;
+  }
+  .doc-table-wrap .total-row td,
+  .trct-document .total-row td,
+  body.dark-mode .doc-table-wrap .total-row td,
+  body.dark-mode .trct-document .total-row td {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+  }
+  .observations {
+    margin-top: 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 14px 16px;
+    background: #fcfdff;
+  }
+  .observations h4 {
+    margin: 0 0 10px;
+    font-size: 14px;
+  }
+  .observations ul {
+    margin: 0;
+    padding-left: 18px;
+    color: #475569;
+    line-height: 1.55;
+  }
+  .signature-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 24px;
+  }
+  .signature-box {
+    padding-top: 36px;
+    border-top: 1px solid #94a3b8;
+    text-align: center;
+    color: #475569;
+    font-size: 12px;
+  }
+  .empty-state {
+    padding: 42px 28px;
+    text-align: center;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .pill {
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #eef2ff;
+    color: #3730a3;
+  }
+  .pill.warn {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .pill.good {
+    background: #dcfce7;
+    color: #166534;
+  }
+  body.dark-mode .pill {
+    background: rgba(99, 102, 241, 0.22);
+    color: #e0e7ff;
+  }
+  body.dark-mode .pill.warn {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fde68a;
+  }
+  body.dark-mode .pill.good {
+    background: rgba(34, 197, 94, 0.18);
+    color: #bbf7d0;
+  }
+  @media (max-width: 980px) {
+    .grid.two, .grid.three, .field-grid, .field-grid.three, .summary-grid, .signature-row, .mini-grid, .doc-grid, .calc-config-grid {
+      grid-template-columns: 1fr;
+    }
+    label { min-height: 0; }
+  }
+  @media print {
+    body {
+      background: white !important;
+    }
+    header, .hero-note, .legal-note, .helper-note, form, #calcForm, .toolbar, .modal-backdrop {
+      display: none !important;
+    }
+    .container {
+      max-width: none;
+      padding: 0;
+    }
+    .result-shell {
+      border: none;
+      box-shadow: none;
+      border-radius: 0;
+    }
+    .result-head,
+    .summary-grid,
+    .sheet {
+      display: none !important;
+    }
+    .result-body {
+      padding: 0;
+    }
+    .trct-document {
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      break-inside: avoid;
+    }
+    .trct-head {
+      background: white !important;
+      padding: 0 0 12px !important;
+      border-bottom: 2px solid #0f172a !important;
+    }
+    .trct-body {
+      padding: 12px 0 0 !important;
+      gap: 10px !important;
+    }
+    .doc-section,
+    .doc-table-wrap,
+    .doc-footnote {
+      border-color: #cbd5e1 !important;
+      background: white !important;
+      box-shadow: none !important;
+    }
+    .doc-section h4,
+    .doc-table-title,
+    .doc-item,
+    .mini-item,
+    .doc-item strong,
+    .doc-item span,
+    .doc-footnote,
+    .doc-footnote strong,
+    .signature-box {
+      color: #0f172a !important;
+      background: white !important;
+    }
+    .doc-section h4 {
+      border-bottom-color: #cbd5e1 !important;
+    }
+    .doc-table-title {
+      border-bottom-color: #cbd5e1 !important;
+    }
+    .doc-item,
+    .mini-item {
+      border-color: #dbe4f0 !important;
+    }
+    .signature-row {
+      margin-top: 18px;
+    }
+    .signature-box {
+      padding-top: 28px;
+      border-top-color: #64748b !important;
+    }
+    table, thead th, tbody td, .total-row td, .highlight-row td, .doc-table-title {
+      color: #0f172a !important;
+      background: white !important;
+      border-color: #dbe4f0 !important;
+    }
+    @page {
+      size: A4 portrait;
+      margin: 7mm;
+    }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Simulador de Rescisão</h1>
+    <p>Preencha os dados manualmente para estimar as verbas rescisórias, descontos e o líquido final. O resultado pode ser impresso em PDF em um layout próximo ao TRCT para conferência interna.</p>
+  </header>
+
+  <div class="container">
+    <div class="hero-note"><strong>Fluxo sugerido:</strong> preencha os dados contratuais, revise os avos sugeridos, informe o saldo base de FGTS se quiser calcular multa e só então gere o PDF final para conferência.</div>
+    <div class="legal-note"><strong>Atenção:</strong> este simulador entrega uma estimativa operacional. Convenções coletivas, médias de variáveis, descontos específicos, verbas judiciais, bases de incidência e regras internas podem alterar o valor oficial da rescisão.</div>
+
+    <div id="calcForm" role="form">
+      <div class="grid two">
+        <section class="card">
+          <div class="card-head">
+            <h2>Identificação e contrato</h2>
+            <p>Campos principais para montar uma ficha próxima ao TRCT atual.</p>
+          </div>
+          <div class="card-body">
+            <div class="field-grid three">
+              <div class="field full">
+                <label for="razaoSocial">Razão social / nome do empregador</label>
+                <input id="razaoSocial" type="text" placeholder="Ex.: Superfrio Logística Frigorificada Ltda.">
+              </div>
+              <div class="field">
+                <label for="cnpj">CNPJ / CEI</label>
+                <input id="cnpj" type="text" placeholder="00.000.000/0000-00">
+              </div>
+              <div class="field">
+                <label for="cidadeUf">Município / UF</label>
+                <input id="cidadeUf" type="text" placeholder="Ex.: Guarulhos / SP">
+              </div>
+              <div class="field">
+                <label for="tipoContrato">Tipo de contrato</label>
+                <input id="tipoContrato" type="text" placeholder="Ex.: Prazo indeterminado">
+              </div>
+              <div class="field full">
+                <label for="nome">Nome do colaborador</label>
+                <input id="nome" type="text" placeholder="Ex.: Maria Aparecida Souza">
+              </div>
+              <div class="field">
+                <label for="cpf">CPF</label>
+                <input id="cpf" type="text" placeholder="000.000.000-00">
+              </div>
+              <div class="field">
+                <label for="cargo">Cargo</label>
+                <input id="cargo" type="text" placeholder="Ex.: Assistente Administrativo">
+              </div>
+              <div class="field">
+                <label for="pis">PIS / PASEP</label>
+                <input id="pis" type="text" placeholder="000.00000.00-0">
+              </div>
+              <div class="field">
+                <label for="admissao">Data de admissão</label>
+                <input id="admissao" type="date">
+              </div>
+              <div class="field">
+                <label for="desligamento">Data de desligamento</label>
+                <input id="desligamento" type="date">
+              </div>
+              <div class="field">
+                <label for="dataAviso">Data do aviso prévio</label>
+                <input id="dataAviso" type="date">
+              </div>
+              <div class="field">
+                <label for="motivo">Motivo da rescisão</label>
+                <select id="motivo">
+                  <option value="sem_justa_causa">Sem justa causa</option>
+                  <option value="pedido_demissao">Pedido de demissão</option>
+                  <option value="termino_prazo">Término de contrato a prazo</option>
+                  <option value="acordo_484a">Acordo art. 484-A</option>
+                  <option value="justa_causa">Justa causa</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="avisoTipo">Aviso prévio</label>
+                <select id="avisoTipo">
+                  <option value="indenizado">Indenizado</option>
+                  <option value="trabalhado">Trabalhado</option>
+                  <option value="desconto_empregado">Desconto do empregado</option>
+                  <option value="nao_aplica">Não se aplica</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="codigoAfastamento">Código / descrição do afastamento</label>
+                <input id="codigoAfastamento" type="text" placeholder="Ex.: SJ2 - Dispensa sem justa causa">
+              </div>
+              <div class="field">
+                <label for="sindicato">Entidade sindical laboral</label>
+                <input id="sindicato" type="text" placeholder="Opcional para o PDF">
+              </div>
+              <div class="field full">
+                <label for="observacoes">Observações da simulação</label>
+                <textarea id="observacoes" placeholder="Ex.: considerar convenção interna, desconto de adiantamento ou premissas específicas deste cálculo."></textarea>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Bases de cálculo</h2>
+            <p>Os avos e dias podem ser ajustados manualmente antes do cálculo final.</p>
+          </div>
+          <div class="card-body">
+            <div class="field-grid three">
+              <div class="field">
+                <label for="salarioBase">Salário base (R$)</label>
+                <input id="salarioBase" type="number" min="0" step="0.01" placeholder="0,00">
+              </div>
+              <div class="field">
+                <label for="diasSaldo">Dias de saldo salário</label>
+                <input id="diasSaldo" type="number" min="0" max="30" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label for="avisoDias">Dias de aviso</label>
+                <input id="avisoDias" type="number" min="0" max="90" step="1" placeholder="30">
+              </div>
+              <div class="field">
+                <label for="avos13">13º proporcional (avos)</label>
+                <input id="avos13" type="number" min="0" max="12" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label for="avosFerias">Férias proporcionais (avos)</label>
+                <input id="avosFerias" type="number" min="0" max="12" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label for="feriasVencidas">Períodos de férias vencidas</label>
+                <input id="feriasVencidas" type="number" min="0" max="5" step="1" value="0">
+              </div>
+              <div class="field">
+                <label for="fgtsBase">Saldo base do FGTS (R$)</label>
+                <input id="fgtsBase" type="number" min="0" step="0.01" placeholder="Informe se quiser multa do FGTS">
+              </div>
+              <div class="field">
+                <label for="dependentes">Dependentes IRRF</label>
+                <input id="dependentes" type="number" min="0" max="20" step="1" value="0">
+              </div>
+              <div class="field">
+                <label for="outrosDescontos">Outros descontos (R$)</label>
+                <input id="outrosDescontos" type="number" min="0" step="0.01" value="0">
+              </div>
+              <div class="field full">
+                <div class="toggle-row">
+                  <input id="considerarDataBase" type="checkbox">
+                  <div class="toggle-copy">
+                    <strong>Considerar indenização adicional da data-base</strong>
+                    <span>Quando marcada, a simulação adiciona 1 salário nominal como verba estimada de indenização adicional da data-base.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="helper-note" id="autoHint">Preencha admissão, desligamento e motivo para sugerir automaticamente saldo de salário, avos e aviso prévio.</div>
+            <div class="pill-row" id="rulePills"></div>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="toolbar">
+        <button type="button" class="btn-primary" id="btnCalc">Calcular rescisão</button>
+        <button type="button" class="btn-secondary" id="btnNova">Nova simulação</button>
+        <button type="button" class="btn-ghost" id="btnPdf">Gerar PDF</button>
+        <button type="button" class="btn-ghost" id="btnMemoria">Exportar memória</button>
+        <button type="button" class="btn-ghost" id="btnOpenCalcConfig">Configurações de cálculo</button>
+      </div>
+
+      <div class="modal-backdrop hidden" id="calcConfigModal">
+        <section class="config-modal" role="dialog" aria-modal="true" aria-labelledby="calcConfigTitle">
+          <div class="config-modal-head">
+            <div>
+              <h2 id="calcConfigTitle">Configurações de cálculo</h2>
+              <p>Atualize as tabelas quando houver mudança oficial. As premissas salvas ficam no navegador e aparecem na memória da simulação.</p>
+            </div>
+            <button type="button" class="btn-secondary" id="btnCloseCalcConfig">Fechar</button>
+          </div>
+          <div class="config-modal-body">
+            <div class="field-grid three">
+              <div class="field">
+                <label for="calcConfigName">Nome da tabela</label>
+                <input id="calcConfigName" type="text" placeholder="Ex.: INSS/IRRF 2026">
+              </div>
+              <div class="field">
+                <label for="cfgIrrfDependente">Dedução por dependente (R$)</label>
+                <input id="cfgIrrfDependente" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgIrrfSimplificado">Desconto simplificado (R$)</label>
+                <input id="cfgIrrfSimplificado" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgReducaoIsencaoAte">Redução isenta até (R$)</label>
+                <input id="cfgReducaoIsencaoAte" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgReducaoFaixaAte">Redução progressiva até (R$)</label>
+                <input id="cfgReducaoFaixaAte" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgReducaoValorBase">Valor base da redução (R$)</label>
+                <input id="cfgReducaoValorBase" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgReducaoFator">Fator da redução</label>
+                <input id="cfgReducaoFator" type="number" min="0" step="0.000001">
+              </div>
+            </div>
+            <div class="calc-config-grid" style="margin-top:16px;">
+              <div class="calc-table-wrap">
+                <h3>Tabela INSS</h3>
+                <table class="calc-table">
+                  <thead><tr><th>Limite até</th><th>Alíquota %</th></tr></thead>
+                  <tbody id="inssConfigRows"></tbody>
+                </table>
+              </div>
+              <div class="calc-table-wrap">
+                <h3>Tabela IRRF</h3>
+                <table class="calc-table">
+                  <thead><tr><th>Limite até</th><th>Alíquota %</th><th>Dedução</th></tr></thead>
+                  <tbody id="irrfConfigRows"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="calc-config-actions">
+              <button type="button" class="btn-primary" id="btnSaveCalcConfig">Salvar configuração</button>
+              <button type="button" class="btn-secondary" id="btnResetCalcConfig">Restaurar padrão 2026</button>
+            </div>
+            <div class="calc-config-status" id="calcConfigStatus"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="result-shell">
+      <div class="result-head">
+        <h2>Resumo da simulação</h2>
+        <p>Os valores abaixo consideram as premissas informadas no formulário. A memória de cálculo detalha bases, percentuais e descontos estimados.</p>
+      </div>
+      <div class="result-body" id="resultadoWrap">
+        <div class="empty-state">Preencha os dados acima e clique em <strong>Calcular rescisão</strong> para montar a simulação.</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    var RESCISAO_CONFIG_STORAGE_KEY = 'checkFolhaIA_rescisaoCalcConfig_v1';
+    var DEFAULT_CALC_CONFIG = {
+      name: 'INSS/IRRF 2026',
+      inssBrackets: [
+        { limit: 1621.00, rate: 0.075 },
+        { limit: 2902.84, rate: 0.09 },
+        { limit: 4354.27, rate: 0.12 },
+        { limit: 8475.55, rate: 0.14 }
+      ],
+      irrfBrackets: [
+        { limit: 2428.80, rate: 0, deduction: 0 },
+        { limit: 2826.65, rate: 0.075, deduction: 182.16 },
+        { limit: 3751.05, rate: 0.15, deduction: 394.16 },
+        { limit: 4664.68, rate: 0.225, deduction: 675.49 },
+        { limit: Infinity, rate: 0.275, deduction: 908.73 }
+      ],
+      irrfDependente: 189.59,
+      irrfSimplificado: 607.20,
+      reducaoIsencaoAte: 5000,
+      reducaoFaixaAte: 7350,
+      reducaoValorBase: 978.62,
+      reducaoFator: 0.133145
+    };
+    var calcConfig = loadCalcConfig();
+    var lastSimulation = null;
+
+    function cloneCalcConfig(config) {
+      var source = config || DEFAULT_CALC_CONFIG;
+      return {
+        name: source.name,
+        inssBrackets: (source.inssBrackets || []).map(function(row) {
+          return { limit: row.limit === Infinity ? Infinity : Number(row.limit || 0), rate: Number(row.rate || 0) };
+        }),
+        irrfBrackets: (source.irrfBrackets || []).map(function(row) {
+          return { limit: row.limit === Infinity ? Infinity : Number(row.limit || 0), rate: Number(row.rate || 0), deduction: Number(row.deduction || 0) };
+        }),
+        irrfDependente: Number(source.irrfDependente || 0),
+        irrfSimplificado: Number(source.irrfSimplificado || 0),
+        reducaoIsencaoAte: Number(source.reducaoIsencaoAte || 0),
+        reducaoFaixaAte: Number(source.reducaoFaixaAte || 0),
+        reducaoValorBase: Number(source.reducaoValorBase || 0),
+        reducaoFator: Number(source.reducaoFator || 0)
+      };
+    }
+
+    function normalizeConfigLimit(value) {
+      if (value === Infinity || value === 'Infinity') return Infinity;
+      if (value == null || value === '') return Infinity;
+      var text = String(value).trim().toLowerCase();
+      if (text === 'infinito' || text === 'sem teto' || text === 'inf') return Infinity;
+      var n = parseFloat(text.replace(',', '.'));
+      return isNaN(n) ? Infinity : Math.max(0, n);
+    }
+
+    function sanitizeCalcConfig(input) {
+      var source = input || {};
+      var base = cloneCalcConfig(DEFAULT_CALC_CONFIG);
+      base.name = String(source.name || base.name || 'Tabela personalizada').trim() || 'Tabela personalizada';
+      base.irrfDependente = round2(source.irrfDependente != null ? source.irrfDependente : base.irrfDependente);
+      base.irrfSimplificado = round2(source.irrfSimplificado != null ? source.irrfSimplificado : base.irrfSimplificado);
+      base.reducaoIsencaoAte = round2(source.reducaoIsencaoAte != null ? source.reducaoIsencaoAte : base.reducaoIsencaoAte);
+      base.reducaoFaixaAte = round2(source.reducaoFaixaAte != null ? source.reducaoFaixaAte : base.reducaoFaixaAte);
+      base.reducaoValorBase = round2(source.reducaoValorBase != null ? source.reducaoValorBase : base.reducaoValorBase);
+      base.reducaoFator = Math.max(0, Number(source.reducaoFator != null ? source.reducaoFator : base.reducaoFator) || 0);
+
+      function cleanBrackets(rows, withDeduction) {
+        var cleaned = (rows || []).map(function(row) {
+          return {
+            limit: normalizeConfigLimit(row.limit),
+            rate: Math.max(0, Number(row.rate) || 0),
+            deduction: withDeduction ? round2(row.deduction || 0) : 0
+          };
+        }).filter(function(row) { return row.limit > 0 || row.limit === Infinity; });
+        cleaned.sort(function(a, b) { return a.limit - b.limit; });
+        if (!cleaned.length) cleaned = withDeduction ? cloneCalcConfig(DEFAULT_CALC_CONFIG).irrfBrackets : cloneCalcConfig(DEFAULT_CALC_CONFIG).inssBrackets;
+        return cleaned;
+      }
+
+      base.inssBrackets = cleanBrackets(source.inssBrackets || base.inssBrackets, false);
+      base.irrfBrackets = cleanBrackets(source.irrfBrackets || base.irrfBrackets, true);
+      return base;
+    }
+
+    function loadCalcConfig() {
+      try {
+        var raw = localStorage.getItem(RESCISAO_CONFIG_STORAGE_KEY);
+        if (raw) return sanitizeCalcConfig(JSON.parse(raw));
+      } catch (e) {}
+      return sanitizeCalcConfig(DEFAULT_CALC_CONFIG);
+    }
+
+    function persistCalcConfig() {
+      try {
+        localStorage.setItem(RESCISAO_CONFIG_STORAGE_KEY, JSON.stringify(calcConfig));
+      } catch (e) {}
+    }
+
+    function formatConfigLimit(value) {
+      return value === Infinity ? 'Infinito' : String(Number(value || 0).toFixed(2)).replace('.', ',');
+    }
+
+    function setConfigStatus(message) {
+      var status = document.getElementById('calcConfigStatus');
+      if (status) status.textContent = message || '';
+    }
+
+    function renderCalcConfigPanel() {
+      var name = document.getElementById('calcConfigName');
+      if (!name) return;
+      name.value = calcConfig.name || '';
+      document.getElementById('cfgIrrfDependente').value = calcConfig.irrfDependente;
+      document.getElementById('cfgIrrfSimplificado').value = calcConfig.irrfSimplificado;
+      document.getElementById('cfgReducaoIsencaoAte').value = calcConfig.reducaoIsencaoAte;
+      document.getElementById('cfgReducaoFaixaAte').value = calcConfig.reducaoFaixaAte;
+      document.getElementById('cfgReducaoValorBase').value = calcConfig.reducaoValorBase;
+      document.getElementById('cfgReducaoFator').value = calcConfig.reducaoFator;
+
+      document.getElementById('inssConfigRows').innerHTML = calcConfig.inssBrackets.map(function(row, idx) {
+        return '<tr>' +
+          '<td><input data-inss-limit="' + idx + '" type="text" value="' + escapeHtml(formatConfigLimit(row.limit)) + '"></td>' +
+          '<td><input data-inss-rate="' + idx + '" type="number" min="0" step="0.01" value="' + escapeHtml((row.rate * 100).toFixed(2)) + '"></td>' +
+        '</tr>';
+      }).join('');
+      document.getElementById('irrfConfigRows').innerHTML = calcConfig.irrfBrackets.map(function(row, idx) {
+        return '<tr>' +
+          '<td><input data-irrf-limit="' + idx + '" type="text" value="' + escapeHtml(formatConfigLimit(row.limit)) + '"></td>' +
+          '<td><input data-irrf-rate="' + idx + '" type="number" min="0" step="0.01" value="' + escapeHtml((row.rate * 100).toFixed(2)) + '"></td>' +
+          '<td><input data-irrf-deduction="' + idx + '" type="number" min="0" step="0.01" value="' + escapeHtml(row.deduction.toFixed(2)) + '"></td>' +
+        '</tr>';
+      }).join('');
+      setConfigStatus('Configuração ativa: ' + calcConfig.name + '.');
+    }
+
+    function readCalcConfigPanel() {
+      var next = cloneCalcConfig(calcConfig);
+      next.name = document.getElementById('calcConfigName').value.trim() || 'Tabela personalizada';
+      next.irrfDependente = parseMoney(document.getElementById('cfgIrrfDependente').value);
+      next.irrfSimplificado = parseMoney(document.getElementById('cfgIrrfSimplificado').value);
+      next.reducaoIsencaoAte = parseMoney(document.getElementById('cfgReducaoIsencaoAte').value);
+      next.reducaoFaixaAte = parseMoney(document.getElementById('cfgReducaoFaixaAte').value);
+      next.reducaoValorBase = parseMoney(document.getElementById('cfgReducaoValorBase').value);
+      next.reducaoFator = Number(document.getElementById('cfgReducaoFator').value || 0) || 0;
+      next.inssBrackets = calcConfig.inssBrackets.map(function(row, idx) {
+        return {
+          limit: normalizeConfigLimit((document.querySelector('[data-inss-limit="' + idx + '"]') || {}).value),
+          rate: (Number((document.querySelector('[data-inss-rate="' + idx + '"]') || {}).value || 0) || 0) / 100
+        };
+      });
+      next.irrfBrackets = calcConfig.irrfBrackets.map(function(row, idx) {
+        return {
+          limit: normalizeConfigLimit((document.querySelector('[data-irrf-limit="' + idx + '"]') || {}).value),
+          rate: (Number((document.querySelector('[data-irrf-rate="' + idx + '"]') || {}).value || 0) || 0) / 100,
+          deduction: parseMoney((document.querySelector('[data-irrf-deduction="' + idx + '"]') || {}).value)
+        };
+      });
+      return sanitizeCalcConfig(next);
+    }
+
+    function saveCalcConfigFromPanel() {
+      calcConfig = readCalcConfigPanel();
+      persistCalcConfig();
+      renderCalcConfigPanel();
+      setConfigStatus('Configuração salva. O próximo cálculo já usa essas premissas.');
+    }
+
+    function resetCalcConfigPanel() {
+      calcConfig = sanitizeCalcConfig(DEFAULT_CALC_CONFIG);
+      persistCalcConfig();
+      renderCalcConfigPanel();
+      setConfigStatus('Tabela padrão 2026 restaurada.');
+    }
+
+    function openCalcConfigModal() {
+      renderCalcConfigPanel();
+      document.getElementById('calcConfigModal').classList.remove('hidden');
+      syncParentHeight();
+    }
+
+    function closeCalcConfigModal() {
+      document.getElementById('calcConfigModal').classList.add('hidden');
+      syncParentHeight();
+    }
+
+    function handleModalKeydown(event) {
+      if (event.key === 'Escape') closeCalcConfigModal();
+    }
+
+    function parseDate(value) {
+      if (!value) return null;
+      var parts = String(value).split('-');
+      if (parts.length !== 3) return null;
+      return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    }
+
+    function isValidDate(date) {
+      return date instanceof Date && !isNaN(date.getTime());
+    }
+
+    function diffDaysInclusive(start, end) {
+      if (!isValidDate(start) || !isValidDate(end) || end < start) return 0;
+      var ms = end.getTime() - start.getTime();
+      return Math.floor(ms / 86400000) + 1;
+    }
+
+    function cloneDate(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function addYears(date, years) {
+      return new Date(date.getFullYear() + years, date.getMonth(), date.getDate());
+    }
+
+    function addMonths(date, months) {
+      return new Date(date.getFullYear(), date.getMonth() + months, date.getDate());
+    }
+
+    function fullYearsBetween(start, end) {
+      if (!isValidDate(start) || !isValidDate(end) || end < start) return 0;
+      var years = end.getFullYear() - start.getFullYear();
+      var anniversary = new Date(end.getFullYear(), start.getMonth(), start.getDate());
+      if (anniversary > end) years -= 1;
+      return Math.max(0, years);
+    }
+
+    function monthStart(date) {
+      return new Date(date.getFullYear(), date.getMonth(), 1);
+    }
+
+    function monthEnd(date) {
+      return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    }
+
+    function computeAvos13(admission, dismissal) {
+      if (!isValidDate(admission) || !isValidDate(dismissal) || dismissal < admission) return 0;
+      var start = admission.getFullYear() === dismissal.getFullYear() ? cloneDate(admission) : new Date(dismissal.getFullYear(), 0, 1);
+      var count = 0;
+      for (var month = 0; month <= dismissal.getMonth(); month++) {
+        var currentStart = new Date(dismissal.getFullYear(), month, 1);
+        var currentEnd = new Date(dismissal.getFullYear(), month + 1, 0);
+        var activeStart = currentStart > start ? currentStart : start;
+        var activeEnd = currentEnd < dismissal ? currentEnd : dismissal;
+        if (activeEnd >= activeStart && diffDaysInclusive(activeStart, activeEnd) >= 15) count += 1;
+      }
+      return Math.max(0, Math.min(12, count));
+    }
+
+    function computeAvosFerias(admission, dismissal) {
+      if (!isValidDate(admission) || !isValidDate(dismissal) || dismissal < admission) return 0;
+      var years = fullYearsBetween(admission, dismissal);
+      var periodStart = addYears(admission, years);
+      if (periodStart > dismissal) periodStart = addYears(admission, Math.max(0, years - 1));
+      var count = 0;
+      for (var i = 0; i < 12; i++) {
+        var sliceStart = addMonths(periodStart, i);
+        if (sliceStart > dismissal) break;
+        var sliceEnd = addMonths(periodStart, i + 1);
+        sliceEnd = new Date(sliceEnd.getFullYear(), sliceEnd.getMonth(), sliceEnd.getDate() - 1);
+        var activeStart = sliceStart > admission ? sliceStart : admission;
+        var activeEnd = sliceEnd < dismissal ? sliceEnd : dismissal;
+        if (activeEnd >= activeStart && diffDaysInclusive(activeStart, activeEnd) >= 15) count += 1;
+      }
+      return Math.max(0, Math.min(11, count));
+    }
+
+    function computeNoticeDays(admission, dismissal, motivo) {
+      if (motivo === 'pedido_demissao') return 30;
+      if (!isValidDate(admission) || !isValidDate(dismissal) || dismissal < admission) return 30;
+      var fullYears = fullYearsBetween(admission, dismissal);
+      return Math.min(90, 30 + (fullYears * 3));
+    }
+
+    function parseMoney(value) {
+      var num = parseFloat(String(value == null ? '' : value).replace(',', '.'));
+      return isNaN(num) ? 0 : num;
+    }
+
+    function round2(value) {
+      return Math.round((Number(value) || 0) * 100) / 100;
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0);
+    }
+
+    function formatDate(value) {
+      var date = value instanceof Date ? value : parseDate(value);
+      return isValidDate(date) ? date.toLocaleDateString('pt-BR') : '—';
+    }
+
+    function computeDataBaseFine(enabled, salary) {
+      if (!enabled) return { value: 0, note: 'Não considerada na simulação.' };
+      return { value: round2(salary), note: 'Indenização adicional incluída manualmente para fins de simulação interna.' };
+    }
+
+    function calcINSS(base) {
+      var remaining = Math.max(0, Number(base) || 0);
+      var previousLimit = 0;
+      var total = 0;
+      calcConfig.inssBrackets.forEach(function(bracket) {
+        if (remaining <= 0) return;
+        var taxable = Math.min(bracket.limit - previousLimit, remaining);
+        if (taxable > 0) total += taxable * bracket.rate;
+        remaining -= taxable;
+        previousLimit = bracket.limit;
+      });
+      return round2(total);
+    }
+
+    function calcIRRFGross(base) {
+      var taxable = Math.max(0, Number(base) || 0);
+      for (var i = 0; i < calcConfig.irrfBrackets.length; i++) {
+        var bracket = calcConfig.irrfBrackets[i];
+        if (taxable <= bracket.limit) {
+          return round2((taxable * bracket.rate) - bracket.deduction);
+        }
+      }
+      return 0;
+    }
+
+    function calcIRRF(baseComInss, dependentes, baseBruta) {
+      var taxable = Math.max(0, Number(baseComInss) || 0);
+      var gross = Math.max(0, Number(baseBruta != null ? baseBruta : baseComInss) || 0);
+      if (taxable <= 0 && gross <= 0) return 0;
+      var deducaoDependentes = Math.max(0, Number(dependentes) || 0) * calcConfig.irrfDependente;
+      var baseComDependentes = Math.max(0, taxable - deducaoDependentes);
+      var baseComSimplificado = Math.max(0, gross - calcConfig.irrfSimplificado);
+      var baseFinal = Math.min(baseComDependentes, baseComSimplificado);
+      var bruto = calcIRRFGross(baseFinal);
+      var reducao = 0;
+      if (gross <= calcConfig.reducaoIsencaoAte) {
+        reducao = bruto;
+      } else if (gross < calcConfig.reducaoFaixaAte) {
+        reducao = Math.max(0, calcConfig.reducaoValorBase - (calcConfig.reducaoFator * gross));
+      }
+      return round2(Math.max(0, bruto - reducao));
+    }
+
+    function motivoConfig(motivo) {
+      var config = {
+        label: 'Sem justa causa',
+        permiteFeriasProp: true,
+        permite13: true,
+        multaFgts: 0.4,
+        avisoMetade: false,
+        descontoAvisoEmpregado: false,
+        descricao: 'Inclui férias proporcionais, 13º proporcional, multa de 40% do FGTS e aviso quando aplicável.'
+      };
+
+      if (motivo === 'pedido_demissao') {
+        config.label = 'Pedido de demissão';
+        config.multaFgts = 0;
+        config.descontoAvisoEmpregado = true;
+        config.descricao = 'Não calcula multa de FGTS. O aviso pode virar desconto se a empresa descontar do empregado.';
+      } else if (motivo === 'termino_prazo') {
+        config.label = 'Término de contrato a prazo';
+        config.multaFgts = 0;
+        config.descricao = 'Considera férias e 13º proporcionais, sem multa de FGTS e sem aviso padrão.';
+      } else if (motivo === 'acordo_484a') {
+        config.label = 'Acordo art. 484-A';
+        config.multaFgts = 0.2;
+        config.avisoMetade = true;
+        config.descricao = 'Aplica metade do aviso indenizado e multa de 20% do FGTS, conforme art. 484-A.';
+      } else if (motivo === 'justa_causa') {
+        config.label = 'Justa causa';
+        config.permiteFeriasProp = false;
+        config.permite13 = false;
+        config.multaFgts = 0;
+        config.descricao = 'Mantém saldo de salário e férias vencidas. Não inclui férias proporcionais, 13º proporcional nem multa de FGTS.';
+      }
+      return config;
+    }
+
+    function updateAutomaticFields() {
+      var admission = parseDate(document.getElementById('admissao').value);
+      var dismissal = parseDate(document.getElementById('desligamento').value);
+      var motivo = document.getElementById('motivo').value;
+      var avisoTipo = document.getElementById('avisoTipo').value;
+      var considerarDataBase = document.getElementById('considerarDataBase').checked;
+      var hint = [];
+
+      if (isValidDate(dismissal)) {
+        document.getElementById('diasSaldo').value = dismissal.getDate();
+        hint.push('Saldo salário sugerido com ' + dismissal.getDate() + ' dia(s).');
+      }
+
+      if (isValidDate(admission) && isValidDate(dismissal) && dismissal >= admission) {
+        var avos13 = computeAvos13(admission, dismissal);
+        var avosFerias = computeAvosFerias(admission, dismissal);
+        var avisoDias = computeNoticeDays(admission, dismissal, motivo);
+        document.getElementById('avos13').value = avos13;
+        document.getElementById('avosFerias').value = avosFerias;
+        document.getElementById('avisoDias').value = avisoDias;
+        hint.push('13º proporcional sugerido em ' + avos13 + '/12.');
+        hint.push('Férias proporcionais sugeridas em ' + avosFerias + '/12.');
+        hint.push('Aviso prévio sugerido em ' + avisoDias + ' dia(s).');
+      }
+
+      var config = motivoConfig(motivo);
+      var pills = [
+        '<span class="pill">' + config.label + '</span>',
+        '<span class="pill warn">Aviso: ' + labelAviso(avisoTipo) + '</span>'
+      ];
+      if (config.multaFgts > 0) pills.push('<span class="pill">Multa FGTS: ' + (config.multaFgts * 100).toFixed(0) + '%</span>');
+      if (!config.permite13) pills.push('<span class="pill warn">13º proporcional bloqueado</span>');
+      if (!config.permiteFeriasProp) pills.push('<span class="pill warn">Férias proporcionais bloqueadas</span>');
+      if (considerarDataBase) {
+        pills.push('<span class="pill good">Multa data-base ativa</span>');
+      }
+      document.getElementById('rulePills').innerHTML = pills.join('');
+      if (considerarDataBase) {
+        hint.push('A indenização adicional da data-base será incluída nesta simulação.');
+      }
+      document.getElementById('autoHint').textContent = hint.length ? hint.join(' ') : 'Preencha admissão, desligamento e motivo para sugerir automaticamente saldo de salário, avos e aviso prévio.';
+    }
+
+    function labelAviso(avisoTipo) {
+      if (avisoTipo === 'indenizado') return 'Indenizado';
+      if (avisoTipo === 'trabalhado') return 'Trabalhado';
+      if (avisoTipo === 'desconto_empregado') return 'Desconto do empregado';
+      return 'Não se aplica';
+    }
+
+    function buildLine(code, label, value, note, highlight) {
+      return { code: code || '—', label: label, value: round2(value), note: note || '', highlight: !!highlight };
+    }
+
+    function recalculate() {
+      var salary = parseMoney(document.getElementById('salarioBase').value);
+      var fgtsBase = parseMoney(document.getElementById('fgtsBase').value);
+      var outrosDescontos = parseMoney(document.getElementById('outrosDescontos').value);
+      var dependentes = parseInt(document.getElementById('dependentes').value || '0', 10) || 0;
+      var diasSaldo = Math.max(0, Math.min(30, parseInt(document.getElementById('diasSaldo').value || '0', 10) || 0));
+      var avisoDias = Math.max(0, Math.min(90, parseInt(document.getElementById('avisoDias').value || '0', 10) || 0));
+      var avos13 = Math.max(0, Math.min(12, parseInt(document.getElementById('avos13').value || '0', 10) || 0));
+      var avosFerias = Math.max(0, Math.min(12, parseInt(document.getElementById('avosFerias').value || '0', 10) || 0));
+      var feriasVencidas = Math.max(0, parseInt(document.getElementById('feriasVencidas').value || '0', 10) || 0);
+      var motivo = document.getElementById('motivo').value;
+      var avisoTipo = document.getElementById('avisoTipo').value;
+      var considerarDataBase = document.getElementById('considerarDataBase').checked;
+      var dataAviso = document.getElementById('dataAviso').value;
+      var config = motivoConfig(motivo);
+
+      var saldoSalario = round2((salary / 30) * diasSaldo);
+      var avisoBase = round2((salary / 30) * avisoDias);
+      var avisoIndenizado = 0;
+      var descontoAviso = 0;
+
+      if (avisoTipo === 'indenizado' && motivo !== 'pedido_demissao' && motivo !== 'termino_prazo' && motivo !== 'justa_causa') {
+        avisoIndenizado = config.avisoMetade ? round2(avisoBase * 0.5) : avisoBase;
+      }
+
+      if (avisoTipo === 'desconto_empregado' && config.descontoAvisoEmpregado) {
+        descontoAviso = round2(Math.min(avisoBase, salary));
+      }
+
+      var feriasVencidasValor = round2(salary * feriasVencidas);
+      var tercoVencidas = round2(feriasVencidasValor / 3);
+      var feriasProporcionais = config.permiteFeriasProp ? round2(salary * (avosFerias / 12)) : 0;
+      var tercoProporcional = round2(feriasProporcionais / 3);
+      var decimoTerceiro = config.permite13 ? round2(salary * (avos13 / 12)) : 0;
+      var multaFgts = round2(fgtsBase * config.multaFgts);
+      var multaDataBase = computeDataBaseFine(considerarDataBase, salary);
+
+      var proventos = [
+        buildLine('50', 'Saldo de salário', saldoSalario, diasSaldo + ' dia(s)'),
+        buildLine('66.1', 'Férias vencidas', feriasVencidasValor, feriasVencidas + ' período(s)'),
+        buildLine('68', '1/3 sobre férias vencidas', tercoVencidas, 'Adicional constitucional'),
+        buildLine('65', 'Férias proporcionais', feriasProporcionais, avosFerias + '/12'),
+        buildLine('68', '1/3 sobre férias proporcionais', tercoProporcional, 'Adicional constitucional'),
+        buildLine('63', '13º proporcional', decimoTerceiro, avos13 + '/12'),
+        buildLine('69', 'Aviso prévio indenizado', avisoIndenizado, avisoIndenizado > 0 ? avisoDias + ' dia(s)' : 'Sem incidência'),
+        buildLine('FGTS', 'Multa FGTS / Rescisão indenizada', multaFgts, fgtsBase > 0 ? (config.multaFgts * 100).toFixed(0) + '% sobre saldo base informado' : 'Informe o saldo base do FGTS para calcular', multaFgts > 0),
+        buildLine('ADB', 'Indenização adicional da data-base', multaDataBase.value, multaDataBase.note)
+      ];
+
+      var inssFolha = calcINSS(saldoSalario);
+      var inssDecimoTerceiro = calcINSS(decimoTerceiro);
+      var descontoINSS = round2(inssFolha + inssDecimoTerceiro);
+      var baseIRRFFolha = Math.max(0, saldoSalario - inssFolha);
+      var baseIRRFDecimo = Math.max(0, decimoTerceiro - inssDecimoTerceiro);
+      var irrfFolha = calcIRRF(baseIRRFFolha, dependentes, saldoSalario);
+      var irrfDecimo = calcIRRF(baseIRRFDecimo, 0, decimoTerceiro);
+      var descontoIRRF = round2(irrfFolha + irrfDecimo);
+
+      var descontos = [
+        buildLine('112.1', 'Previdência social', inssFolha, 'Incidência estimada sobre saldo salarial'),
+        buildLine('112.2', 'Previdência social sobre 13º', inssDecimoTerceiro, 'Incidência estimada sobre 13º proporcional'),
+        buildLine('114.1', 'IRRF', irrfFolha, 'Incidência estimada sobre verbas salariais'),
+        buildLine('114.2', 'IRRF sobre 13º', irrfDecimo, 'Incidência estimada sobre 13º proporcional'),
+        buildLine('103', 'Desconto de aviso', descontoAviso, descontoAviso > 0 ? 'Aplicado ao pedido de demissão' : 'Sem desconto'),
+        buildLine('999', 'Outros descontos', outrosDescontos, 'Campo manual')
+      ];
+
+      var totalProventos = round2(proventos.reduce(function(sum, item) { return sum + item.value; }, 0));
+      var totalDescontos = round2(descontos.reduce(function(sum, item) { return sum + item.value; }, 0));
+      var liquido = round2(totalProventos - totalDescontos);
+
+      lastSimulation = {
+        geradoEm: new Date().toISOString(),
+        empregador: {
+          razaoSocial: document.getElementById('razaoSocial').value.trim(),
+          cnpj: document.getElementById('cnpj').value.trim(),
+          cidadeUf: document.getElementById('cidadeUf').value.trim(),
+          sindicato: document.getElementById('sindicato').value.trim()
+        },
+        colaborador: {
+          nome: document.getElementById('nome').value.trim(),
+          cpf: document.getElementById('cpf').value.trim(),
+          cargo: document.getElementById('cargo').value.trim(),
+          pis: document.getElementById('pis').value.trim(),
+          admissao: document.getElementById('admissao').value,
+          desligamento: document.getElementById('desligamento').value
+        },
+        parametros: {
+          motivo: config.label,
+          aviso: labelAviso(avisoTipo),
+          dataAviso: dataAviso,
+          considerarDataBase: considerarDataBase,
+          codigoAfastamento: document.getElementById('codigoAfastamento').value.trim(),
+          tipoContrato: document.getElementById('tipoContrato').value.trim(),
+          salarioBase: salary,
+          diasSaldo: diasSaldo,
+          avisoDias: avisoDias,
+          avos13: avos13,
+          avosFerias: avosFerias,
+          feriasVencidas: feriasVencidas,
+          fgtsBase: fgtsBase,
+          dependentes: dependentes,
+          outrosDescontos: outrosDescontos,
+          observacoes: document.getElementById('observacoes').value.trim()
+        },
+        bases: {
+          baseINSSFolha: saldoSalario,
+          baseINSSDecimoTerceiro: decimoTerceiro,
+          baseIRRFFolha: round2(baseIRRFFolha),
+          baseIRRFDecimoTerceiro: round2(baseIRRFDecimo),
+          tabelaINSS: calcConfig.name,
+          tabelaIRRF: calcConfig.name,
+          configCalculo: cloneCalcConfig(calcConfig),
+          multaDataBase: multaDataBase
+        },
+        proventos: proventos,
+        descontos: descontos,
+        totalProventos: totalProventos,
+        totalDescontos: totalDescontos,
+        liquido: liquido
+      };
+
+      renderSimulation(lastSimulation, config);
+    }
+
+    function renderRows(items, isDiscount) {
+      return items.map(function(item) {
+        return '<tr' + (item.highlight ? ' class="highlight-row"' : '') + '>' +
+          '<td class="code-col">' + escapeHtml(item.code || '—') + '</td>' +
+          '<td><strong>' + escapeHtml(item.label) + '</strong><br><span class="row-note">' + escapeHtml(item.note || '') + '</span></td>' +
+          '<td class="money">' + formatMoney(isDiscount ? -item.value : item.value) + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function renderSimulation(data, config) {
+      var html =
+        '<div class="summary-grid">' +
+          '<div class="summary-card good"><span class="kicker">Total de proventos</span><strong>' + formatMoney(data.totalProventos) + '</strong></div>' +
+          '<div class="summary-card danger"><span class="kicker">Total de descontos</span><strong>' + formatMoney(data.totalDescontos) + '</strong></div>' +
+          '<div class="summary-card brand"><span class="kicker">Líquido estimado</span><strong>' + formatMoney(data.liquido) + '</strong></div>' +
+          '<div class="summary-card neutral"><span class="kicker">Motivo</span><strong style="font-size:18px;">' + escapeHtml(config.label) + '</strong></div>' +
+        '</div>' +
+        '<div class="trct-stack">' +
+          '<div class="trct-document">' +
+            '<div class="trct-head"><h3>Termo de Rescisão do Contrato de Trabalho - Simulação</h3><p>Layout inspirado no modelo oficial do TRCT disponível no portal gov.br/eSocial, adaptado para conferência interna.</p></div>' +
+            '<div class="trct-body">' +
+              '<div class="doc-section">' +
+                '<h4>Identificação do empregador</h4>' +
+                '<div class="doc-grid">' +
+                  docItem('01 Razão social / nome', data.empregador.razaoSocial || '—') +
+                  docItem('02 CNPJ / CEI', data.empregador.cnpj || '—') +
+                  docItem('03 Município / UF', data.empregador.cidadeUf || '—') +
+                  docItem('32 Entidade sindical laboral', data.empregador.sindicato || '—') +
+                '</div>' +
+              '</div>' +
+              '<div class="doc-section">' +
+                '<h4>Identificação do trabalhador</h4>' +
+                '<div class="doc-grid">' +
+                  docItem('10 Nome', data.colaborador.nome || '—') +
+                  docItem('11 CPF', data.colaborador.cpf || '—') +
+                  docItem('12 PIS / PASEP', data.colaborador.pis || '—') +
+                  docItem('13 Cargo', data.colaborador.cargo || '—') +
+                '</div>' +
+              '</div>' +
+              '<div class="doc-section">' +
+                '<h4>Dados do contrato</h4>' +
+                '<div class="doc-grid">' +
+                  docItem('21 Tipo de contrato', data.parametros.tipoContrato || '—') +
+                  docItem('22 Causa do afastamento', data.parametros.motivo) +
+                  docItem('23 Remuneração mês anterior', formatMoney(data.parametros.salarioBase)) +
+                  docItem('24 Data de admissão', formatDate(data.colaborador.admissao)) +
+                  docItem('25 Data do aviso prévio', formatDate(data.parametros.dataAviso)) +
+                  docItem('26 Data de afastamento', formatDate(data.colaborador.desligamento)) +
+                  docItem('27 Código / descrição do afastamento', data.parametros.codigoAfastamento || '—') +
+                  docItem('29 Aviso', data.parametros.aviso) +
+                '</div>' +
+              '</div>' +
+              '<div class="doc-table-wrap">' +
+                '<h4 class="doc-table-title">Discriminação das verbas rescisórias</h4>' +
+                '<table>' +
+                  '<thead><tr><th class="code-col">Rubrica</th><th>Verbas rescisórias</th><th class="money">Valor</th></tr></thead>' +
+                  '<tbody>' + renderRows(data.proventos, false) +
+                    '<tr class="total-row"><td colspan="2">Total bruto</td><td class="money">' + formatMoney(data.totalProventos) + '</td></tr>' +
+                  '</tbody>' +
+                '</table>' +
+              '</div>' +
+              '<div class="doc-table-wrap">' +
+                '<h4 class="doc-table-title">Deduções</h4>' +
+                '<table>' +
+                  '<thead><tr><th class="code-col">Rubrica</th><th>Deduções</th><th class="money">Valor</th></tr></thead>' +
+                  '<tbody>' + renderRows(data.descontos, true) +
+                    '<tr class="total-row"><td colspan="2">Total de deduções</td><td class="money">' + formatMoney(-data.totalDescontos) + '</td></tr>' +
+                    '<tr class="total-row"><td colspan="2">Valor líquido estimado</td><td class="money">' + formatMoney(data.liquido) + '</td></tr>' +
+                  '</tbody>' +
+                '</table>' +
+              '</div>' +
+              '<div class="doc-footnote"><strong>Premissas desta simulação:</strong> ' + escapeHtml(config.descricao) + ' INSS/IRRF calculados com a configuração "' + escapeHtml(data.bases.tabelaINSS || 'Tabela não identificada') + '". ' + escapeHtml(data.bases.multaDataBase.note || '') + ' Observações: ' + escapeHtml(data.parametros.observacoes || 'Nenhuma observação adicional.') + '<br><strong>Documento gerado para fins de simulação. Não substitui o TRCT oficial.</strong></div>' +
+              '<div class="signature-row">' +
+                '<div class="signature-box">Responsável pela conferência</div>' +
+                '<div class="signature-box">Ciência do colaborador</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="sheet">' +
+            '<div class="sheet-head"><h3>Memória de cálculo</h3><p>Resumo das bases e incidências usadas nesta estimativa.</p></div>' +
+            '<div class="sheet-body">' +
+              '<div class="mini-grid">' +
+                miniItem('Base INSS - verbas salariais', formatMoney(data.bases.baseINSSFolha)) +
+                miniItem('Base INSS - 13º', formatMoney(data.bases.baseINSSDecimoTerceiro)) +
+                miniItem('Base IRRF - verbas salariais', formatMoney(data.bases.baseIRRFFolha)) +
+                miniItem('Base IRRF - 13º', formatMoney(data.bases.baseIRRFDecimoTerceiro)) +
+                miniItem('Saldo base FGTS informado', formatMoney(data.parametros.fgtsBase)) +
+                miniItem('Multa data-base', data.parametros.considerarDataBase ? 'Considerada' : 'Não considerada') +
+              '</div>' +
+              '<div class="observations">' +
+                '<h4>Bases e premissas desta simulação</h4>' +
+                '<ul>' +
+                  '<li>INSS calculado com a configuração: ' + escapeHtml(data.bases.tabelaINSS || 'Tabela não identificada') + '.</li>' +
+                  '<li>IRRF calculado com dependente de ' + formatMoney((data.bases.configCalculo || {}).irrfDependente || 0) + ', desconto simplificado de ' + formatMoney((data.bases.configCalculo || {}).irrfSimplificado || 0) + ' e redutor configurável.</li>' +
+                  '<li>Data-base: ' + escapeHtml(data.bases.multaDataBase.note || 'Não considerada.') + '</li>' +
+                  '<li>Observações informadas: ' + escapeHtml(data.parametros.observacoes || 'Nenhuma observação adicional.') + '</li>' +
+                  '<li>Descrição do motivo: ' + escapeHtml(config.descricao) + '</li>' +
+                '</ul>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('resultadoWrap').innerHTML = html;
+      syncParentHeight();
+    }
+
+    function miniItem(label, value) {
+      return '<div class="mini-item"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '—') + '</strong></div>';
+    }
+
+    function docItem(label, value) {
+      return '<div class="doc-item"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '—') + '</strong></div>';
+    }
+
+    function pdfDisplayValue(value) {
+      var text = value == null ? '' : String(value).trim();
+      return text ? text : '—';
+    }
+
+    function pdfMoneyOrDash(value) {
+      return Number(value) ? formatMoney(value) : '—';
+    }
+
+    function pdfNormalizeText(value) {
+      var text = String(value == null ? '' : value).replace(/\\s+/g, ' ').trim();
+      return text || '—';
+    }
+
+    function pdfWinAnsiByte(code) {
+      var map = {
+        8364: 128, 8218: 130, 402: 131, 8222: 132, 8230: 133, 8224: 134, 8225: 135,
+        710: 136, 8240: 137, 352: 138, 8249: 139, 338: 140, 381: 142, 8216: 145,
+        8217: 146, 8220: 147, 8221: 148, 8226: 149, 8211: 150, 8212: 151, 732: 152,
+        8482: 153, 353: 154, 8250: 155, 339: 156, 382: 158, 376: 159
+      };
+      if (map[code] != null) return map[code];
+      if (code >= 0 && code <= 127) return code;
+      if (code >= 160 && code <= 255) return code;
+      return null;
+    }
+
+    function pdfToWinAnsi(text) {
+      var value = pdfNormalizeText(text);
+      var out = '';
+      for (var i = 0; i < value.length; i++) {
+        var ch = value.charAt(i);
+        var code = value.charCodeAt(i);
+        var byte = pdfWinAnsiByte(code);
+        if (byte == null && ch && ch.normalize) {
+          var normalized = ch.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');
+          if (normalized && normalized !== ch) {
+            byte = pdfWinAnsiByte(normalized.charCodeAt(0));
+          }
+        }
+        if (byte == null) byte = 63;
+        out += String.fromCharCode(byte);
+      }
+      return out || String.fromCharCode(151);
+    }
+
+    function pdfLiteral(text) {
+      var value = pdfToWinAnsi(text);
+      var out = '';
+      for (var i = 0; i < value.length; i++) {
+        var code = value.charCodeAt(i) & 255;
+        out += String.fromCharCode(92) + ('000' + code.toString(8)).slice(-3);
+      }
+      return out;
+    }
+
+    function wrapPdfText(text, maxWidth, fontSize) {
+      var content = String(text == null ? '' : text).replace(/\\s+/g, ' ').trim();
+      if (!content) return ['—'];
+      var maxChars = Math.max(1, Math.floor(maxWidth / Math.max(3.8, fontSize * 0.52)));
+      var words = content.split(' ');
+      var lines = [];
+      var current = '';
+
+      function pushWordChunks(word) {
+        if (word.length <= maxChars) return [word];
+        var chunks = [];
+        for (var idx = 0; idx < word.length; idx += maxChars) {
+          chunks.push(word.slice(idx, idx + maxChars));
+        }
+        return chunks;
+      }
+
+      for (var i = 0; i < words.length; i++) {
+        var parts = pushWordChunks(words[i]);
+        for (var j = 0; j < parts.length; j++) {
+          var candidate = current ? current + ' ' + parts[j] : parts[j];
+          if (candidate.length <= maxChars) {
+            current = candidate;
+          } else {
+            if (current) lines.push(current);
+            current = parts[j];
+          }
+        }
+      }
+      if (current) lines.push(current);
+      return lines.length ? lines : ['—'];
+    }
+
+    function estimatePdfTextWidth(text, fontSize) {
+      return pdfNormalizeText(text).length * Math.max(3.5, fontSize * 0.5);
+    }
+
+    function createSimplePdfDocument() {
+      var LF = String.fromCharCode(10);
+      return {
+        width: 595.28,
+        height: 841.89,
+        pages: [],
+        page: null,
+        addPage: function() {
+          this.page = { commands: [] };
+          this.pages.push(this.page);
+          return this.page;
+        },
+        ensurePage: function() {
+          if (!this.page) this.addPage();
+          return this.page;
+        },
+        push: function(command) {
+          this.ensurePage().commands.push(command);
+        },
+        rectTop: function(x, top, width, height, options) {
+          options = options || {};
+          var y = this.height - top - height;
+          if (options.fillColor) {
+            this.push(options.fillColor.join(' ') + ' rg');
+            this.push(x.toFixed(2) + ' ' + y.toFixed(2) + ' ' + width.toFixed(2) + ' ' + height.toFixed(2) + ' re f');
+          }
+          this.push((options.strokeColor || [0.75, 0.75, 0.75]).join(' ') + ' RG');
+          this.push((options.lineWidth || 0.6).toFixed(2) + ' w');
+          this.push(x.toFixed(2) + ' ' + y.toFixed(2) + ' ' + width.toFixed(2) + ' ' + height.toFixed(2) + ' re S');
+        },
+        lineTop: function(x1, top1, x2, top2, options) {
+          options = options || {};
+          var y1 = this.height - top1;
+          var y2 = this.height - top2;
+          this.push((options.strokeColor || [0.75, 0.75, 0.75]).join(' ') + ' RG');
+          this.push((options.lineWidth || 0.6).toFixed(2) + ' w');
+          this.push(x1.toFixed(2) + ' ' + y1.toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' l S');
+        },
+        textTop: function(x, top, text, options) {
+          options = options || {};
+          var y = this.height - top - (options.fontSize || 10);
+          this.push('BT');
+          this.push('/' + (options.font || 'F1') + ' ' + (options.fontSize || 10).toFixed(2) + ' Tf');
+          this.push((options.color || [0, 0, 0]).join(' ') + ' rg');
+          this.push('1 0 0 1 ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' Tm');
+          this.push('(' + pdfLiteral(text) + ') Tj');
+          this.push('ET');
+        },
+        textRightTop: function(rightX, top, text, options) {
+          options = options || {};
+          var width = estimatePdfTextWidth(text, options.fontSize || 10);
+          this.textTop(rightX - width, top, text, options);
+        },
+        textCenterTop: function(centerX, top, text, options) {
+          options = options || {};
+          var width = estimatePdfTextWidth(text, options.fontSize || 10);
+          this.textTop(centerX - (width / 2), top, text, options);
+        },
+        save: function(filename) {
+          var objects = [];
+          function addObject(body) {
+            objects.push(body);
+            return objects.length;
+          }
+
+          var fontRegularId = addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+          var fontBoldId = addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+          var pageIds = [];
+
+          for (var i = 0; i < this.pages.length; i++) {
+            var stream = this.pages[i].commands.join(LF);
+            var contentId = addObject('<< /Length ' + stream.length + ' >>' + LF + 'stream' + LF + stream + LF + 'endstream');
+            pageIds.push(addObject('<< /Type /Page /Parent PAGES_REF 0 R /MediaBox [0 0 ' + this.width.toFixed(2) + ' ' + this.height.toFixed(2) + '] /Resources << /Font << /F1 ' + fontRegularId + ' 0 R /F2 ' + fontBoldId + ' 0 R >> >> /Contents ' + contentId + ' 0 R >>'));
+          }
+
+          var kids = pageIds.map(function(id) { return id + ' 0 R'; }).join(' ');
+          var pagesId = addObject('<< /Type /Pages /Count ' + pageIds.length + ' /Kids [' + kids + '] >>');
+          var catalogId = addObject('<< /Type /Catalog /Pages ' + pagesId + ' 0 R >>');
+
+          for (var p = 0; p < pageIds.length; p++) {
+            objects[pageIds[p] - 1] = objects[pageIds[p] - 1].replace('PAGES_REF', pagesId);
+          }
+
+          var pdf = '%PDF-1.4' + LF;
+          var offsets = [0];
+          for (var n = 0; n < objects.length; n++) {
+            offsets.push(pdf.length);
+            pdf += (n + 1) + ' 0 obj' + LF + objects[n] + LF + 'endobj' + LF;
+          }
+          var xrefStart = pdf.length;
+          pdf += 'xref' + LF + '0 ' + (objects.length + 1) + LF;
+          pdf += '0000000000 65535 f ' + LF;
+          for (var o = 1; o < offsets.length; o++) {
+            pdf += ('0000000000' + offsets[o]).slice(-10) + ' 00000 n ' + LF;
+          }
+          pdf += 'trailer' + LF + '<< /Size ' + (objects.length + 1) + ' /Root ' + catalogId + ' 0 R >>' + LF + 'startxref' + LF + xrefStart + LF + '%%EOF';
+
+          var bytes = new Uint8Array(pdf.length);
+          for (var b = 0; b < pdf.length; b++) bytes[b] = pdf.charCodeAt(b) & 255;
+          var blob = new Blob([bytes], { type: 'application/pdf' });
+          var link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = filename;
+          link.click();
+          setTimeout(function() { URL.revokeObjectURL(link.href); }, 1000);
+        }
+      };
+    }
+
+    var TrctSimulationPdfTemplate = {
+      create: function(data, config) {
+        var empregador = [
+          [
+            { label: '01 CNPJ / CEI', value: pdfDisplayValue(data.empregador && data.empregador.cnpj), width: 0.32 },
+            { label: '02 Razão Social / Nome', value: pdfDisplayValue(data.empregador && data.empregador.razaoSocial), width: 0.68 }
+          ],
+          [
+            { label: '03 Endereço', value: '—', width: 0.46 },
+            { label: '04 Município / UF', value: pdfDisplayValue(data.empregador && data.empregador.cidadeUf), width: 0.30 },
+            { label: '05 CEP', value: '—', width: 0.24 }
+          ],
+          [
+            { label: '32 Entidade Sindical Laboral', value: pdfDisplayValue(data.empregador && data.empregador.sindicato), width: 1 }
+          ]
+        ];
+        var trabalhador = [
+          [
+            { label: '10 PIS / PASEP', value: pdfDisplayValue(data.colaborador && data.colaborador.pis), width: 0.28 },
+            { label: '11 Nome', value: pdfDisplayValue(data.colaborador && data.colaborador.nome), width: 0.72 }
+          ],
+          [
+            { label: '12 CPF', value: pdfDisplayValue(data.colaborador && data.colaborador.cpf), width: 0.28 },
+            { label: '13 CTPS', value: '—', width: 0.24 },
+            { label: '14 Cargo', value: pdfDisplayValue(data.colaborador && data.colaborador.cargo), width: 0.48 }
+          ]
+        ];
+        var contrato = [
+          [
+            { label: '21 Tipo de Contrato', value: pdfDisplayValue(data.parametros && data.parametros.tipoContrato), width: 0.30 },
+            { label: '22 Causa do Afastamento', value: pdfDisplayValue(data.parametros && data.parametros.motivo), width: 0.42 },
+            { label: '23 Remuneração do Mês Anterior', value: formatMoney(data.parametros && data.parametros.salarioBase || 0), width: 0.28 }
+          ],
+          [
+            { label: '24 Data de Admissão', value: formatDate(data.colaborador && data.colaborador.admissao), width: 0.20 },
+            { label: '25 Data do Aviso Prévio', value: formatDate(data.parametros && data.parametros.dataAviso), width: 0.20 },
+            { label: '26 Data de Afastamento', value: formatDate(data.colaborador && data.colaborador.desligamento), width: 0.20 },
+            { label: '27 Código de Afastamento', value: pdfDisplayValue(data.parametros && data.parametros.codigoAfastamento), width: 0.24 },
+            { label: '29 Aviso', value: pdfDisplayValue(data.parametros && data.parametros.aviso), width: 0.16 }
+          ]
+        ];
+        var verbas = (data.proventos || []).map(function(item) {
+          var description = item.label;
+          if (item.note && item.code !== 'FGTS') description += ' - ' + item.note;
+          var value = item.value > 0 ? formatMoney(item.value) : '—';
+          if (item.code === 'FGTS' && item.value <= 0 && item.note) {
+            value = item.note;
+          }
+          return {
+            code: item.code || '—',
+            description: description,
+            value: value,
+            highlight: !!item.highlight
+          };
+        });
+        var deducoes = (data.descontos || []).map(function(item) {
+          var description = item.label;
+          if (item.note) description += ' - ' + item.note;
+          return {
+            code: item.code || '—',
+            description: description,
+            value: item.value > 0 ? formatMoney(item.value) : '—'
+          };
+        });
+        return {
+          title: 'TERMO DE RESCISÃO DO CONTRATO DE TRABALHO - SIMULAÇÃO',
+          empregadorRows: empregador,
+          trabalhadorRows: trabalhador,
+          contratoRows: contrato,
+          verbas: verbas,
+          deducoes: deducoes,
+          totalBruto: formatMoney(data.totalProventos || 0),
+          totalDeducoes: formatMoney(data.totalDescontos || 0),
+          liquido: formatMoney(data.liquido || 0),
+          notaFgts: pdfDisplayValue(data.bases && data.bases.multaDataBase && data.bases.multaDataBase.note),
+          observacoes: pdfDisplayValue(data.parametros && data.parametros.observacoes),
+          rodape: 'Documento gerado para fins de simulação. Não substitui o TRCT oficial. Premissas: ' + pdfDisplayValue(data.bases && data.bases.tabelaINSS) + '.'
+        };
+      }
+    };
+
+    function drawPdfSectionTitle(pdf, top, title) {
+      pdf.rectTop(32, top, 531, 18, { fillColor: [0.92, 0.92, 0.92], strokeColor: [0.75, 0.75, 0.75] });
+      pdf.textCenterTop(297.5, top + 4, title, { font: 'F2', fontSize: 9.3, color: [0, 0, 0] });
+      return top + 18;
+    }
+
+    function drawPdfFieldRows(pdf, top, rows) {
+      var x = 32;
+      var tableWidth = 531;
+      for (var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+        var row = rows[rowIdx];
+        var maxLines = 1;
+        for (var cellIdx = 0; cellIdx < row.length; cellIdx++) {
+          var cellWidth = tableWidth * row[cellIdx].width;
+          var cellLines = wrapPdfText(row[cellIdx].value, cellWidth - 12, 8.1).slice(0, 3);
+          row[cellIdx]._lines = cellLines;
+          if (cellLines.length > maxLines) maxLines = cellLines.length;
+        }
+        var rowHeight = Math.max(26, 17 + (maxLines * 7.8));
+        var cursorX = x;
+        for (var i = 0; i < row.length; i++) {
+          var width = tableWidth * row[i].width;
+          pdf.rectTop(cursorX, top, width, rowHeight, { strokeColor: [0.76, 0.76, 0.76], lineWidth: 0.55 });
+          pdf.textTop(cursorX + 4, top + 4, row[i].label, { font: 'F2', fontSize: 6.8, color: [0.28, 0.28, 0.28] });
+          for (var lineIdx = 0; lineIdx < row[i]._lines.length; lineIdx++) {
+            pdf.textTop(cursorX + 4, top + 12 + (lineIdx * 7.6), row[i]._lines[lineIdx], { font: 'F1', fontSize: 8.1, color: [0, 0, 0] });
+          }
+          cursorX += width;
+        }
+        top += rowHeight;
+      }
+      return top;
+    }
+
+    function drawPdfTable(pdf, top, title, rows, totals) {
+      var tableWidth = 531;
+      var x = 32;
+      var codeWidth = 56;
+      var valueWidth = 128;
+      var descWidth = tableWidth - codeWidth - valueWidth;
+      top = drawPdfSectionTitle(pdf, top, title);
+      pdf.rectTop(x, top, tableWidth, 18, { fillColor: [0.97, 0.97, 0.97], strokeColor: [0.75, 0.75, 0.75] });
+      pdf.lineTop(x + codeWidth, top, x + codeWidth, top + 18);
+      pdf.lineTop(x + codeWidth + descWidth, top, x + codeWidth + descWidth, top + 18);
+      pdf.textTop(x + 5, top + 4, 'Rubrica', { font: 'F2', fontSize: 8.2 });
+      pdf.textTop(x + codeWidth + 5, top + 4, 'Descrição', { font: 'F2', fontSize: 8.2 });
+      pdf.textRightTop(x + tableWidth - 6, top + 4, 'Valor', { font: 'F2', fontSize: 8.2 });
+      top += 18;
+
+      for (var i = 0; i < rows.length; i++) {
+        var descLines = wrapPdfText(rows[i].description, descWidth - 10, 8.0).slice(0, 3);
+        var valueLines = wrapPdfText(rows[i].value, valueWidth - 10, 8.0).slice(0, 3);
+        var rowHeight = Math.max(21, 9 + (Math.max(descLines.length, valueLines.length) * 8));
+        pdf.rectTop(x, top, tableWidth, rowHeight, { fillColor: rows[i].highlight ? [0.95, 0.95, 0.95] : null, strokeColor: [0.80, 0.80, 0.80] });
+        pdf.lineTop(x + codeWidth, top, x + codeWidth, top + rowHeight);
+        pdf.lineTop(x + codeWidth + descWidth, top, x + codeWidth + descWidth, top + rowHeight);
+        pdf.textTop(x + 5, top + 5, rows[i].code, { font: 'F2', fontSize: 8.0 });
+        for (var dl = 0; dl < descLines.length; dl++) {
+          pdf.textTop(x + codeWidth + 5, top + 5 + (dl * 7.8), descLines[dl], { font: rows[i].highlight ? 'F2' : 'F1', fontSize: rows[i].highlight ? 8.0 : 7.9 });
+        }
+        for (var vl = 0; vl < valueLines.length; vl++) {
+          pdf.textRightTop(x + tableWidth - 6, top + 5 + (vl * 7.8), valueLines[vl], { font: rows[i].highlight ? 'F2' : 'F1', fontSize: rows[i].highlight ? 8.0 : 7.9 });
+        }
+        top += rowHeight;
+      }
+
+      for (var t = 0; t < totals.length; t++) {
+        pdf.rectTop(x, top, tableWidth, 18, { fillColor: [0.97, 0.97, 0.97], strokeColor: [0.75, 0.75, 0.75] });
+        pdf.lineTop(x + codeWidth + descWidth, top, x + codeWidth + descWidth, top + 18);
+        pdf.textTop(x + 5, top + 4, totals[t][0], { font: 'F2', fontSize: 8.3 });
+        pdf.textRightTop(x + tableWidth - 6, top + 4, totals[t][1], { font: 'F2', fontSize: 8.3 });
+        top += 18;
+      }
+      return top;
+    }
+
+    function generateSimulationPdf() {
+      if (!lastSimulation) {
+        alert('Calcule a simulação antes de gerar o PDF.');
+        return;
+      }
+
+      var template = TrctSimulationPdfTemplate.create(lastSimulation, motivoConfig(document.getElementById('motivo').value));
+      var pdf = createSimplePdfDocument();
+      pdf.addPage();
+
+      var top = 28;
+      var titleSize = 11.5;
+      var titleX = Math.max(32, (pdf.width - estimatePdfTextWidth(template.title, titleSize)) / 2);
+      pdf.textCenterTop(pdf.width / 2, top, template.title, { font: 'F2', fontSize: titleSize, color: [0, 0, 0] });
+      top += 22;
+
+      top = drawPdfSectionTitle(pdf, top, 'Identificação do Empregador');
+      top = drawPdfFieldRows(pdf, top, template.empregadorRows) + 10;
+
+      top = drawPdfSectionTitle(pdf, top, 'Identificação do Trabalhador');
+      top = drawPdfFieldRows(pdf, top, template.trabalhadorRows) + 10;
+
+      top = drawPdfSectionTitle(pdf, top, 'Dados do Contrato');
+      top = drawPdfFieldRows(pdf, top, template.contratoRows) + 10;
+
+      top = drawPdfTable(pdf, top, 'Discriminação das Verbas Rescisórias', template.verbas, [['Total Bruto', template.totalBruto]]) + 10;
+      top = drawPdfTable(pdf, top, 'Deduções', template.deducoes, [['Total de Deduções', template.totalDeducoes], ['Valor Líquido Estimado', template.liquido]]) + 10;
+
+      top = drawPdfSectionTitle(pdf, top, 'Conferência');
+      pdf.lineTop(44, top + 26, 280, top + 26, { strokeColor: [0.62, 0.62, 0.62], lineWidth: 0.8 });
+      pdf.lineTop(315, top + 26, 551, top + 26, { strokeColor: [0.62, 0.62, 0.62], lineWidth: 0.8 });
+      pdf.textTop(86, top + 30, 'Responsável pela conferência', { font: 'F1', fontSize: 8.1 });
+      pdf.textTop(370, top + 30, 'Ciência do colaborador', { font: 'F1', fontSize: 8.1 });
+
+      var footerTop = 802;
+      pdf.lineTop(32, footerTop - 4, 563, footerTop - 4, { strokeColor: [0.70, 0.70, 0.70], lineWidth: 0.7 });
+      pdf.textTop(36, footerTop, template.rodape, { font: 'F1', fontSize: 8, color: [0.20, 0.20, 0.20] });
+
+      var fileName = 'trct_simulacao_' + (lastSimulation.colaborador.nome || 'colaborador').toLowerCase().replace(/[^a-z0-9]+/gi, '_') + '.pdf';
+      pdf.save(fileName);
+    }
+
+    function escapeHtml(value) {
+      var div = document.createElement('div');
+      div.textContent = value == null ? '' : String(value);
+      return div.innerHTML;
+    }
+
+    function exportMemory() {
+      if (!lastSimulation) {
+        alert('Calcule a simulação antes de exportar a memória de cálculo.');
+        return;
+      }
+      var blob = new Blob([JSON.stringify(lastSimulation, null, 2)], { type: 'application/json' });
+      var fileName = 'memoria_rescisao_' + (lastSimulation.colaborador.nome || 'colaborador').toLowerCase().replace(/[^a-z0-9]+/gi, '_') + '.json';
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function clearForm() {
+      document.getElementById('calcForm').reset();
+      document.getElementById('motivo').value = 'sem_justa_causa';
+      document.getElementById('avisoTipo').value = 'indenizado';
+      document.getElementById('feriasVencidas').value = '0';
+      document.getElementById('dependentes').value = '0';
+      document.getElementById('outrosDescontos').value = '0';
+      document.getElementById('considerarDataBase').checked = false;
+      document.getElementById('resultadoWrap').innerHTML = '<div class="empty-state">Preencha os dados acima e clique em <strong>Calcular rescisão</strong> para montar a simulação.</div>';
+      lastSimulation = null;
+      updateAutomaticFields();
+      syncParentHeight();
+    }
+
+    function syncParentHeight() {
+      try {
+        if (window.parent && typeof window.parent.syncIframes === 'function') {
+          setTimeout(function() { window.parent.syncIframes(); }, 40);
+        }
+      } catch (e) {}
+    }
+
+    document.getElementById('btnCalc').addEventListener('click', recalculate);
+    document.getElementById('btnNova').addEventListener('click', clearForm);
+    document.getElementById('btnPdf').addEventListener('click', function() {
+      generateSimulationPdf();
+    });
+    document.getElementById('btnMemoria').addEventListener('click', exportMemory);
+    document.getElementById('btnOpenCalcConfig').addEventListener('click', openCalcConfigModal);
+    document.getElementById('btnCloseCalcConfig').addEventListener('click', closeCalcConfigModal);
+    document.getElementById('calcConfigModal').addEventListener('click', function(event) {
+      if (event.target === this) closeCalcConfigModal();
+    });
+    document.addEventListener('keydown', handleModalKeydown);
+    document.getElementById('btnSaveCalcConfig').addEventListener('click', saveCalcConfigFromPanel);
+    document.getElementById('btnResetCalcConfig').addEventListener('click', resetCalcConfigPanel);
+    ['admissao', 'desligamento', 'motivo', 'avisoTipo', 'considerarDataBase'].forEach(function(id) {
+      document.getElementById(id).addEventListener('change', updateAutomaticFields);
+    });
+    renderCalcConfigPanel();
+    updateAutomaticFields();
+    syncParentHeight();
+  ${RESCISAO_SCRIPT_CLOSE}
+</body>
+</html>`;
+
+  function bootDashboardFolhaFrame(frame) {
+    return frame;
+  }
+
+  function hydrateDashboardFolhaModule() {
+    var frame = document.getElementById('dashboard-folha-frame');
+    if (!frame) return;
+    if (!frame.dataset.dashboardFolhaMounted) {
+      frame.dataset.dashboardFolhaMounted = '1';
+      frame.src = 'dashboard_folha_mod.html';
+    }
+  }
+
+  function bootRescisaoFrame(frame) {
+    if (!frame) return;
+    try {
+      var win = frame.contentWindow;
+      if (!win || win.__rescisaoBootstrapped) return;
+      if (typeof win.recalculate === 'function') { win.__rescisaoBootstrapped = true; return; }
+      var scriptStartMarker = '<script>';
+      var scriptEndMarker = RESCISAO_SCRIPT_CLOSE;
+      var start = RESCISAO_SRCDOC.indexOf(scriptStartMarker);
+      var end = RESCISAO_SRCDOC.lastIndexOf(scriptEndMarker);
+      if (start < 0 || end <= start) return;
+      var scriptContent = RESCISAO_SRCDOC.slice(start + scriptStartMarker.length, end);
+      if (!scriptContent.trim()) return;
+      var ifrDoc = frame.contentDocument;
+      if (!ifrDoc || !ifrDoc.body) return;
+      var scriptEl = ifrDoc.createElement('script');
+      scriptEl.text = scriptContent;
+      ifrDoc.body.appendChild(scriptEl);
+      win.__rescisaoBootstrapped = true;
+    } catch (e) {
+      try {
+        var errDoc = frame.contentDocument;
+        var wrap = errDoc && errDoc.getElementById && errDoc.getElementById('resultadoWrap');
+        if (wrap) {
+          wrap.innerHTML = '<div class="empty-state"><strong>Erro ao iniciar o simulador:</strong> ' + String((e && e.message) ? e.message : e) + '</div>';
+        }
+      } catch (_) {}
+    }
+  }
+
+  function renderRescisaoFrame(frame) {
+    if (!frame) return false;
+    try {
+      frame.srcdoc = RESCISAO_SRCDOC;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function hydrateRescisaoModule() {
+    var frame = document.getElementById('rescisao-frame');
+    if (!frame) return;
+    if (!frame.dataset.rescisaoMounted) {
+      frame.dataset.rescisaoMounted = '1';
+      frame.srcdoc = RESCISAO_SRCDOC;
+      frame.addEventListener('load', function() {
+        bootRescisaoFrame(frame);
+      }, { once: true });
+      setTimeout(function() { bootRescisaoFrame(frame); }, 400);
+    }
+  }
+
+  hydrateDashboardFolhaModule();
+  hydrateRescisaoModule();
+
   // Dark mode ativo por padrão
   document.body.classList.add('dark-mode');
   const themeBtnInit = document.getElementById('theme-btn');
@@ -8596,8 +12311,8 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 </script>
 
   <script>
-    const HUB_RH_VERSION = '1.1.1';
-    const HUB_RH_VERSION_DATE = '21/04/2026';
+const HUB_RH_VERSION = '1.2.0';
+const HUB_RH_VERSION_DATE = '30/04/2026';
     window.HUB_RH_VERSION = HUB_RH_VERSION;
     window.HUB_RH_VERSION_DATE = HUB_RH_VERSION_DATE;
 
@@ -8719,6 +12434,17 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
           { icon: 'list-filter', title: 'Status E no filtro', summary: 'Não é uma coluna original; é o filtro de dias com indício.', details: ['Mostra registros que pertencem a dias classificados com indício pela análise.'] }
         ]
       },
+      'dashboardFolha:default': {
+        kicker: 'Dashboard Folha',
+        title: 'O que este modulo acompanha',
+        intro: 'Consolida a PLANILHA 30 em visão gerencial para comparação mês a mês da folha.',
+        note: 'O painel trabalha em nível agregado. Colaborador entra apenas como base técnica para contagem de pessoas, entradas, saídas e consolidação dos valores.',
+        groups: [
+          { icon: 'layout-dashboard', title: 'Visão macro da folha', summary: 'Compara competência atual x mês anterior.', details: ['Mostra total da folha, variação absoluta e percentual, custo médio e composição por categoria.', 'Destaques relevantes aparecem em cards e alertas gerenciais.'] },
+          { icon: 'building-2', title: 'Cortes agregados', summary: 'Setor, centro de custo, rubrica e categoria.', details: ['Permite enxergar aumentos e reduções por área e por código de seção.', 'Não exibe ranking ou tabela principal por colaborador.'] },
+          { icon: 'triangle-alert', title: 'Anomalias e bases', summary: 'Sinaliza desvios e separa bases de cálculo.', details: ['Rubricas de base ficam segregadas para não inflar o custo total.', 'Quando o mês anterior é zero e o atual tem valor, o painel marca como Novo valor.'] }
+        ]
+      },
       'folha:default': {
         kicker: 'Conferencia de Folha',
         title: 'O que este modulo confere',
@@ -8764,6 +12490,17 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         groups: [
           { icon: 'shield-check', title: 'Exceção ativa', summary: 'Justifica uma chapa/regra conhecida.', details: ['Pode ser carregada por JSON ou removida da lista.', 'A Conferência de Folha usa essas exceções para suprimir casos justificados.'] },
           { icon: 'save', title: 'Arquivo de exceções', summary: 'Gera JSON para reaproveitar depois.', details: ['O navegador baixa o arquivo; ele não grava sozinho no OneDrive.'] }
+        ]
+      },
+      'rescisao:default': {
+        kicker: 'Simulador de Rescisão',
+        title: 'O que este modulo simula',
+        intro: 'Monta uma estimativa manual das verbas rescisórias para conferência interna.',
+        note: 'Os resultados dependem das premissas preenchidas manualmente e não substituem o cálculo oficial da folha ou da homologação.',
+        groups: [
+          { icon: 'calculator', title: 'Entradas principais', summary: 'Salário, datas, aviso, avos e saldo de FGTS.', details: ['O módulo não lê arquivos externos: todos os dados são preenchidos manualmente.', 'Saldo salário, avos de férias/13º e aviso são sugeridos automaticamente, mas continuam editáveis.'] },
+          { icon: 'calculator', title: 'Saídas da simulação', summary: 'Verbas, descontos, líquido e termo estimado.', details: ['Exibe saldo de salário, férias, 13º, aviso, multa do FGTS e descontos estimados em tela.', 'Organiza um layout próximo ao TRCT para conferência e impressão em PDF.'] },
+          { icon: 'file-json', title: 'Memória de cálculo', summary: 'Exporta os detalhes da estimativa.', details: ['Permite baixar um arquivo JSON com bases, parâmetros e valores calculados.', 'Ajuda a guardar a trilha da conferência junto com observações da simulação.'] }
         ]
       }
     };
@@ -8870,10 +12607,10 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   " id="lgpdBar">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     <span class="footer-full" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Check da Folha IA v1.1.0</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
+<span data-hub-version>Check da Folha IA v1.2.0</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
     </span>
     <span class="footer-mobile" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Check da Folha IA v1.1.0</span> · Processamento local · LGPD
+<span data-hub-version>Check da Folha IA v1.2.0</span> · Processamento local · LGPD
     </span>
     <button type="button" class="footer-help-btn" onclick="openTeamFlowModal()">Fluxo de equipe</button>
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -8887,7 +12624,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         <div class="flow-step"><div class="num">1</div><div><strong>Centralize os arquivos JSON</strong><span>Crie ou use uma pasta compartilhada no OneDrive, por exemplo: RH / Check da Folha IA / Fechamentos JSON.</span></div></div>
         <div class="flow-step"><div class="num">2</div><div><strong>Antes de uma nova conferencia</strong><span>Na aba Historico &amp; Excecoes, carregue os fechamentos anteriores e o arquivo de excecoes ativo, se existir.</span></div></div>
         <div class="flow-step"><div class="num">3</div><div><strong>Depois de salvar o fechamento</strong><span>Guarde o JSON gerado na mesma pasta do OneDrive e mantenha o nome por competencia, como conferencia_03-2026.json.</span></div></div>
-        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Check da Folha IA v1.1.0</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
+<div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Check da Folha IA v1.2.0</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
       </div>
       <div class="flow-note">O navegador nao salva automaticamente direto no OneDrive. Baixe o JSON e mova/salve na pasta compartilhada combinada pela equipe.</div>
       <div class="flow-actions">
@@ -8958,4 +12695,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   </script>
 </body>
 </html>
+
+
+
 

@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparativo da Folha</title>
+<script src="vendor/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #f3f6fb;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --surface-3: #eef2f7;
+    --border: #d8e1eb;
+    --text: #0f172a;
+    --muted: #64748b;
+    --muted-2: #94a3b8;
+    --brand: #2563eb;
+    --brand-soft: rgba(37, 99, 235, 0.12);
+    --ok: #0f766e;
+    --ok-soft: rgba(15, 118, 110, 0.12);
+    --warn: #b45309;
+    --warn-soft: rgba(245, 158, 11, 0.14);
+    --critical: #b91c1c;
+    --critical-soft: rgba(239, 68, 68, 0.14);
+    --drop: #7c2d12;
+    --drop-soft: rgba(194, 65, 12, 0.12);
+    --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+  }
+  body.dark-mode {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-2: #172033;
+    --surface-3: #0f172a;
+    --border: #334155;
+    --text: #f8fafc;
+    --muted: #cbd5e1;
+    --muted-2: #94a3b8;
+    --brand: #60a5fa;
+    --brand-soft: rgba(59, 130, 246, 0.18);
+    --ok: #2dd4bf;
+    --ok-soft: rgba(45, 212, 191, 0.16);
+    --warn: #fbbf24;
+    --warn-soft: rgba(245, 158, 11, 0.18);
+    --critical: #f87171;
+    --critical-soft: rgba(239, 68, 68, 0.18);
+    --drop: #fb923c;
+    --drop-soft: rgba(251, 146, 60, 0.18);
+    --shadow: 0 20px 48px rgba(2, 6, 23, 0.42);
+  }
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(180deg, var(--surface-3) 0%, var(--bg) 100%);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+  html.dark-mode body,
+  body.dark-mode {
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+  }
+  .app-shell { max-width: 1720px; margin: 0 auto; padding: 16px 18px 24px; }
+  .app-shell > * { min-width: 0; }
+  .hero { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
+  .hero h1 { margin: 0; font-size: 26px; }
+  .hero p { margin: 8px 0 0; color: var(--muted); max-width: 900px; line-height: 1.6; font-size: 14px; }
+  .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); }
+  .compact-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
+  .top-note { margin-bottom: 18px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); line-height: 1.6; font-size: 12px; }
+  .top-note strong { color: var(--text); }
+  .card-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; padding: 16px 18px 12px; border-bottom: 1px solid rgba(148, 163, 184, 0.18); }
+  .card-head h2 { margin: 0; font-size: 17px; }
+  .card-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; max-width: 760px; }
+  .card-body { padding: 18px; }
+  .stack { display: grid; gap: 18px; }
+  .hidden { display: none !important; }
+  .btn { border: none; border-radius: 12px; padding: 11px 14px; font: inherit; font-weight: 700; cursor: pointer; transition: transform .14s ease, background .14s ease, border-color .14s ease; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+  .btn-ghost.subtle { background: var(--surface-2); }
+  .source-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .source-status { color: var(--muted); font-size: 12px; }
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .tag { display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 11px; font-weight: 700; }
+  .tag.ok { color: var(--ok); background: var(--ok-soft); border-color: transparent; }
+  .tag.warn { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+  .toolbar-row { display: flex; justify-content: space-between; gap: 18px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 18px; }
+  .toolbar-meta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 12px; }
+  .toolbar-meta strong { color: var(--text); }
+  .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; align-items: end; }
+  .field { display: grid; gap: 6px; min-width: 0; }
+  .field label { font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .field input, .field select { width: 100%; min-width: 0; min-height: 40px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); padding: 10px 12px; font: inherit; }
+  body.dark-mode .field input, body.dark-mode .field select { background: var(--surface-3); }
+  .executive-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; align-items: stretch; }
+  .kpi { padding: 18px 18px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; min-height: 112px; display: flex; flex-direction: column; justify-content: flex-start; }
+  .kpi .label { display: block; margin-bottom: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; }
+  .kpi strong { display: block; font-size: 29px; line-height: 1.1; margin-bottom: 6px; }
+  .kpi .sub { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .kpi.status-neutral { border-left: 4px solid rgba(148, 163, 184, 0.6); }
+  .kpi.status-info { border-left: 4px solid rgba(37, 99, 235, 0.7); }
+  .kpi.status-attention { border-left: 4px solid rgba(245, 158, 11, 0.95); }
+  .kpi.status-critical { border-left: 4px solid rgba(239, 68, 68, 0.95); }
+  .kpi.status-drop { border-left: 4px solid rgba(194, 65, 12, 0.95); }
+  .section-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr); gap: 18px; margin-bottom: 18px; align-items: start; }
+  .section-grid > .card { align-self: start; }
+  .legend-inline { display: flex; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 11px; }
+  .legend-inline span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend-inline i { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+  .waterfall-wrap, .scatter-wrap, .trend-wrap { min-height: 360px; }
+  .svg-box { width: 100%; min-height: 320px; padding: 12px 14px 10px; border: 1px solid rgba(148, 163, 184, 0.14); border-radius: 16px; background: var(--surface-2); overflow: auto; }
+  .chart-foot { margin-top: 14px; padding-left: 4px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .chip { padding: 7px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 700; }
+  .timeline-table-wrap { overflow: auto; border: 1px solid rgba(148, 163, 184, 0.18); border-radius: 16px; }
+  .timeline-row-active td { background: rgba(37, 99, 235, 0.10); }
+  .timeline-action { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .exceptions-toolbar { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .exceptions-toolbar .summary { color: var(--muted); font-size: 12px; }
+  .toggle-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .toggle-btn { border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted); padding: 8px 11px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .toggle-btn.active { background: var(--brand-soft); color: var(--brand); border-color: transparent; }
+  .exception-table-wrap { overflow: auto; border: 1px solid rgba(148, 163, 184, 0.18); border-radius: 16px; }
+  table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+  thead th { background: var(--surface-2); color: var(--muted); padding: 12px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; text-align: left; border-bottom: 1px solid rgba(148, 163, 184, 0.18); position: sticky; top: 0; }
+  tbody td { padding: 11px 10px; font-size: 12px; border-bottom: 1px solid rgba(148, 163, 184, 0.14); vertical-align: middle; }
+  tbody tr:hover td { background: rgba(37, 99, 235, 0.05); }
+  td.money, th.money { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .row-name strong { display: block; font-size: 12px; }
+  .row-name span { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
+  .status-pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 5px 8px; font-size: 10px; font-weight: 700; }
+  .status-pill.status-neutral { background: var(--surface-2); color: var(--muted); }
+  .status-pill.status-info { background: var(--brand-soft); color: var(--brand); }
+  .status-pill.status-attention { background: var(--warn-soft); color: var(--warn); }
+  .status-pill.status-critical { background: var(--critical-soft); color: var(--critical); }
+  .status-pill.status-drop { background: var(--drop-soft); color: var(--drop); }
+  .table-action { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .spark svg { display: block; width: 110px; height: 24px; }
+  .alerts-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .alert-card { padding: 14px; border-radius: 16px; border: 1px solid var(--border); background: var(--surface-2); }
+  .alert-card strong { display: block; margin-bottom: 6px; font-size: 13px; }
+  .alert-card span { display: block; color: var(--muted); font-size: 12px; line-height: 1.55; }
+  .alert-card.status-attention { background: var(--warn-soft); border-color: transparent; }
+  .alert-card.status-critical { background: var(--critical-soft); border-color: transparent; }
+  .alert-card.status-drop { background: var(--drop-soft); border-color: transparent; }
+  .alert-card.status-info { background: var(--brand-soft); border-color: transparent; }
+  .alert-card.status-neutral { background: var(--surface-2); }
+  .validation-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .validation-box { padding: 12px 13px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); }
+  .validation-box .label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+  .validation-box strong { display: block; font-size: 13px; line-height: 1.5; }
+  .drawer-backdrop, .panel-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.44); z-index: 40; }
+  .drawer, .panel { position: fixed; top: 0; right: 0; height: 100vh; width: min(520px, 94vw); background: var(--surface); border-left: 1px solid var(--border); box-shadow: var(--shadow); z-index: 45; display: flex; flex-direction: column; }
+  .panel { width: min(430px, 92vw); }
+  .drawer-head, .panel-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; padding: 18px 18px 14px; border-bottom: 1px solid rgba(148, 163, 184, 0.16); }
+  .drawer-head h3, .panel-head h3 { margin: 0; font-size: 18px; }
+  .drawer-head p, .panel-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+  .drawer-body, .panel-body { flex: 1; overflow: auto; padding: 18px; }
+  .drawer-section { display: grid; gap: 14px; margin-bottom: 18px; }
+  .mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mini-box { padding: 12px 13px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); }
+  .mini-box .label { display: block; color: var(--muted); margin-bottom: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+  .mini-box strong { display: block; font-size: 15px; }
+  .subtable { border: 1px solid rgba(148, 163, 184, 0.16); border-radius: 14px; overflow: auto; }
+  .subtable table { min-width: 100%; }
+  .empty-state { padding: 28px; text-align: center; color: var(--muted); line-height: 1.6; }
+  .row-note { color: var(--muted); font-size: 11px; line-height: 1.55; }
+  @media (max-width: 1280px) {
+    .section-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 1160px) {
+    .executive-grid, .filters-grid, .alerts-grid, .validation-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 760px) {
+    .hero, .toolbar-row { flex-direction: column; align-items: stretch; }
+    .executive-grid, .filters-grid, .section-grid, .alerts-grid, .validation-grid, .mini-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="hero">
+      <div>
+        <h1>Comparativo da Folha</h1>
+        <p>Visão executiva mês a mês da PLANILHA 30. Primeiro mostra o que aconteceu, depois explica por que aconteceu e por fim abre o detalhe apenas quando a exceção merece investigação.</p>
+      </div>
+      <div class="hero-actions"></div>
+    </div>
+
+    <section class="card" id="sourceCard">
+      <div class="card-head">
+        <div>
+          <h2>Fonte de dados</h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="source-row">
+          <button class="btn btn-primary" type="button" id="btnSelectFileInline">Carregar PLANILHA 30</button>
+          <button class="btn btn-ghost hidden" type="button" id="btnReloadFile">Trocar arquivo</button>
+          <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
+          <div class="source-status" id="loadStatus">Nenhum arquivo carregado.</div>
+        </div>
+        <div class="tag-row" id="sourceMeta">
+          <span class="tag">Aguardando PLANILHA 30</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="compact-card hidden" id="filtersCard">
+      <div class="card-body">
+        <div class="toolbar-row">
+          <div class="toolbar-meta" id="contextMeta"></div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" type="button" data-table-mode="all">Mostrar todos</button>
+            <button class="toggle-btn" type="button" data-table-mode="exceptions">Somente exceções</button>
+          </div>
+        </div>
+        <div class="filters-grid" id="filtersGrid"></div>
+      </div>
+    </section>
+
+    <div class="executive-grid hidden" id="executiveGrid"></div>
+
+    <section class="card hidden" id="timelineCard">
+      <div class="card-head">
+        <div>
+          <h2>Comparativo entre competências</h2>
+          <p>Visão mês a mês da folha para comparar todas as competências do recorte atual. Você pode usar qualquer linha como competência ativa do dashboard.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="timeline-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Competência</th>
+                <th class="money">Folha total</th>
+                <th class="money">Mês anterior</th>
+                <th class="money">Diferença</th>
+                <th class="money">Variação %</th>
+                <th class="money">Headcount</th>
+                <th class="money">Custo médio</th>
+                <th>Status</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="timelineTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="monthlyBarsCard">
+      <div class="card-head">
+        <div>
+          <h2>Total mês a mês</h2>
+          <p>Comparativo visual dos totais da folha por competência.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="svg-box" id="monthlyBarsWrap"></div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="waterfallCard">
+      <div class="card-head">
+        <div>
+          <h2>De onde veio a variação da folha?</h2>
+          <p>Ponte executiva entre o período de comparação e a competência atual. Impactos pequenos são agrupados em <strong>Outras variações</strong>.</p>
+        </div>
+        <div class="legend-inline">
+          <span><i style="background:#cbd5e1"></i>Base</span>
+          <span><i style="background:#2563eb"></i>Aumento</span>
+          <span><i style="background:#dc2626"></i>Redução</span>
+          <span><i style="background:#0f766e"></i>Atual</span>
+        </div>
+      </div>
+      <div class="card-body waterfall-wrap" id="waterfallWrap"></div>
+    </section>
+
+    <div class="section-grid hidden" id="scatterTrendGrid">
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>Custo total x volume de colaboradores</h2>
+            <p>Matriz de eficiência com gestão por exceção. Pontos em <strong>Poucos colaboradores + alto custo</strong> recebem atenção automática.</p>
+          </div>
+        </div>
+        <div class="card-body scatter-wrap" id="scatterWrap"></div>
+      </section>
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>Contexto e composição</h2>
+            <p>Evolução recente, composição do custo e sinais que ajudam a explicar se a variação é pontual ou tendência.</p>
+          </div>
+        </div>
+        <div class="card-body trend-wrap">
+          <div class="stack" id="sideSummary"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card hidden" id="exceptionCard">
+      <div class="card-head">
+        <div>
+          <h2>Tendência e exceções</h2>
+          <p>Tabela agregada com sparkline de 6 meses, status por sensibilidade e observação gerencial. O detalhe abre em drill-down, não na primeira tela.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="exceptions-toolbar">
+          <div class="summary" id="tableSummary">Sem dados carregados.</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" type="button" data-group-view="center">Centro de custo</button>
+            <button class="toggle-btn" type="button" data-group-view="sector">Setor</button>
+            <button class="toggle-btn" type="button" data-group-view="category">Categoria</button>
+            <button class="toggle-btn" type="button" data-group-view="event">Verba</button>
+          </div>
+        </div>
+        <div class="exception-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Agrupamento</th>
+                <th class="money">Valor anterior</th>
+                <th class="money">Valor atual</th>
+                <th class="money">Diferença</th>
+                <th class="money">Variação %</th>
+                <th>Tendência 6m</th>
+                <th>Status</th>
+                <th>Observação gerencial</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="exceptionTableBody">
+              <tr><td colspan="9" class="empty-state">Carregue a base para montar a visão de exceções.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="alertsCard">
+      <div class="card-head">
+        <div>
+          <h2>Gestão por exceção</h2>
+          <p>O painel só destaca o que saiu do padrão. Se estiver tudo dentro da meta, o bloco fica discreto.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alerts-grid" id="alertsGrid"></div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="validationCard">
+      <div class="card-head">
+        <div>
+          <h2>Validação da leitura</h2>
+          <p>Resumo técnico da base lida para conferência do cálculo e troubleshooting do módulo.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="validation-grid" id="validationGrid"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
+  <aside class="drawer hidden" id="drillDrawer">
+    <div class="drawer-head">
+      <div>
+        <h3 id="drawerTitle">Drill-down</h3>
+        <p id="drawerSubtitle">Detalhe técnico da exceção selecionada.</p>
+      </div>
+      <button class="btn btn-ghost" type="button" id="btnCloseDrawer">Fechar</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+<script>
+(function(){
+  if (window.__dashboardFolhaRuntimeStarted) return;
+  window.__dashboardFolhaRuntimeStarted = true;
+
+  const requiredHeaders = ['CHAPA','NOME','SECAO','DESC SECAO','MES COMP','ANO COMP','EVENTO','DESC EVENTO','TIPO','VALOR'];
+  const categoryOrder = ['Proventos','Encargos','Benefícios','Descontos','Base de cálculo','Outros'];
+  const componentColors = { 'Proventos':'#2563eb', 'Encargos':'#8b5cf6', 'Beneficios':'#0f766e', 'Benefícios':'#0f766e', 'Descontos':'#dc2626', 'Base de calculo':'#f59e0b', 'Base de cálculo':'#f59e0b', 'Outros':'#64748b' };
+  const parameterSchema = [
+    { id:'compareMode', label:'Base de comparação', type:'select', options:[{value:'previous',label:'Mês anterior'},{value:'average',label:'Média dos meses anteriores'}], note:'A média ajuda a reduzir ruído pontual.' },
+    { id:'compareWindow', label:'Janela da média (meses)', type:'number', min:2, max:6, step:1, note:'Usado somente na comparação por média.' },
+    { id:'totalWarn', label:'Alerta folha total (%)', type:'number', step:1 },
+    { id:'totalCritical', label:'Crítico folha total (%)', type:'number', step:1 },
+    { id:'groupWarn', label:'Alerta setor/centro (%)', type:'number', step:1 },
+    { id:'groupCritical', label:'Crítico setor/centro (%)', type:'number', step:1 },
+    { id:'eventWarn', label:'Alerta verba (%)', type:'number', step:1 },
+    { id:'eventCritical', label:'Crítico verba (%)', type:'number', step:1 },
+    { id:'avgWarn', label:'Alerta custo médio (%)', type:'number', step:1 },
+    { id:'avgCritical', label:'Crítico custo médio (%)', type:'number', step:1 },
+    { id:'extraWarn', label:'Alerta horas extras (%)', type:'number', step:1 },
+    { id:'extraCritical', label:'Crítico horas extras (%)', type:'number', step:1 },
+    { id:'benefitWarn', label:'Alerta benefícios (%)', type:'number', step:1 },
+    { id:'benefitCritical', label:'Crítico benefícios (%)', type:'number', step:1 },
+    { id:'chargeWarn', label:'Alerta encargos (%)', type:'number', step:1 },
+    { id:'chargeCritical', label:'Crítico encargos (%)', type:'number', step:1 },
+    { id:'minImpact', label:'Relevância mínima no waterfall (R$)', type:'number', step:1000, note:'Impactos abaixo deste valor entram em Outras variações.' },
+    { id:'hideInGoal', label:'Ocultar itens dentro da meta', type:'checkbox' },
+    { id:'exceptionsOnly', label:'Exibir somente exceções', type:'checkbox' }
+  ];
+
+  const state = {
+    rows: [],
+    fileName: '',
+    rawRows: 0,
+    validRows: 0,
+    sheetName: '',
+    headerRow: 0,
+    months: [],
+    countsByMonth: {},
+    currentKey: '',
+    groupView: 'center',
+    scatterMode: 'sector',
+    tableMode: 'all',
+    activeRow: null,
+    dashboard: null,
+    fileDialogLocked: false,
+    settings: {
+      compareMode: 'previous',
+      compareWindow: 3,
+      totalWarn: 8,
+      totalCritical: 16,
+      groupWarn: 10,
+      groupCritical: 20,
+      eventWarn: 18,
+      eventCritical: 32,
+      avgWarn: 12,
+      avgCritical: 22,
+      extraWarn: 18,
+      extraCritical: 32,
+      benefitWarn: 12,
+      benefitCritical: 24,
+      chargeWarn: 10,
+      chargeCritical: 20,
+      minImpact: 5000,
+      hideInGoal: false,
+      exceptionsOnly: false
+    }
+  };
+
+  const $ = id => document.getElementById(id);
+  function getXlsxLib(){
+    return window.XLSX || (window.parent && window.parent.XLSX) || null;
+  }
+  function ensureXlsxLib(){
+    const existing = getXlsxLib();
+    if (existing) return Promise.resolve(existing);
+    return Promise.reject(new Error('Biblioteca XLSX não foi carregada no módulo.'));
+  }
+  function syncThemeFromParent(){
+    try {
+      const parentDoc = window.parent && window.parent.document;
+      const dark = !!(parentDoc && (parentDoc.body.classList.contains('dark-mode') || parentDoc.documentElement.classList.contains('dark-mode')));
+      document.documentElement.classList.toggle('dark-mode', dark);
+      document.body.classList.toggle('dark-mode', dark);
+    } catch (e) {}
+  }
+  const syncParentHeight = () => {
+    try {
+      if (window.parent && typeof window.parent.syncIframes === 'function') setTimeout(() => window.parent.syncIframes(), 60);
+    } catch (e) {}
+  };
+  const esc = value => { const d = document.createElement('div'); d.textContent = value == null ? '' : String(value); return d.innerHTML; };
+  const toStr = value => value == null ? '' : String(value).trim();
+  const fmtMoney = value => 'R$ ' + Number(value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtInt = value => Number(value || 0).toLocaleString('pt-BR');
+  const fmtPct = value => value == null || !isFinite(value) ? 'Novo impacto' : (value > 0 ? '+' : '') + value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+  const monthLabel = key => !key || key.indexOf('-') < 0 ? 'Sem base' : key.split('-')[1] + '/' + key.split('-')[0];
+  const monthKey = (m, y) => String(parseInt(y, 10) || 0) + '-' + String(parseInt(m, 10) || 0).padStart(2, '0');
+  const normalizeHeader = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+  const parseMonthFromDate = value => {
+    const match = toStr(value).match(/(\d{4})-(\d{2})/);
+    return match ? match[1] + '-' + match[2] : '';
+  };
+  function parseMoney(value){
+    if (value == null || value === '') return 0;
+    if (typeof value === 'number') return isFinite(value) ? value : 0;
+    let s = String(value).trim().replace(/\s/g, '');
+    if (!s) return 0;
+    s = s.replace(/[^\d,.\-]/g, '');
+    if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(s);
+    return isNaN(n) ? 0 : n;
+  }
+  function calcVariation(previous, current){
+    previous = Number(previous || 0);
+    current = Number(current || 0);
+    const diff = current - previous;
+    if (previous === 0 && current > 0) return { diff, pct: null, label: 'Novo impacto', type: 'new' };
+    if (previous === 0 && current === 0) return { diff: 0, pct: 0, label: '0,0%', type: 'flat' };
+    const pct = previous === 0 ? 0 : (diff / previous) * 100;
+    return { diff, pct, label: fmtPct(pct), type: diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat' };
+  }
+  function statusMeta(status){
+    return {
+      neutral:{ label:'Dentro da meta', cls:'status-neutral' },
+      info:{ label:'Informativo', cls:'status-info' },
+      attention:{ label:'Atenção', cls:'status-attention' },
+      critical:{ label:'Crítico', cls:'status-critical' },
+      drop:{ label:'Queda relevante', cls:'status-drop' }
+    }[status] || { label:'Dentro da meta', cls:'status-neutral' };
+  }
+  function classifyStatus(pct, warn, critical){
+    if (pct == null) return 'info';
+    const abs = Math.abs(pct);
+    if (pct < 0 && abs >= critical) return 'drop';
+    if (abs >= critical) return 'critical';
+    if (abs >= warn) return 'attention';
+    return 'neutral';
+  }
+  function classifyCategory(desc, tipo){
+    const d = normalizeHeader(desc);
+    const t = toStr(tipo).toUpperCase();
+    if (d.startsWith('BASE ') || d.includes('REMUNERACAO BASE') || d.includes('BASE TRIBUTADA')) return 'Base de cálculo';
+    if (/(FGTS|I\.N\.S\.S|INSS|PATRONAL|RAT|TERCEIROS|SEST|SENAT)/.test(d)) return 'Encargos';
+    if (/(VALE|UNIMED|PLANO|SEGURO|ASSISTENCIA MEDICA|BENEF|FRETADO|REFEICAO|ALIMENTAC|TRANSPORTE|COMBUSTI|FARMACIA|ODONTO|BRADESCO|DASA)/.test(d)) return 'Benefícios';
+    if (t === 'D') return 'Descontos';
+    if (t === 'P') return 'Proventos';
+    if (t === 'B') return 'Outros';
+    return 'Outros';
+  }
+  function classifyRecurring(desc, category){
+    const d = normalizeHeader(desc);
+    if (category === 'Base de cálculo') return 'Base técnica';
+    if (/(FERIAS|13O|13º|PLR|ABONO|PROVISAO|TRIENIO|DIFERENCA SALARIAL|MATERNIDADE|PERNOITE|DIARIA|RESCISAO|INDEN|BONUS|SERVICOS PRESTADOS|HONORARIOS)/.test(d)) return 'Eventual';
+    return 'Recorrente';
+  }
+  function classifyDriver(desc, category){
+    const d = normalizeHeader(desc);
+    if (/(HORA EXTRA|HORAS EXTRAS|HORA EXTRA NOTURNA|D\.S\.R\. S\/HORAS EXTRAS)/.test(d)) return 'Horas extras';
+    if (/(FERIAS|1\/3 FERIAS|ABONO DE FERIAS)/.test(d)) return 'Férias';
+    if (/(DISSID|REAJUST|DIFERENCA SALARIAL|TRIENIO|QUINQUENIO)/.test(d)) return 'Dissídio/reajustes';
+    if (category === 'Benefícios') return 'Benefícios';
+    if (category === 'Encargos') return 'Encargos';
+    if (category === 'Descontos') return 'Descontos';
+    return 'Outras variações';
+  }
+  function decodePreviewRows(ws, maxRows, maxCols){
+    const XLSX = getXlsxLib();
+    const range = ws && ws['!ref'] && XLSX ? XLSX.utils.decode_range(ws['!ref']) : null;
+    if (!range) return [];
+    const out = [];
+    const endRow = Math.min(range.e.r, maxRows - 1);
+    const endCol = Math.min(range.e.c, maxCols - 1);
+    for (let r = range.s.r; r <= endRow; r++) {
+      const row = [];
+      for (let c = range.s.c; c <= endCol; c++) {
+        const cell = ws[XLSX.utils.encode_cell({ r, c })];
+        row.push(cell ? cell.v : '');
+      }
+      out.push(row);
+    }
+    return out;
+  }
+  function detectHeaderRow(raw){
+    let bestIdx = -1;
+    let bestScore = -1;
+    for (let i = 0; i < Math.min(raw.length, 18); i++) {
+      const headers = (raw[i] || []).map(normalizeHeader);
+      let score = 0;
+      requiredHeaders.forEach(h => { if (headers.includes(h)) score += 4; });
+      if (headers.includes('VALOR')) score += 8;
+      if (headers.includes('DESC EVENTO')) score += 8;
+      if (score > bestScore) { bestScore = score; bestIdx = i; }
+    }
+    return bestScore >= 30 ? bestIdx : -1;
+  }
+  function scoreSheet(ws){
+    const preview = decodePreviewRows(ws, 18, 24);
+    const idx = detectHeaderRow(preview);
+    return idx < 0 ? -1 : preview.length + (preview[idx] || []).length;
+  }
+  function pickBestSheet(wb){
+    let best = wb.SheetNames[0], score = -1;
+    wb.SheetNames.forEach(name => {
+      const next = scoreSheet(wb.Sheets[name]);
+      if (next > score) { score = next; best = name; }
+    });
+    return best;
+  }
+  function updateSourceMeta(items){
+    $('sourceMeta').innerHTML = items.map(item => `<span class="tag ${esc(item.cls || '')}">${esc(item.label)}</span>`).join('');
+  }
+  function toggleMainSections(show){
+    ['filtersCard','executiveGrid','timelineCard','monthlyBarsCard','waterfallCard','scatterTrendGrid','alertsCard','validationCard'].forEach(id => $(id).classList.toggle('hidden', !show));
+    $('btnReloadFile').classList.toggle('hidden', !show);
+  }
+  function suggestCurrentMonth(months, counts){
+    if (months.length === 1) return months[0];
+    const latest = months[months.length - 1];
+    const prev = months[months.length - 2];
+    return (counts[latest] || 0) < (counts[prev] || 0) * 0.35 ? prev : latest;
+  }
+  function openFilePicker(){
+    if (state.fileDialogLocked) return;
+    state.fileDialogLocked = true;
+    $('fileInput').click();
+    setTimeout(() => { state.fileDialogLocked = false; }, 600);
+  }
+  function uniqueOptions(field){
+    const seen = {};
+    state.rows.forEach(row => {
+      const value = String(row[field] || '').trim();
+      if (value) seen[value] = 1;
+    });
+    return Object.keys(seen).sort((a, b) => a.localeCompare(b, 'pt-BR')).map(value => ({ value, label:value }));
+  }
+  function firstFilled(obj, keys){
+    for (const key of keys) {
+      const value = toStr(obj[key]);
+      if (value) return value;
+    }
+    return '';
+  }
+  function getFilterSummary(){
+    const labels = [];
+    const coligada = getFilterValue('filtroColigada');
+    const center = getFilterValue('filtroCentro');
+    const sector = getFilterValue('filtroSetor');
+    const category = getFilterValue('filtroCategoria');
+    const eventDesc = getFilterValue('filtroRubrica');
+    if (coligada) labels.push('Coligada: ' + coligada);
+    if (center) labels.push('Centro: ' + center);
+    if (sector) labels.push('Setor: ' + sector);
+    if (category) labels.push('Categoria: ' + category);
+    if (eventDesc) labels.push('Verba: ' + eventDesc);
+    return labels.join(' · ') || 'Sem restrição';
+  }
+  function detectProvisionType(desc){
+    const d = normalizeHeader(desc);
+    if (/(PROVISAO.*13|13.*PROVISAO|13O SALARIO|13 SALARIO|DECIMO TERCEIRO|AVOS 13)/.test(d)) return '13o';
+    if (/(PROVISAO.*FERIAS|FERIAS.*PROVISAO|AVOS FERIAS)/.test(d)) return 'Ferias';
+    return '';
+  }
+  function summarizeProvisions(rows){
+    const out = { decimoTerceiro:0, ferias:0, total:0 };
+    rows.forEach(row => {
+      const type = detectProvisionType(row.eventDesc);
+      if (type === '13o') out.decimoTerceiro += row.valor;
+      if (type === 'Ferias') out.ferias += row.valor;
+    });
+    out.total = out.decimoTerceiro + out.ferias;
+    return out;
+  }
+  function buildProvisionInsight(context){
+    const prov = summarizeProvisions(context.currentRows);
+    if (!prov.total) return 'A base atual nao trouxe rubricas explicitas de provisao de 13o ou ferias neste recorte.';
+    const share = context.currentMonth.custo ? (prov.total / context.currentMonth.custo) * 100 : 0;
+    return `Provisoes identificadas no mes: 13o ${fmtMoney(prov.decimoTerceiro)} | Ferias ${fmtMoney(prov.ferias)} | Total ${fmtMoney(prov.total)} (${fmtPct(share)} do custo atual).`;
+  }
+  function renderSelectField(label, id, options, selected){
+    return `<div class="field"><label for="${esc(id)}">${esc(label)}</label><select id="${esc(id)}">${options.map(opt => `<option value="${esc(opt.value)}"${String(opt.value) === String(selected) ? ' selected' : ''}>${esc(opt.label)}</option>`).join('')}</select></div>`;
+  }
+  function renderSensitivityPanel(){
+    $('parameterFields').innerHTML = parameterSchema.map(item => {
+      if (item.type === 'checkbox') {
+        return `<div class="field"><label for="${esc(item.id)}">${esc(item.label)}</label><label style="display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);font-size:12px;color:var(--muted)"><input type="checkbox" id="${esc(item.id)}"${state.settings[item.id] ? ' checked' : ''}><span>${esc(item.label)}</span></label></div>`;
+      }
+      if (item.type === 'select') {
+        return `<div class="field"><label for="${esc(item.id)}">${esc(item.label)}</label><select id="${esc(item.id)}">${item.options.map(opt => `<option value="${esc(opt.value)}"${String(state.settings[item.id]) === String(opt.value) ? ' selected' : ''}>${esc(opt.label)}</option>`).join('')}</select>${item.note ? `<div class="row-note">${esc(item.note)}</div>` : ''}</div>`;
+      }
+      return `<div class="field"><label for="${esc(item.id)}">${esc(item.label)}</label><input id="${esc(item.id)}" type="number" step="${esc(item.step || 1)}" value="${esc(state.settings[item.id])}">${item.note ? `<div class="row-note">${esc(item.note)}</div>` : ''}</div>`;
+    }).join('');
+    parameterSchema.forEach(item => {
+      const el = $(item.id);
+      if (!el) return;
+      const eventName = item.type === 'checkbox' ? 'change' : item.type === 'select' ? 'change' : 'input';
+      el.addEventListener(eventName, () => {
+        state.settings[item.id] = item.type === 'checkbox' ? !!el.checked : item.type === 'select' ? el.value : parseFloat(el.value || '0');
+        renderDashboard();
+      });
+    });
+  }
+  function renderPayrollComparisonFilters(){
+    $('filtersGrid').innerHTML = [
+      renderSelectField('Competência atual', 'competenciaAtual', state.months.map(key => ({ value:key, label:monthLabel(key) })), state.currentKey),
+      renderSelectField('Coligada', 'filtroColigada', [{value:'',label:'Todas'}].concat(uniqueOptions('coligada')), ''),
+      renderSelectField('Centro de custo', 'filtroCentro', [{value:'',label:'Todos'}].concat(uniqueOptions('centerLabel')), ''),
+      renderSelectField('Setor', 'filtroSetor', [{value:'',label:'Todos'}].concat(uniqueOptions('sector')), ''),
+      renderSelectField('Categoria de custo', 'filtroCategoria', [{value:'',label:'Todas'}].concat(categoryOrder.map(item => ({ value:item, label:item }))), ''),
+      renderSelectField('Tipo de verba', 'filtroRubrica', [{value:'',label:'Todas'}].concat(uniqueOptions('eventDesc')), '')
+    ].join('');
+    ['competenciaAtual','filtroColigada','filtroCentro','filtroSetor','filtroCategoria','filtroRubrica'].forEach(id => $(id).addEventListener('change', () => { if (id === 'competenciaAtual') state.currentKey = $(id).value; renderDashboard(); }));
+  }
+  function getFilterValue(id){ return $(id) ? $(id).value : ''; }
+  function getActiveRows(){
+    const coligada = getFilterValue('filtroColigada');
+    const center = getFilterValue('filtroCentro');
+    const sector = getFilterValue('filtroSetor');
+    const category = getFilterValue('filtroCategoria');
+    const eventDesc = getFilterValue('filtroRubrica');
+    return state.rows.filter(row => (!coligada || row.coligada === coligada) && (!center || row.centerLabel === center) && (!sector || row.sector === sector) && (!category || row.category === category) && (!eventDesc || row.eventDesc === eventDesc));
+  }
+  function getBaselineKeys(currentKey){
+    const idx = state.months.indexOf(currentKey);
+    if (idx <= 0) return [];
+    if (state.settings.compareMode === 'previous') return [state.months[idx - 1]];
+    const windowSize = Math.max(2, parseInt(state.settings.compareWindow, 10) || 3);
+    return state.months.slice(Math.max(0, idx - windowSize), idx);
+  }
+  function aggregateRows(rows){
+    const monthly = {};
+    rows.forEach(row => {
+      if (!monthly[row.competenceKey]) monthly[row.competenceKey] = { proventos:0, descontos:0, encargos:0, beneficios:0, bases:0, outros:0, bruto:0, liquido:0, custo:0 };
+      const m = monthly[row.competenceKey];
+      if (row.category === 'Proventos') m.proventos += row.valor;
+      else if (row.category === 'Descontos') m.descontos += row.valor;
+      else if (row.category === 'Encargos') m.encargos += row.valor;
+      else if (row.category === 'Benefícios') m.beneficios += row.valor;
+      else if (row.category === 'Base de cálculo') m.bases += row.valor;
+      else m.outros += row.valor;
+      m.bruto = m.proventos;
+      m.liquido = m.proventos - m.descontos;
+      m.custo = m.proventos + m.encargos + m.beneficios;
+    });
+    return monthly;
+  }
+  function averageBuckets(keys, monthly){
+    if (!keys.length) return { proventos:0, descontos:0, encargos:0, beneficios:0, bases:0, outros:0, bruto:0, liquido:0, custo:0 };
+    const acc = { proventos:0, descontos:0, encargos:0, beneficios:0, bases:0, outros:0, bruto:0, liquido:0, custo:0 };
+    keys.forEach(key => {
+      const item = monthly[key] || {};
+      Object.keys(acc).forEach(field => { acc[field] += Number(item[field] || 0); });
+    });
+    Object.keys(acc).forEach(field => { acc[field] = acc[field] / keys.length; });
+    return acc;
+  }
+  const aggregateBy = (rows, keyFn, metricFn) => {
+    const map = {};
+    rows.forEach(row => {
+      const key = keyFn(row);
+      map[key] = (map[key] || 0) + metricFn(row);
+    });
+    return map;
+  };
+  function buildEmployeeTotals(rows){
+    const map = {};
+    rows.forEach(row => {
+      const key = row.chapa || row.nome;
+      if (!map[key]) map[key] = { cost:0, name:row.nome, centerLabel:row.centerLabel, sector:row.sector };
+      const cost = row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0;
+      map[key].cost += cost;
+    });
+    return map;
+  }
+  function buildComparisonList(currentMap, baseMap){
+    const keys = {};
+    Object.keys(baseMap).forEach(key => { keys[key] = 1; });
+    Object.keys(currentMap).forEach(key => { keys[key] = 1; });
+    return Object.keys(keys).map(key => {
+      const current = Number(currentMap[key] || 0);
+      const previous = Number(baseMap[key] || 0);
+      const variation = calcVariation(previous, current);
+      return { label:key, previous, current, diff:variation.diff, pct:variation.pct, pctLabel:variation.label, type:variation.type };
+    });
+  }
+  function buildSeriesForGroup(rows, field){
+    const map = {};
+    rows.forEach(row => {
+      const key = field === 'centerLabel' ? row.centerLabel : field === 'sector' ? row.sector : field === 'category' ? row.category : row.eventDesc;
+      if (!map[key]) map[key] = {};
+      if (!map[key][row.competenceKey]) map[key][row.competenceKey] = 0;
+      const impact = row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0;
+      map[key][row.competenceKey] += impact;
+    });
+    return map;
+  }
+  function lastMonthsSeries(seriesMap, size){
+    return state.months.slice(-size).map(key => ({ key, label:monthLabel(key), value:Number(seriesMap[key] || 0) }));
+  }
+  function renderMiniTrendSvg(values, tips, width, height){
+    if (!values.length) return `<svg viewBox="0 0 ${width} ${height}"></svg>`;
+    const max = Math.max(...values, 1);
+    const min = Math.min(...values, 0);
+    const span = max - min || 1;
+    const points = values.map((value, idx) => {
+      const x = (idx / Math.max(values.length - 1, 1)) * (width - 8) + 4;
+      const y = height - 4 - ((value - min) / span) * (height - 8);
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    }).join(' ');
+    const title = tips.join(' | ');
+    const last = points.split(' ').slice(-1)[0].split(',');
+    return `<svg viewBox="0 0 ${width} ${height}"><polyline fill="none" stroke="#94a3b8" stroke-width="1.25" points="${points}"><title>${esc(title)}</title></polyline><circle cx="${last[0]}" cy="${last[1]}" r="2.5" fill="#2563eb"><title>${esc(title)}</title></circle></svg>`;
+  }
+  function buildContext(){
+    const filteredRows = getActiveRows();
+    const monthly = aggregateRows(filteredRows);
+    const baselineKeys = getBaselineKeys(state.currentKey);
+    const currentRows = filteredRows.filter(row => row.competenceKey === state.currentKey);
+    const baselineRows = filteredRows.filter(row => baselineKeys.includes(row.competenceKey));
+    const currentMonth = monthly[state.currentKey] || { proventos:0, descontos:0, encargos:0, beneficios:0, bases:0, outros:0, bruto:0, liquido:0, custo:0 };
+    const compareMonth = state.settings.compareMode === 'previous'
+      ? (baselineKeys[0] ? (monthly[baselineKeys[0]] || { proventos:0, descontos:0, encargos:0, beneficios:0, bases:0, outros:0, bruto:0, liquido:0, custo:0 }) : { proventos:0, descontos:0, encargos:0, beneficios:0, bases:0, outros:0, bruto:0, liquido:0, custo:0 })
+      : averageBuckets(baselineKeys, monthly);
+    const compareLabel = state.settings.compareMode === 'previous'
+      ? (baselineKeys[0] ? monthLabel(baselineKeys[0]) : 'Sem base anterior')
+      : `Média de ${baselineKeys.map(monthLabel).join(', ') || 'sem base'}`;
+    return {
+      filteredRows,
+      monthly,
+      baselineKeys,
+      currentRows,
+      baselineRows,
+      currentMonth,
+      compareMonth,
+      compareLabel,
+      compareLabelKey: baselineKeys[0] || '',
+      currentHeadcount: Object.keys(buildEmployeeTotals(currentRows)).length,
+      compareHeadcount: state.settings.compareMode === 'previous' ? Object.keys(buildEmployeeTotals(baselineRows)).length : (baselineKeys.length ? Object.keys(buildEmployeeTotals(baselineRows)).length / baselineKeys.length : 0)
+    };
+  }
+  function buildTimelineData(filteredRows, monthly){
+    const rowsByMonth = {};
+    filteredRows.forEach(row => {
+      if (!rowsByMonth[row.competenceKey]) rowsByMonth[row.competenceKey] = [];
+      rowsByMonth[row.competenceKey].push(row);
+    });
+    return state.months.map((key, index) => {
+      const currentMonth = monthly[key] || { custo:0 };
+      const previousKey = index > 0 ? state.months[index - 1] : '';
+      const previousMonth = previousKey ? (monthly[previousKey] || { custo:0 }) : { custo:0 };
+      const headcount = Object.keys(buildEmployeeTotals(rowsByMonth[key] || [])).length;
+      const variation = calcVariation(previousMonth.custo, currentMonth.custo);
+      const avgCost = headcount ? currentMonth.custo / headcount : 0;
+      const isFirstCompetence = !previousKey;
+      const timelineStatus = isFirstCompetence ? 'neutral' : classifyStatus(variation.pct, 5, 10);
+      return {
+        key,
+        label: monthLabel(key),
+        previousKey,
+        current: currentMonth.custo,
+        previous: previousMonth.custo,
+        diff: variation.diff,
+        pct: isFirstCompetence ? 0 : variation.pct,
+        pctLabel: isFirstCompetence ? 'Primeira competência' : variation.label,
+        headcount,
+        avgCost,
+        status: timelineStatus,
+        statusLabel: isFirstCompetence ? 'Base inicial' : statusMeta(timelineStatus).label,
+        isActive: key === state.currentKey
+      };
+    });
+  }
+  function groupSmallImpacts(items, threshold){
+    const major = [];
+    let other = 0;
+    items.forEach(item => {
+      if (Math.abs(item.value) >= threshold) major.push(item);
+      else other += item.value;
+    });
+    if (Math.abs(other) > 0) major.push({ label:'Outras variações', value:other, hint:'Agrupamento automático de impactos menores.' });
+    return major;
+  }
+  function buildWaterfallData(context){
+    const currentEmployees = buildEmployeeTotals(context.currentRows);
+    const baselineEmployees = buildEmployeeTotals(context.baselineRows);
+    const currentEvents = aggregateBy(context.currentRows, r => r.driver, r => r.valor);
+    const baselineEvents = aggregateBy(context.baselineRows, r => r.driver, r => r.valor);
+    let admissionsImpact = 0;
+    let exitsImpact = 0;
+    Object.keys(currentEmployees).forEach(key => {
+      const admitted = context.currentRows.some(r => (r.chapa || r.nome) === key && r.admissionMonth === state.currentKey);
+      if (!baselineEmployees[key] || admitted) admissionsImpact += currentEmployees[key].cost;
+    });
+    Object.keys(baselineEmployees).forEach(key => {
+      const left = context.baselineRows.some(r => (r.chapa || r.nome) === key && r.desligamentoMonth === context.compareLabelKey);
+      if (!currentEmployees[key] || left) exitsImpact -= baselineEmployees[key].cost;
+    });
+    const prelim = [
+      { label:'Admissões', value:admissionsImpact, hint:'Impacto aproximado de colaboradores novos na competência.' },
+      { label:'Desligamentos', value:exitsImpact, hint:'Redução estimada de custo associada a saídas do quadro.' },
+      { label:'Horas extras', value:(currentEvents['Horas extras'] || 0) - (baselineEvents['Horas extras'] || 0), hint:'Delta das rubricas classificadas como horas extras.' },
+      { label:'Férias', value:(currentEvents['Férias'] || 0) - (baselineEvents['Férias'] || 0), hint:'Delta das rubricas ligadas a férias.' },
+      { label:'Dissídio/reajustes', value:(currentEvents['Dissídio/reajustes'] || 0) - (baselineEvents['Dissídio/reajustes'] || 0), hint:'Delta de reajustes e diferenças salariais.' },
+      { label:'Benefícios', value:context.currentMonth.beneficios - context.compareMonth.beneficios, hint:'Delta agregado das rubricas de benefícios.' },
+      { label:'Encargos', value:context.currentMonth.encargos - context.compareMonth.encargos, hint:'Delta agregado das rubricas de encargos.' },
+      { label:'Descontos', value:-(context.currentMonth.descontos - context.compareMonth.descontos), hint:'Descontos entram como ajuste líquido de leitura executiva.' }
+    ];
+    const items = groupSmallImpacts(prelim, Math.max(0, state.settings.minImpact || 0));
+    const totalDiff = context.currentMonth.custo - context.compareMonth.custo;
+    const currentSum = items.reduce((acc, item) => acc + item.value, 0);
+    if (Math.abs(totalDiff - currentSum) > 1) items.push({ label:'Outras variações', value:totalDiff - currentSum, hint:'Fechamento da ponte para reconciliar a variação total.' });
+    return { start:context.compareMonth.custo, end:context.currentMonth.custo, compareLabel:context.compareLabel, items };
+  }
+  function median(values){
+    if (!values.length) return 0;
+    const arr = values.slice().sort((a, b) => a - b);
+    const mid = Math.floor(arr.length / 2);
+    return arr.length % 2 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
+  }
+  function buildRowHeadcount(rows, keyFn){
+    const map = {};
+    rows.forEach(row => {
+      const key = keyFn(row);
+      if (!map[key]) map[key] = {};
+      map[key][row.chapa || row.nome] = 1;
+    });
+    const out = {};
+    Object.keys(map).forEach(key => { out[key] = Object.keys(map[key]).length; });
+    return out;
+  }
+  function buildScatterPoints(context, dimension){
+    const field = dimension === 'sector' ? 'sector' : 'centerLabel';
+    const currentMap = aggregateBy(context.currentRows, row => row[field], row => row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0);
+    const baseMap = aggregateBy(context.baselineRows, row => row[field], row => row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0);
+    const currentHead = buildRowHeadcount(context.currentRows, row => row[field]);
+    const keys = {};
+    Object.keys(currentMap).forEach(key => { keys[key] = 1; });
+    Object.keys(baseMap).forEach(key => { keys[key] = 1; });
+    const points = Object.keys(keys).map(label => {
+      const current = Number(currentMap[label] || 0);
+      const previous = Number(baseMap[label] || 0);
+      const headcount = Number(currentHead[label] || 0);
+      const avgCost = headcount ? current / headcount : 0;
+      const variation = calcVariation(previous, current);
+      return { label, current, previous, headcount, avgCost, diff:variation.diff, pct:variation.pct, pctLabel:variation.label, status:classifyStatus(variation.pct, state.settings.groupWarn, state.settings.groupCritical) };
+    });
+    const medianHead = median(points.map(point => point.headcount));
+    const medianCost = median(points.map(point => point.current));
+    points.forEach(point => {
+      if (point.headcount <= medianHead && point.current >= medianCost && point.status === 'neutral') point.status = 'attention';
+    });
+    return { points, medianHead, medianCost };
+  }
+  function isGrowingTrend(series){
+    if (series.length < 4) return false;
+    let gains = 0;
+    for (let i = 1; i < series.length; i++) if (series[i].value >= series[i - 1].value) gains++;
+    return gains >= series.length - 2;
+  }
+  function isSpike(series){
+    if (series.length < 3) return false;
+    const current = series[series.length - 1].value;
+    const avg = series.slice(0, series.length - 1).reduce((sum, item) => sum + item.value, 0) / (series.length - 1);
+    return avg > 0 && current >= avg * 1.3;
+  }
+  function buildObservation(row, series, avgCost, headcount, view){
+    let status = classifyStatus(row.pct, state.settings.groupWarn, state.settings.groupCritical);
+    let text = 'Comportamento dentro da meta no recorte atual.';
+    if (row.pct == null) { status = 'info'; text = 'Novo impacto sem base anterior comparável.'; }
+    else if (isGrowingTrend(series) && row.pct > 0) { if (status === 'neutral') status = 'attention'; text = 'Tendência de alta contínua nos últimos meses.'; }
+    else if (isSpike(series) && row.pct > 0) { if (status === 'neutral') status = 'attention'; text = 'Pico pontual frente à tendência recente.'; }
+    else if (row.pct != null && row.pct < 0 && Math.abs(row.pct) >= state.settings.groupCritical) { status = 'drop'; text = 'Queda relevante que merece validação gerencial.'; }
+    if (view !== 'category' && headcount > 0) {
+      const avgPct = calcVariation(row.previous && headcount ? row.previous / headcount : 0, avgCost).pct;
+      const avgStatus = classifyStatus(avgPct, state.settings.avgWarn, state.settings.avgCritical);
+      if (avgStatus === 'critical' && status === 'neutral') { status = 'attention'; text = 'Custo médio por colaborador acima da sensibilidade.'; }
+    }
+    return { status, text };
+  }
+  function buildTrendRows(context, view){
+    const field = view === 'center' ? 'centerLabel' : view === 'sector' ? 'sector' : view === 'category' ? 'category' : 'eventDesc';
+    const seriesMap = buildSeriesForGroup(context.filteredRows, field);
+    const currentMap = {};
+    const baseMap = {};
+    context.currentRows.forEach(row => {
+      const key = row[field];
+      const amount = row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0;
+      currentMap[key] = (currentMap[key] || 0) + amount;
+    });
+    context.baselineRows.forEach(row => {
+      const key = row[field];
+      const amount = row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0;
+      baseMap[key] = (baseMap[key] || 0) + amount;
+    });
+    const headMap = buildRowHeadcount(context.currentRows, row => row[field]);
+    let rows = buildComparisonList(currentMap, baseMap).map(row => {
+      const series = lastMonthsSeries(seriesMap[row.label] || {}, 6);
+      const headcount = Number(headMap[row.label] || 0);
+      const avgCost = headcount ? row.current / headcount : 0;
+      const observation = buildObservation(row, series, avgCost, headcount, view);
+      return { ...row, series, headcount, avgCost, status:observation.status, observation:observation.text };
+    }).sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+    if (state.settings.hideInGoal || state.settings.exceptionsOnly || state.tableMode === 'exceptions') rows = rows.filter(row => row.status !== 'neutral');
+    return rows;
+  }
+  function buildAlerts(context, trendRows, scatter, waterfall){
+    const alerts = [];
+    const totalVar = calcVariation(context.compareMonth.custo, context.currentMonth.custo);
+    const push = (status, title, text) => alerts.push({ status, title, text });
+    const eventFilter = getFilterValue('filtroRubrica');
+    if (eventFilter) push('info', 'Leitura isolada por verba', `Todo o dashboard foi recalculado apenas para a verba ${eventFilter}, incluindo cards, cascata, matriz e tabelas.`);
+    if (totalVar.pct == null) push('info', 'Nova base de comparação', 'A competência atual não tem base anterior suficiente para percentual; o painel trata como novo impacto.');
+    else if (Math.abs(totalVar.pct) >= state.settings.totalCritical) push(totalVar.pct < 0 ? 'drop' : 'critical', 'Folha total fora do limite crítico', 'A folha variou ' + fmtPct(totalVar.pct) + ' em comparação com ' + context.compareLabel + '.');
+    else if (Math.abs(totalVar.pct) >= state.settings.totalWarn) push(totalVar.pct < 0 ? 'drop' : 'attention', 'Folha total fora da faixa de atenção', 'A variação consolidada foi de ' + fmtPct(totalVar.pct) + '.');
+    scatter.points.filter(point => point.status === 'critical' || point.status === 'attention').slice(0, 2).forEach(point => {
+      push(point.status, 'Sensibilidade na matriz de eficiência', `${point.label} tem ${fmtInt(point.headcount)} colaboradores, custo de ${fmtMoney(point.current)} e variação de ${point.pctLabel}.`);
+    });
+    trendRows.filter(row => row.status !== 'neutral').slice(0, 3).forEach(row => {
+      push(row.status, 'Exceção na tabela agregada', `${row.label} variou ${row.pctLabel} e pede leitura da tendência dos últimos meses.`);
+    });
+    const extra = waterfall.items.find(item => item.label === 'Horas extras');
+    if (extra && Math.abs(extra.value) >= state.settings.minImpact) push(extra.value > 0 ? 'attention' : 'drop', 'Horas extras com impacto relevante', `Horas extras contribuíram com ${fmtMoney(extra.value)} na ponte da variação.`);
+    const benefits = waterfall.items.find(item => item.label === 'Benefícios');
+    if (benefits && Math.abs(benefits.value) >= state.settings.minImpact) push(benefits.value > 0 ? 'attention' : 'drop', 'Benefícios fora do padrão', `Benefícios impactaram ${fmtMoney(benefits.value)} no comparativo.`);
+    const charges = waterfall.items.find(item => item.label === 'Encargos');
+    if (charges && Math.abs(charges.value) >= state.settings.minImpact) push(charges.value > 0 ? 'attention' : 'drop', 'Encargos fora do padrão', `Encargos impactaram ${fmtMoney(charges.value)} na ponte executiva.`);
+    if (!alerts.length) push('neutral', 'Sem exceções relevantes no recorte atual', 'Os principais indicadores e agrupamentos ficaram dentro dos limites configurados.');
+    return alerts.slice(0, 6);
+  }
+  function buildValidation(context){
+    return [
+      { label:'Arquivo', value:state.fileName || '-' },
+      { label:'Aba detectada', value:`${state.sheetName} · cabeçalho na linha ${state.headerRow}` },
+      { label:'Linhas válidas', value:`${fmtInt(state.validRows)} de ${fmtInt(state.rawRows)} lidas` },
+      { label:'Competências', value:state.months.map(monthLabel).join(', ') },
+      { label:'Base de comparação', value:context.compareLabel },
+      { label:'Mapeamento', value:'Setor = Desc Seção · Centro = Seção' },
+      { label:'Custo total atual', value:fmtMoney(context.currentMonth.custo) },
+      { label:'Líquido consolidado', value:fmtMoney(context.currentMonth.liquido) },
+      { label:'Bases segregadas', value:fmtMoney(context.currentMonth.bases) + ' fora do custo total' }
+    ];
+  }
+  function renderContextMeta(context){
+    $('contextMeta').innerHTML = `<span><strong>Competência:</strong> ${esc(monthLabel(state.currentKey))}</span><span><strong>Filtro:</strong> ${esc(getFilterSummary())}</span>`;
+  }
+  function renderExecutiveKpiCards(context){
+    const totalVar = calcVariation(context.compareMonth.custo, context.currentMonth.custo);
+    const headVar = calcVariation(context.compareHeadcount, context.currentHeadcount);
+    const currentAvg = context.currentHeadcount ? context.currentMonth.custo / context.currentHeadcount : 0;
+    const baseAvg = context.compareHeadcount ? context.compareMonth.custo / context.compareHeadcount : 0;
+    const avgVar = calcVariation(baseAvg, currentAvg);
+    const isFirstCompetence = !context.compareLabelKey;
+    const totalVarLabel = isFirstCompetence ? 'Primeira competencia' : totalVar.label;
+    const totalVarStatus = isFirstCompetence ? 'neutral' : classifyStatus(totalVar.pct, 5, 10);
+    const cleanTotalVarLabel = isFirstCompetence ? 'Primeira competência' : totalVar.label;
+    const cards = [
+      { label:'Total da folha', value:fmtMoney(context.currentMonth.custo), sub:monthLabel(state.currentKey), status:classifyStatus(totalVar.pct, state.settings.totalWarn, state.settings.totalCritical), title:`Atual: ${fmtMoney(context.currentMonth.custo)} | Base: ${fmtMoney(context.compareMonth.custo)} | Diferença: ${fmtMoney(totalVar.diff)} | Variação: ${totalVar.label} | Cálculo: Proventos + Encargos + Benefícios` },
+      { label:'Variação vs comparação', value:totalVar.label, sub:context.compareLabel, status:classifyStatus(totalVar.pct, state.settings.totalWarn, state.settings.totalCritical), title:`Valor da base: ${fmtMoney(context.compareMonth.custo)} | Diferença absoluta: ${fmtMoney(totalVar.diff)} | Quando a base é zero, o módulo marca como Novo impacto.` },
+      { label:'Headcount total', value:fmtInt(context.currentHeadcount), sub:`Base: ${fmtInt(context.compareHeadcount)}`, status:classifyStatus(headVar.pct, state.settings.groupWarn, state.settings.groupCritical), title:`Headcount atual: ${fmtInt(context.currentHeadcount)} | Headcount da base: ${fmtInt(context.compareHeadcount)} | Variação: ${headVar.label}` },
+      { label:'Custo médio por colaborador', value:fmtMoney(currentAvg), sub:`Base média: ${fmtMoney(baseAvg)}`, status:classifyStatus(avgVar.pct, state.settings.avgWarn, state.settings.avgCritical), title:`Cálculo: custo total / headcount | Atual: ${fmtMoney(currentAvg)} | Base: ${fmtMoney(baseAvg)} | Variação: ${avgVar.label}` }
+    ];
+    cards[0].status = totalVarStatus;
+    cards[0].title = `Atual: ${fmtMoney(context.currentMonth.custo)} | Base: ${fmtMoney(context.compareMonth.custo)} | Diferença: ${fmtMoney(totalVar.diff)} | Variação: ${cleanTotalVarLabel} | Cálculo: Proventos + Encargos + Benefícios`;
+    cards[1].value = cleanTotalVarLabel;
+    cards[1].status = totalVarStatus;
+    cards[1].title = isFirstCompetence
+      ? 'Primeira competência disponível na série carregada. Ainda não existe mês anterior para comparação percentual.'
+      : `Valor da base: ${fmtMoney(context.compareMonth.custo)} | Diferença absoluta: ${fmtMoney(totalVar.diff)} | Variação percentual: ${totalVar.label}`;
+    $('executiveGrid').innerHTML = cards.map(card => `<div class="kpi ${statusMeta(card.status).cls}" title="${esc(card.title)}"><span class="label">${esc(card.label)}</span><strong>${esc(card.value)}</strong><div class="sub">${esc(card.sub)}</div></div>`).join('');
+  }
+  function renderPayrollWaterfallChart(waterfall, context){
+    const items = [{ label:context.compareLabel, value:waterfall.start, kind:'base' }].concat(waterfall.items.map(item => ({ ...item, kind:item.value >= 0 ? 'up' : 'down' }))).concat([{ label:monthLabel(state.currentKey), value:waterfall.end, kind:'final' }]);
+    const steps = [];
+    let running = waterfall.start;
+    steps.push({ start:0, end:waterfall.start, value:waterfall.start });
+    waterfall.items.forEach(item => {
+      const next = running + item.value;
+      steps.push({ start:running, end:next, value:item.value });
+      running = next;
+    });
+    steps.push({ start:0, end:waterfall.end, value:waterfall.end });
+    const wrapWidth = Math.max(($('waterfallWrap') && $('waterfallWrap').clientWidth ? $('waterfallWrap').clientWidth : 1120) - 12, 860);
+    const width = Math.max(wrapWidth, items.length * 108), height = 360, top = 28, bottom = 40, chartHeight = height - top - bottom;
+    const stepWidth = width / items.length;
+    const maxAbs = Math.max(...steps.map(step => Math.max(Math.abs(step.start), Math.abs(step.end))), 1);
+    const y = val => top + (chartHeight - (val / maxAbs) * chartHeight);
+    let html = `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="340"><line x1="0" y1="${y(0)}" x2="${width}" y2="${y(0)}" stroke="rgba(148,163,184,.5)" stroke-width="1"/>`;
+    items.forEach((item, idx) => {
+      const step = steps[idx];
+      const x = (idx * stepWidth) + 26;
+      const barWidth = Math.max(stepWidth - 48, 34);
+      const barStart = item.kind === 'base' || item.kind === 'final' ? 0 : step.start;
+      const barEnd = item.kind === 'base' || item.kind === 'final' ? step.end : step.end;
+      const topY = Math.min(y(barStart), y(barEnd));
+      const heightY = Math.max(Math.abs(y(barStart) - y(barEnd)), 4);
+      const color = item.kind === 'base' ? '#cbd5e1' : item.kind === 'final' ? '#0f766e' : item.value >= 0 ? '#2563eb' : '#dc2626';
+      const title = `${item.label} | Valor: ${fmtMoney(item.value)}${item.hint ? ' | ' + item.hint : ''}`;
+      html += `<rect x="${x}" y="${topY}" width="${barWidth}" height="${heightY}" rx="8" fill="${color}"><title>${esc(title)}</title></rect>`;
+      html += `<text x="${x + barWidth / 2}" y="${topY - 8}" text-anchor="middle" font-size="11" fill="${document.body.classList.contains('dark-mode') ? '#e2e8f0' : '#475569'}">${esc(fmtMoney(item.value))}</text>`;
+      html += `<text x="${x + barWidth / 2}" y="${height - 16}" text-anchor="middle" font-size="11" fill="${document.body.classList.contains('dark-mode') ? '#cbd5e1' : '#475569'}">${esc(item.label)}</text>`;
+      if (idx > 0 && idx < items.length - 1) {
+        const prevEnd = steps[idx - 1].end;
+        html += `<line x1="${((idx - 1) * stepWidth) + 26 + barWidth}" y1="${y(prevEnd)}" x2="${x}" y2="${y(step.start)}" stroke="rgba(148,163,184,.45)" stroke-dasharray="4 3"/>`;
+      }
+    });
+    html += '</svg>';
+    html += `<div class="chip-row">${waterfall.items.map(item => {
+      const share = waterfall.end !== waterfall.start ? (item.value / (waterfall.end - waterfall.start || 1)) * 100 : 0;
+      return `<span class="chip">${esc(item.label)}: ${esc(fmtMoney(item.value))} · ${esc(fmtPct(share))}</span>`;
+    }).join('')}</div>`;
+    html += '<div class="chart-foot">O waterfall fecha na variação total da folha e agrupa impactos pequenos em <strong>Outras variações</strong>. Descontos entram como ajuste líquido de explicação e não substituem a leitura do custo total.</div>';
+    $('waterfallWrap').innerHTML = html;
+  }
+  function renderCostEfficiencyScatterPlot(scatter, context){
+    if (!scatter.points.length) {
+      $('scatterWrap').innerHTML = '<div class="empty-state">Sem grupos suficientes para a matriz de eficiência.</div>';
+      return;
+    }
+    const wrapWidth = Math.max(($('scatterWrap') && $('scatterWrap').clientWidth ? $('scatterWrap').clientWidth : 640) - 12, 640);
+    const width = wrapWidth, height = 340, left = 54, right = 18, top = 18, bottom = 38;
+    const innerW = width - left - right;
+    const innerH = height - top - bottom;
+    const maxX = Math.max(...scatter.points.map(point => point.headcount), 1);
+    const maxY = Math.max(...scatter.points.map(point => point.current), 1);
+    const maxR = Math.max(...scatter.points.map(point => Math.abs(point.diff)), 1);
+    const x = val => left + (val / maxX) * innerW;
+    const y = val => top + innerH - (val / maxY) * innerH;
+    const radius = val => 8 + (Math.abs(val) / maxR) * 12;
+    let html = `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="320"><rect x="${left}" y="${top}" width="${innerW}" height="${innerH}" fill="transparent" stroke="rgba(148,163,184,.30)"/>`;
+    html += `<line x1="${x(scatter.medianHead)}" y1="${top}" x2="${x(scatter.medianHead)}" y2="${top + innerH}" stroke="rgba(148,163,184,.4)" stroke-dasharray="4 4"/>`;
+    html += `<line x1="${left}" y1="${y(scatter.medianCost)}" x2="${left + innerW}" y2="${y(scatter.medianCost)}" stroke="rgba(148,163,184,.4)" stroke-dasharray="4 4"/>`;
+    html += `<text x="${left + 6}" y="${top + 14}" font-size="11" fill="${document.body.classList.contains('dark-mode') ? '#cbd5e1' : '#475569'}">Poucos colaboradores + alto custo</text>`;
+    html += `<text x="${left + innerW - 175}" y="${top + 14}" font-size="11" fill="${document.body.classList.contains('dark-mode') ? '#cbd5e1' : '#475569'}">Muitos colaboradores + alto custo</text>`;
+    html += `<text x="${left + 8}" y="${top + innerH - 10}" font-size="11" fill="${document.body.classList.contains('dark-mode') ? '#cbd5e1' : '#475569'}">Poucos colaboradores + baixo custo</text>`;
+    html += `<text x="${left + innerW - 182}" y="${top + innerH - 10}" font-size="11" fill="${document.body.classList.contains('dark-mode') ? '#cbd5e1' : '#475569'}">Muitos colaboradores + baixo custo</text>`;
+    scatter.points.forEach(point => {
+      const fill = point.status === 'critical' ? '#ef4444' : point.status === 'attention' ? '#f59e0b' : point.status === 'drop' ? '#c2410c' : '#2563eb';
+      const title = `${point.label} | Colaboradores: ${fmtInt(point.headcount)} | Custo: ${fmtMoney(point.current)} | Custo médio: ${fmtMoney(point.avgCost)} | Variação: ${point.pctLabel} | Diferença: ${fmtMoney(point.diff)} | Status: ${statusMeta(point.status).label}`;
+      html += `<circle cx="${x(point.headcount)}" cy="${y(point.current)}" r="${radius(point.diff).toFixed(1)}" fill="${fill}" fill-opacity=".72" stroke="#fff" stroke-width="2"><title>${esc(title)}</title></circle>`;
+    });
+    html += `<text x="${left + innerW / 2}" y="${height - 8}" text-anchor="middle" font-size="11" fill="${document.body.classList.contains('dark-mode') ? '#cbd5e1' : '#475569'}">Quantidade de colaboradores</text>`;
+    html += `<text x="16" y="${top + innerH / 2}" text-anchor="middle" transform="rotate(-90 16 ${top + innerH / 2})" font-size="11" fill="${document.body.classList.contains('dark-mode') ? '#cbd5e1' : '#475569'}">Custo total</text>`;
+    html += '</svg>';
+    html += '<div class="chart-foot">O tamanho do ponto representa o impacto financeiro da variação. O módulo destaca automaticamente o quadrante de poucos colaboradores e alto custo.</div>';
+    if (getFilterValue('filtroRubrica')) html += '<div class="chart-foot">A matriz esta recalculada apenas para a verba filtrada, sem o ruido das demais rubricas.</div>';
+    html += `<div class="legend-inline" style="margin-top:10px"><span><i style="background:#2563eb"></i>Azul: dentro da meta</span><span><i style="background:#f59e0b"></i>Laranja: atencao por variacao relevante ou quadrante de alto custo</span><span><i style="background:#ef4444"></i>Vermelho: critico</span><span><i style="background:#c2410c"></i>Marrom: queda relevante</span></div>`;
+    $('scatterWrap').innerHTML = html;
+  }
+  function renderSideSummary(context){
+    const evolution = state.months.map(key => {
+      const item = context.monthly[key] || { custo:0, proventos:0, encargos:0, beneficios:0, descontos:0 };
+      return { key, label:monthLabel(key), custo:item.custo, proventos:item.proventos, descontos:item.descontos, encargos:item.encargos, beneficios:item.beneficios };
+    });
+    const lastSix = evolution.slice(-6);
+    const composition = [
+      { label:'Proventos', value:context.currentMonth.proventos },
+      { label:'Encargos', value:context.currentMonth.encargos },
+      { label:'Beneficios', value:context.currentMonth.beneficios },
+      { label:'Descontos', value:context.currentMonth.descontos },
+      { label:'Base de calculo', value:context.currentMonth.bases }
+    ];
+    const totalComp = composition.reduce((sum, item) => sum + Math.abs(item.value), 0) || 1;
+    const trendSvg = renderMiniTrendSvg(lastSix.map(item => item.custo), lastSix.map(item => `${item.label}: ${fmtMoney(item.custo)}`), 540, 160);
+    const provisionInsight = buildProvisionInsight(context);
+    $('sideSummary').innerHTML =
+      `<div class="compact-card"><div class="card-body"><div class="row-note" style="margin-bottom:10px"><strong style="color:var(--text)">Evolucao recente</strong> | ultimas competencias no recorte atual.</div><div class="svg-box">${trendSvg}</div></div></div>` +
+      `<div class="compact-card"><div class="card-body"><div class="row-note" style="margin-bottom:10px"><strong style="color:var(--text)">Composicao da folha</strong> | leitura complementar para explicar o mes atual.</div><div style="display:flex;height:20px;border-radius:999px;overflow:hidden;background:var(--surface-3);margin-bottom:14px">${composition.filter(item => Math.abs(item.value) > 0).map(item => `<span style="display:block;width:${((Math.abs(item.value) / totalComp) * 100).toFixed(4)}%;background:${componentColors[item.label] || '#94a3b8'}"></span>`).join('')}</div>${composition.map(item => `<div style="display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center;font-size:12px;margin-bottom:8px"><span style="width:12px;height:12px;border-radius:999px;background:${componentColors[item.label] || '#94a3b8'}"></span><span>${esc(item.label)}</span><strong>${esc(fmtMoney(item.value))}</strong></div>`).join('')}<div class="row-note" style="margin-top:12px"><strong style="color:var(--text)">Insight de provisoes</strong> | ${esc(provisionInsight)}</div></div></div>`;
+  }
+  function renderTrendSparkline(series){
+    return renderMiniTrendSvg(series.map(item => item.value), series.map(item => `${item.label}: ${fmtMoney(item.value)}`), 110, 24);
+  }
+  function buildObservation(row, series, avgCost, headcount, view){
+    let status = classifyStatus(row.pct, state.settings.groupWarn, state.settings.groupCritical);
+    let text = 'Comportamento dentro da meta no recorte atual.';
+    if (row.pct == null) { status = 'info'; text = 'Novo impacto sem base anterior comparável.'; }
+    else if (isGrowingTrend(series) && row.pct > 0) { if (status === 'neutral') status = 'attention'; text = 'Tendência de alta contínua nos últimos meses.'; }
+    else if (isSpike(series) && row.pct > 0) { if (status === 'neutral') status = 'attention'; text = 'Pico pontual frente à tendência recente.'; }
+    else if (row.pct != null && row.pct < 0 && Math.abs(row.pct) >= state.settings.groupCritical) { status = 'drop'; text = 'Queda relevante que merece validação gerencial.'; }
+    if (view !== 'category' && headcount > 0) {
+      const avgPct = calcVariation(row.previous && headcount ? row.previous / headcount : 0, avgCost).pct;
+      const avgStatus = classifyStatus(avgPct, state.settings.avgWarn, state.settings.avgCritical);
+      if (avgStatus === 'critical' && status === 'neutral') { status = 'attention'; text = 'Custo médio por colaborador acima da sensibilidade.'; }
+    }
+    return { status, text };
+  }
+  function buildTrendRows(context, view){
+    const field = view === 'center' ? 'centerLabel' : view === 'sector' ? 'sector' : view === 'category' ? 'category' : 'eventDesc';
+    const seriesMap = buildSeriesForGroup(context.filteredRows, field);
+    const currentMap = {};
+    const baseMap = {};
+    context.currentRows.forEach(row => {
+      const amount = row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0;
+      currentMap[row[field]] = (currentMap[row[field]] || 0) + amount;
+    });
+    context.baselineRows.forEach(row => {
+      const amount = row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0;
+      baseMap[row[field]] = (baseMap[row[field]] || 0) + amount;
+    });
+    const headMap = buildRowHeadcount(context.currentRows, row => row[field]);
+    let rows = buildComparisonList(currentMap, baseMap).map(row => {
+      const series = lastMonthsSeries(seriesMap[row.label] || {}, 6);
+      const headcount = Number(headMap[row.label] || 0);
+      const avgCost = headcount ? row.current / headcount : 0;
+      const observation = buildObservation(row, series, avgCost, headcount, view);
+      return { ...row, series, headcount, avgCost, status:observation.status, observation:observation.text };
+    }).sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+    if (state.settings.hideInGoal || state.settings.exceptionsOnly || state.tableMode === 'exceptions') rows = rows.filter(row => row.status !== 'neutral');
+    return rows;
+  }
+  function renderExceptionTable(rows, context){
+    $('tableSummary').textContent = `${rows.length} linhas na visão ${state.groupView} · competência ${monthLabel(state.currentKey)} contra ${context.compareLabel}.`;
+    if (!rows.length) {
+      $('exceptionTableBody').innerHTML = '<tr><td colspan="9" class="empty-state">Nenhuma exceção encontrada para os filtros atuais.</td></tr>';
+      return;
+    }
+    $('exceptionTableBody').innerHTML = rows.map(row => {
+      const meta = statusMeta(row.status);
+      return `<tr>
+        <td class="row-name"><strong>${esc(row.label)}</strong><span>Headcount: ${esc(fmtInt(row.headcount))} · Custo médio: ${esc(fmtMoney(row.avgCost))}</span></td>
+        <td class="money">${esc(fmtMoney(row.previous))}</td>
+        <td class="money">${esc(fmtMoney(row.current))}</td>
+        <td class="money">${esc(fmtMoney(row.diff))}</td>
+        <td class="money">${esc(row.pctLabel)}</td>
+        <td class="spark">${renderTrendSparkline(row.series)}</td>
+        <td><span class="status-pill ${meta.cls}">${esc(row.statusLabel || meta.label)}</span></td>
+        <td>${esc(row.observation)}</td>
+        <td><button class="table-action" type="button" data-drill="${esc(row.label)}">Detalhar</button></td>
+      </tr>`;
+    }).join('');
+    document.querySelectorAll('[data-drill]').forEach(btn => btn.addEventListener('click', () => {
+      const label = btn.getAttribute('data-drill');
+      const target = rows.find(row => row.label === label);
+      if (target) openDrillDownDrawer(target, context);
+    }));
+  }
+  function renderTimelineSection(rows){
+    if (!rows.length) {
+      $('timelineTableBody').innerHTML = '<tr><td colspan="9" class="empty-state">Sem competências suficientes para comparação.</td></tr>';
+      return;
+    }
+    $('timelineTableBody').innerHTML = rows.map(row => {
+      const meta = statusMeta(row.status);
+      return `<tr class="${row.isActive ? 'timeline-row-active' : ''}">
+        <td class="row-name"><strong>${esc(row.label)}</strong><span>${esc(row.previousKey ? 'Comparado com ' + monthLabel(row.previousKey) : 'Primeira competência da série')}</span></td>
+        <td class="money">${esc(fmtMoney(row.current))}</td>
+        <td class="money">${esc(fmtMoney(row.previous))}</td>
+        <td class="money">${esc(fmtMoney(row.diff))}</td>
+        <td class="money">${esc(row.pctLabel)}</td>
+        <td class="money">${esc(fmtInt(row.headcount))}</td>
+        <td class="money">${esc(fmtMoney(row.avgCost))}</td>
+        <td><span class="status-pill ${meta.cls}">${esc(row.statusLabel || meta.label)}</span></td>
+        <td><button class="timeline-action" type="button" data-month-key="${esc(row.key)}">Analisar</button></td>
+      </tr>`;
+    }).join('');
+    document.querySelectorAll('[data-month-key]').forEach(btn => btn.addEventListener('click', () => {
+      state.currentKey = btn.getAttribute('data-month-key');
+      renderDashboard();
+    }));
+  }
+  function renderMonthlyBarsChart(rows){
+    if (!rows.length) {
+      $('monthlyBarsWrap').innerHTML = '<div class="empty-state">Sem competências suficientes para montar o gráfico mensal.</div>';
+      return;
+    }
+    const wrapWidth = Math.max(($('monthlyBarsWrap') && $('monthlyBarsWrap').clientWidth ? $('monthlyBarsWrap').clientWidth : 760) - 28, 760);
+    const width = Math.max(wrapWidth, rows.length * 156);
+    const height = 372;
+    const left = 54, right = 54, top = 36, bottom = 82;
+    const innerW = width - left - right;
+    const innerH = height - top - bottom;
+    const maxVal = Math.max(...rows.map(row => row.current), 1);
+    const maxHeadcount = Math.max(...rows.map(row => row.headcount), 1);
+    const barSlot = innerW / rows.length;
+    const totalBarWidth = Math.max(34, Math.min(58, barSlot * 0.36));
+    const yMoney = val => top + innerH - ((val || 0) / maxVal) * innerH;
+    const yHeadcount = val => top + innerH - ((val || 0) / maxHeadcount) * innerH;
+    const fmtCompact = val => 'R$ ' + (val / 1000000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + 'M';
+    const axisText = document.body.classList.contains('dark-mode') ? '#cbd5e1' : '#64748b';
+    const labelText = document.body.classList.contains('dark-mode') ? '#e2e8f0' : '#334155';
+    const subLabelText = document.body.classList.contains('dark-mode') ? '#94a3b8' : '#64748b';
+    const headcountLabelText = document.body.classList.contains('dark-mode') ? '#f8fafc' : '#0f172a';
+    const plotRows = [];
+    let html = `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`;
+    html += `<line x1="${left}" y1="${top + innerH}" x2="${width - right}" y2="${top + innerH}" stroke="rgba(148,163,184,.45)" stroke-width="1"/>`;
+    [0, 0.25, 0.5, 0.75, 1].forEach(step => {
+      const value = maxVal * step;
+      const lineY = yMoney(value);
+      const headcountValue = maxHeadcount * step;
+      html += `<line x1="${left}" y1="${lineY}" x2="${width - right}" y2="${lineY}" stroke="rgba(148,163,184,.16)" stroke-width="1"/>`;
+      html += `<text x="${left - 8}" y="${lineY + 4}" text-anchor="end" font-size="10" fill="${axisText}">${esc(fmtCompact(value))}</text>`;
+      html += `<text x="${width - right + 8}" y="${lineY + 4}" font-size="10" fill="${axisText}">${esc(fmtInt(Math.round(headcountValue)))}</text>`;
+    });
+    rows.forEach((row, idx) => {
+      const centerX = left + (idx * barSlot) + (barSlot / 2);
+      const totalX = centerX - (totalBarWidth / 2);
+      const totalY = yMoney(row.current);
+      const headcountY = yHeadcount(row.headcount);
+      const totalH = Math.max(6, top + innerH - totalY);
+      const totalColor = row.isActive ? '#2563eb' : '#94a3b8';
+      const totalOpacity = row.isActive ? '1' : '.78';
+      const pointColor = row.isActive ? '#0f766e' : '#334155';
+      const preferredTotalLabelY = totalY - 10;
+      const totalLabelY = Math.max(18, Math.min(preferredTotalLabelY, headcountY - 16));
+      const labelsTooClose = Math.abs(totalLabelY - (headcountY - 10)) < 22;
+      const headcountLabelY = labelsTooClose ? Math.min(top + innerH - 8, headcountY + 20) : headcountY - 12;
+      const headcountLabelX = labelsTooClose ? centerX + 24 : centerX;
+      const headcountAnchor = labelsTooClose ? 'start' : 'middle';
+      const title = `${row.label} | Total: ${fmtMoney(row.current)} | Headcount: ${fmtInt(row.headcount)} | Variação: ${row.pctLabel}`;
+      plotRows.push({ centerX, totalX, totalY, headcountY, totalH, totalColor, totalOpacity, pointColor, totalLabelY, headcountLabelY, headcountLabelX, headcountAnchor, title, row });
+    });
+    const linePoints = plotRows.map(item => `${item.centerX.toFixed(2)},${item.headcountY.toFixed(2)}`);
+    if (linePoints.length > 1) html += `<polyline fill="none" stroke="#0f766e" stroke-opacity=".68" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${linePoints.join(' ')}"></polyline>`;
+    plotRows.forEach(item => {
+      html += `<rect x="${item.totalX}" y="${item.totalY}" width="${totalBarWidth}" height="${item.totalH}" rx="10" fill="${item.totalColor}" fill-opacity="${item.totalOpacity}"><title>${esc(item.title)}</title></rect>`;
+      html += `<text x="${item.totalX + totalBarWidth / 2}" y="${item.totalLabelY}" text-anchor="middle" font-size="10" font-weight="700" fill="${labelText}">${esc(fmtCompact(item.row.current))}</text>`;
+      html += `<circle cx="${item.centerX}" cy="${item.headcountY}" r="${item.row.isActive ? 5 : 4}" fill="${item.pointColor}" stroke="${document.body.classList.contains('dark-mode') ? '#0f172a' : '#ffffff'}" stroke-width="2"><title>${esc(item.title)}</title></circle>`;
+      html += `<text x="${item.headcountLabelX}" y="${item.headcountLabelY}" text-anchor="${item.headcountAnchor}" font-size="10" font-weight="700" fill="${headcountLabelText}" stroke="${document.body.classList.contains('dark-mode') ? '#020617' : '#ffffff'}" stroke-width="3" paint-order="stroke">${esc(fmtInt(item.row.headcount))}</text>`;
+      html += `<text x="${item.centerX}" y="${height - 28}" text-anchor="middle" font-size="11" fill="${labelText}">${esc(item.row.label)}</text>`;
+      html += `<text x="${item.centerX}" y="${height - 12}" text-anchor="middle" font-size="10" fill="${subLabelText}">Folha | HC</text>`;
+    });
+    html += '</svg>';
+    html += `<div class="chart-foot">A barra azul marca a competência ativa do dashboard. As demais barras mostram a evolução do total da folha nas outras competências lidas.</div>`;
+    $('monthlyBarsWrap').innerHTML = html;
+  }
+  function renderAlerts(alerts){
+    $('alertsGrid').innerHTML = alerts.map(item => `<div class="alert-card ${statusMeta(item.status).cls}"><strong>${esc(item.title)}</strong><span>${esc(item.text)}</span></div>`).join('');
+  }
+  function renderValidation(items){
+    $('validationGrid').innerHTML = items.map(item => `<div class="validation-box"><span class="label">${esc(item.label)}</span><strong>${esc(item.value)}</strong></div>`).join('');
+  }
+  function renderMiniBox(label, value){
+    return `<div class="mini-box"><span class="label">${esc(label)}</span><strong>${esc(value)}</strong></div>`;
+  }
+  function renderDrillTable(rows, headers, rowRenderer){
+    if (!rows.length) return '<div class="empty-state">Sem detalhe relevante nesta visão.</div>';
+    return `<div class="subtable"><table><thead><tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(rowRenderer).join('')}</tbody></table></div>`;
+  }
+  function openDrillDownDrawer(row, context){
+    state.activeRow = row;
+    const field = state.groupView === 'center' ? 'centerLabel' : state.groupView === 'sector' ? 'sector' : state.groupView === 'category' ? 'category' : 'eventDesc';
+    const currentRows = context.currentRows.filter(item => item[field] === row.label);
+    const baseRows = context.baselineRows.filter(item => item[field] === row.label);
+    const monthly = aggregateRows(context.filteredRows.filter(item => item[field] === row.label));
+    const trend = lastMonthsSeries(monthly, 6);
+    const currentRubrics = aggregateBy(currentRows, r => r.eventDesc, r => r.valor);
+    const baseRubrics = aggregateBy(baseRows, r => r.eventDesc, r => r.valor);
+    const rubrics = buildComparisonList(currentRubrics, baseRubrics).sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff)).slice(0, 12);
+    const currentEmployees = buildEmployeeTotals(currentRows);
+    const baseEmployees = buildEmployeeTotals(baseRows);
+    const employeeKeys = {};
+    Object.keys(currentEmployees).forEach(key => { employeeKeys[key] = 1; });
+    Object.keys(baseEmployees).forEach(key => { employeeKeys[key] = 1; });
+    const employees = Object.keys(employeeKeys).map(key => {
+      const current = (currentEmployees[key] || {}).cost || 0;
+      const previous = (baseEmployees[key] || {}).cost || 0;
+      const variation = calcVariation(previous, current);
+      return { label:(currentEmployees[key] || baseEmployees[key] || {}).name || key, previous, current, diff:variation.diff, pctLabel:variation.label };
+    }).sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff)).slice(0, 15);
+    $('drawerTitle').textContent = row.label;
+    $('drawerSubtitle').textContent = `Detalhe técnico da exceção em ${monthLabel(state.currentKey)} versus ${context.compareLabel}.`;
+    $('drawerBody').innerHTML =
+      `<div class="drawer-section"><div class="mini-grid">
+        ${renderMiniBox('Valor atual', fmtMoney(row.current))}
+        ${renderMiniBox('Valor da base', fmtMoney(row.previous))}
+        ${renderMiniBox('Diferença', fmtMoney(row.diff))}
+        ${renderMiniBox('Variação', row.pctLabel)}
+        ${renderMiniBox('Headcount', fmtInt(row.headcount))}
+        ${renderMiniBox('Custo médio', fmtMoney(row.avgCost))}
+      </div></div>` +
+      `<div class="drawer-section"><div class="row-note"><strong style="color:var(--text)">Tendência do agrupamento</strong> · sparkline ampliado dos últimos 6 meses.</div><div class="svg-box">${renderMiniTrendSvg(trend.map(item => item.value), trend.map(item => `${item.label}: ${fmtMoney(item.value)}`), 470, 150)}</div></div>` +
+      `<div class="drawer-section"><div class="row-note"><strong style="color:var(--text)">Rubricas com maior impacto</strong> · visão técnica para explicar a exceção.</div>${renderDrillTable(rubrics, ['Rubrica','Base','Atual','Diferença','Variação'], item => `<tr><td>${esc(item.label)}</td><td class="money">${esc(fmtMoney(item.previous))}</td><td class="money">${esc(fmtMoney(item.current))}</td><td class="money">${esc(fmtMoney(item.diff))}</td><td class="money">${esc(item.pctLabel)}</td></tr>`)}</div>` +
+      `<div class="drawer-section"><div class="row-note"><strong style="color:var(--text)">Nível técnico por colaborador</strong> · disponível apenas em drill-down para auditoria interna.</div>${renderDrillTable(employees, ['Colaborador','Base','Atual','Diferença','Variação'], item => `<tr><td>${esc(item.label)}</td><td class="money">${esc(fmtMoney(item.previous))}</td><td class="money">${esc(fmtMoney(item.current))}</td><td class="money">${esc(fmtMoney(item.diff))}</td><td class="money">${esc(item.pctLabel)}</td></tr>`)}</div>`;
+    $('drawerBackdrop').classList.remove('hidden');
+    $('drillDrawer').classList.remove('hidden');
+    syncParentHeight();
+  }
+  function closeDrillDownDrawer(){
+    state.activeRow = null;
+    $('drawerBackdrop').classList.add('hidden');
+    $('drillDrawer').classList.add('hidden');
+  }
+  function openSensitivityPanel(){
+    $('panelBackdrop').classList.remove('hidden');
+    $('sensitivityPanel').classList.remove('hidden');
+  }
+  function closeSensitivityPanel(){
+    $('panelBackdrop').classList.add('hidden');
+    $('sensitivityPanel').classList.add('hidden');
+  }
+  function renderDashboard(){
+    if (!state.rows.length) return;
+    syncThemeFromParent();
+    const context = buildContext();
+    const timelineRows = buildTimelineData(context.filteredRows, context.monthly);
+    const waterfall = buildWaterfallData(context);
+    const scatter = buildScatterPoints(context, 'sector');
+    const trendRows = buildTrendRows(context, state.groupView);
+    const alerts = buildAlerts(context, trendRows, scatter, waterfall);
+    const validation = buildValidation(context);
+    state.dashboard = { context, timelineRows, waterfall, scatter, trendRows, alerts, validation };
+    renderContextMeta(context);
+    renderExecutiveKpiCards(context);
+    renderTimelineSection(timelineRows);
+    renderMonthlyBarsChart(timelineRows);
+    renderPayrollWaterfallChart(waterfall, context);
+    renderCostEfficiencyScatterPlot(scatter, context);
+    renderSideSummary(context);
+    renderExceptionTable(trendRows, context);
+    renderAlerts(alerts);
+    renderValidation(validation);
+    if (state.activeRow) {
+      const stillExists = trendRows.find(row => row.label === state.activeRow.label);
+      if (stillExists) openDrillDownDrawer(stillExists, context);
+      else closeDrillDownDrawer();
+    }
+    syncParentHeight();
+  }
+  function loadWorkbook(file){
+    const reader = new FileReader();
+    $('loadStatus').textContent = 'Lendo planilha e identificando a base...';
+    updateSourceMeta([{ label:'Processando arquivo...', cls:'warn' }]);
+    reader.onload = async event => {
+      try {
+        const XLSX = await ensureXlsxLib();
+        const wb = XLSX.read(new Uint8Array(event.target.result), { type:'array', cellDates:true });
+        const sheetName = pickBestSheet(wb);
+        const ws = wb.Sheets[sheetName];
+        const raw = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+        const headerRow = detectHeaderRow(raw);
+        if (headerRow < 0) throw new Error('Cabeçalhos esperados da PLANILHA 30 não foram encontrados.');
+        const headers = (raw[headerRow] || []).map(normalizeHeader);
+        const rows = [];
+        const counts = {};
+        for (let i = headerRow + 1; i < raw.length; i++) {
+          const source = raw[i];
+          if (!source || !source.some(cell => cell !== '' && cell != null)) continue;
+          const obj = {};
+          for (let c = 0; c < headers.length; c++) obj[headers[c]] = source[c];
+          const month = toStr(obj['MES COMP']);
+          const year = toStr(obj['ANO COMP']);
+          const tipo = toStr(obj['TIPO']).toUpperCase();
+          const period = toStr(obj['NRO PERIODO']);
+          const value = parseMoney(obj['VALOR']);
+          if (!month || !year || !['P','D','B'].includes(tipo)) continue;
+          if (period && period !== '5') continue;
+          if (!isFinite(value)) continue;
+          const key = monthKey(month, year);
+          const eventDesc = toStr(obj['DESC EVENTO']) || 'Sem rubrica';
+          rows.push({
+            competenceKey:key,
+            competenceLabel:monthLabel(key),
+            month:parseInt(month, 10) || 0,
+            year:parseInt(year, 10) || 0,
+            coligada:firstFilled(obj, ['COLIGADA','CODCOLIGADA','COD COLIGADA','CODCOLIG','COLIG']),
+            chapa:toStr(obj['CHAPA']),
+            nome:toStr(obj['NOME']) || 'Sem nome',
+            sector:toStr(obj['DESC SECAO']) || 'Sem setor',
+            center:toStr(obj['SECAO']) || 'Sem centro',
+            centerLabel:(toStr(obj['SECAO']) || 'Sem centro') + ' · ' + (toStr(obj['DESC SECAO']) || 'Sem setor'),
+            eventCode:toStr(obj['EVENTO']),
+            eventDesc,
+            tipo,
+            valor:value,
+            category:classifyCategory(eventDesc, tipo),
+            recurringType:classifyRecurring(eventDesc, classifyCategory(eventDesc, tipo)),
+            driver:classifyDriver(eventDesc, classifyCategory(eventDesc, tipo)),
+            admissionMonth:parseMonthFromDate(obj['ADMISSAO']),
+            desligamentoMonth:parseMonthFromDate(obj['DESLIGAMENTO'])
+          });
+          counts[key] = (counts[key] || 0) + 1;
+        }
+        const months = Object.keys(counts).sort();
+        if (!months.length) throw new Error('Nenhuma linha válida do período 5 foi encontrada.');
+        state.rows = rows;
+        state.fileName = file.name;
+        state.rawRows = raw.length - (headerRow + 1);
+        state.validRows = rows.length;
+        state.sheetName = sheetName;
+        state.headerRow = headerRow + 1;
+        state.months = months;
+        state.countsByMonth = counts;
+        state.currentKey = suggestCurrentMonth(months, counts);
+        $('loadStatus').textContent = file.name + ' carregado com sucesso.';
+        updateSourceMeta([
+          { label:'Aba: ' + sheetName, cls:'ok' },
+          { label:'Competências: ' + months.map(monthLabel).join(', ') },
+          { label:'Linhas válidas: ' + fmtInt(rows.length), cls:'ok' }
+        ]);
+        renderPayrollComparisonFilters();
+        toggleMainSections(true);
+        renderDashboard();
+      } catch (err) {
+        toggleMainSections(false);
+        updateSourceMeta([{ label:'Falha ao ler a base', cls:'warn' }, { label:String(err && err.message ? err.message : err), cls:'warn' }]);
+        $('loadStatus').textContent = 'Erro ao processar a PLANILHA 30: ' + String(err && err.message ? err.message : err);
+        if (window.parent && typeof window.parent.showErrorModal === 'function') {
+          window.parent.showErrorModal('Falha ao montar o Comparativo da Folha.', String(err && err.message ? err.message : err), 'Valide se o arquivo é a PLANILHA 30 e se contém as colunas padrão da folha.');
+        } else {
+          alert('Falha ao montar o Comparativo da Folha: ' + String(err && err.message ? err.message : err));
+        }
+      }
+      syncParentHeight();
+      state.fileDialogLocked = false;
+    };
+    reader.onerror = () => {
+      state.fileDialogLocked = false;
+      $('loadStatus').textContent = 'Erro ao ler o arquivo selecionado.';
+      updateSourceMeta([{ label:'Falha de leitura do arquivo', cls:'warn' }]);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  $('btnSelectFileInline').addEventListener('click', openFilePicker);
+  $('btnReloadFile').addEventListener('click', openFilePicker);
+  $('fileInput').addEventListener('change', event => {
+    if (event.target.files && event.target.files[0]) loadWorkbook(event.target.files[0]);
+    event.target.value = '';
+    setTimeout(() => { state.fileDialogLocked = false; }, 150);
+  });
+  $('btnCloseDrawer').addEventListener('click', closeDrillDownDrawer);
+  $('drawerBackdrop').addEventListener('click', closeDrillDownDrawer);
+  document.querySelectorAll('[data-table-mode]').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-table-mode]').forEach(node => node.classList.remove('active'));
+    btn.classList.add('active');
+    state.tableMode = btn.getAttribute('data-table-mode');
+    renderDashboard();
+  }));
+  document.querySelectorAll('[data-group-view]').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-group-view]').forEach(node => node.classList.remove('active'));
+    btn.classList.add('active');
+    state.groupView = btn.getAttribute('data-group-view');
+    renderDashboard();
+  }));
+  document.querySelectorAll('[data-scatter-mode]').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-scatter-mode]').forEach(node => node.classList.remove('active'));
+    btn.classList.add('active');
+    state.scatterMode = btn.getAttribute('data-scatter-mode');
+    renderDashboard();
+  }));
+  syncThemeFromParent();
+  setTimeout(syncThemeFromParent, 60);
+  setTimeout(syncThemeFromParent, 300);
+  try {
+    const parentDoc = window.parent && window.parent.document;
+    const observerTarget = parentDoc && parentDoc.body;
+    if (observerTarget && typeof MutationObserver !== 'undefined') {
+      new MutationObserver(syncThemeFromParent).observe(observerTarget, { attributes:true, attributeFilter:['class'] });
+    }
+  } catch (e) {}
+  syncParentHeight();
+})();
+</script>
+</body>
+</html>

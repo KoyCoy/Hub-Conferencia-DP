@@ -885,7 +885,11 @@
   <nav class="sidebar-nav">
     <div class="nav-label">Módulos de Validação</div>
     
-    <button class="tab-btn active" onclick="openTab('ocorrencias', this, 'Ocorrências')">
+    <button class="tab-btn active" onclick="openTab('dashboardFolha', this, 'Dashboard Folha')">
+      <i data-lucide="layout-dashboard"></i> Dashboard Folha
+    </button>
+    
+    <button class="tab-btn" onclick="openTab('ocorrencias', this, 'Ocorrências')">
       <i data-lucide="file-warning"></i> Ocorrências
     </button>
     
@@ -903,6 +907,9 @@
     
     <button class="tab-btn" onclick="openTab('folha', this, 'Conferência de Folha')">
       <i data-lucide="file-check"></i> Conf. de Folha
+    </button>
+    <button class="tab-btn" onclick="openTab('rescisao', this, 'Simulador de Rescisão')">
+      <i data-lucide="calculator"></i> Sim. de Rescisão
     </button>
     <button class="tab-btn" onclick="openTab('historico', this, 'Histórico & Exceções')">
       <i data-lucide="history"></i> Histórico & Exceções
@@ -923,7 +930,7 @@
   <header class="topbar">
     <div class="breadcrumb">
       Auditoria <i data-lucide="chevron-right" style="width: 14px;"></i> 
-      <span class="current" id="current-module">Ocorrências</span>
+      <span class="current" id="current-module">Dashboard Folha</span>
     </div>
 
     <div class="topbar-actions">
@@ -940,7 +947,11 @@
   <main class="content-container">
     <div class="iframe-card">
       
-      <div class="tab active" id="ocorrencias">
+      <div class="tab active" id="dashboardFolha">
+        <iframe id="dashboard-folha-frame" title="Dashboard Comparativo da Folha"></iframe>
+      </div>
+
+      <div class="tab" id="ocorrencias">
         <iframe srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;pt-BR&quot;&gt;
 &lt;head&gt;
@@ -5956,7 +5967,7 @@ function checkTipoA(tipoA64, chapasP5, evtsByChapa, info30){
 // ═══ Salvar Fechamento ═══════════════════════════════════════════════
 
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.1.0'; } catch(e) { return '1.1.0'; }
+try { return window.parent.HUB_RH_VERSION || '1.2.0'; } catch(e) { return '1.2.0'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -7005,7 +7016,7 @@ function renderRegraDetalhe(){
 
 // ── TAB: COMPETÊNCIA ─────────────────────────────────────────────────────────
 function getHubVersion(){
-  try { return window.parent.HUB_RH_VERSION || '1.1.0'; } catch(e) { return '1.1.0'; }
+try { return window.parent.HUB_RH_VERSION || '1.2.0'; } catch(e) { return '1.2.0'; }
 }
 function getSavedExecutor(){
   try { return localStorage.getItem('hubRh.executadoPor') || ''; } catch(e) { return ''; }
@@ -7199,14 +7210,2313 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 "></iframe>
       </div>
 
+      <div class="tab" id="rescisao">
+        <iframe id="rescisao-frame" title="Simulador de Rescisão"></iframe>
+      </div>
+
     </div>
   </main>
 
 </div>
 
 <script>
+  // Dashboard Folha agora vive apenas em dashboard_folha_mod.html.
+  // O hub mantém só o iframe e o loader para evitar duplicação de código.
+
+  const RESCISAO_SCRIPT_CLOSE = '</' + 'script>';
+  const RESCISAO_SRCDOC = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Rescisão</title>
+<style>
+  :root {
+    --bg: #eef2ff;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --surface-card: #ffffff;
+    --surface-alt: #f8fafc;
+    --border: #d9e2ec;
+    --text: #0f172a;
+    --muted: #64748b;
+    --label: #334155;
+    --brand: #2563eb;
+    --brand-soft: #dbeafe;
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --danger: #b91c1c;
+    --danger-soft: #fee2e2;
+  }
+  body.dark-mode {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-soft: #0f172a;
+    --surface-card: #1e293b;
+    --surface-alt: #172036;
+    --border: #334155;
+    --text: #f8fafc;
+    --muted: #cbd5e1;
+    --label: #e2e8f0;
+    --brand: #60a5fa;
+    --brand-soft: rgba(59, 130, 246, 0.18);
+    --good: #4ade80;
+    --good-soft: rgba(34, 197, 94, 0.16);
+    --warn: #fbbf24;
+    --warn-soft: rgba(245, 158, 11, 0.18);
+    --danger: #f87171;
+    --danger-soft: rgba(239, 68, 68, 0.18);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--surface-alt) 0%, var(--bg) 100%);
+    color: var(--text);
+  }
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: white;
+    padding: 28px 32px;
+  }
+  header h1 { margin: 0; font-size: 26px; }
+  header p { margin: 8px 0 0; opacity: 0.82; max-width: 820px; line-height: 1.55; }
+  .container { max-width: 1240px; margin: 0 auto; padding: 24px; }
+  .hero-note, .legal-note, .helper-note {
+    border-radius: 16px;
+    padding: 16px 18px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+    border: 1px solid transparent;
+  }
+  .hero-note {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.18);
+    color: #1e3a8a;
+  }
+  .legal-note {
+    background: var(--warn-soft);
+    border-color: rgba(180, 83, 9, 0.2);
+    color: #92400e;
+  }
+  .helper-note {
+    background: #f1f5f9;
+    border-color: #dbe4f0;
+    color: #334155;
+    font-size: 13px;
+  }
+  body.dark-mode .hero-note {
+    background: rgba(59, 130, 246, 0.18);
+    border-color: rgba(96, 165, 250, 0.24);
+    color: #dbeafe;
+  }
+  body.dark-mode .legal-note {
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(251, 191, 36, 0.24);
+    color: #fde68a;
+  }
+  body.dark-mode .helper-note {
+    background: rgba(148, 163, 184, 0.12);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #e2e8f0;
+  }
+  .grid {
+    display: grid;
+    gap: 18px;
+  }
+  .grid.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .card {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 18px 20px 12px;
+    border-bottom: 1px solid #edf2f7;
+  }
+  .card-head h2 {
+    margin: 0;
+    font-size: 17px;
+  }
+  .card-head p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .card-body {
+    padding: 18px 20px 20px;
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+  }
+  .field-grid.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field.full { grid-column: 1 / -1; }
+  label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--label);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    min-height: 32px;
+    display: flex;
+    align-items: flex-end;
+  }
+  input, select, textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 11px 12px;
+    font: inherit;
+    background: white;
+    color: var(--text);
+    min-height: 44px;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.16);
+  }
+  textarea { min-height: 92px; resize: vertical; }
+  body.dark-mode input,
+  body.dark-mode select,
+  body.dark-mode textarea {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f8fafc;
+  }
+  body.dark-mode input::placeholder,
+  body.dark-mode textarea::placeholder {
+    color: #94a3b8;
+  }
+  .field small {
+    color: var(--muted);
+    line-height: 1.45;
+    font-size: 12px;
+  }
+  .calc-config-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .calc-table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface-alt);
+  }
+  .calc-table-wrap h3 {
+    margin: 0;
+    padding: 12px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .calc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .calc-table th,
+  .calc-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .calc-table tr:last-child td { border-bottom: none; }
+  .calc-table input {
+    min-height: 34px;
+    padding: 7px 8px;
+    border-radius: 8px;
+  }
+  .calc-config-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .calc-config-status {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.62);
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-backdrop.hidden { display: none; }
+  .config-modal {
+    width: min(980px, 96vw);
+    max-height: min(780px, 92vh);
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(2, 6, 23, 0.38);
+    display: flex;
+    flex-direction: column;
+  }
+  .config-modal-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-alt);
+  }
+  .config-modal-head h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+  .config-modal-head p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    line-height: 1.45;
+    font-size: 13px;
+  }
+  .config-modal-body {
+    overflow: auto;
+    padding: 18px 20px 20px;
+  }
+  .toggle-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface-alt);
+  }
+  .toggle-row input[type="checkbox"] {
+    width: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--brand);
+  }
+  .toggle-copy strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .toggle-copy span {
+    display: block;
+    color: var(--muted);
+    line-height: 1.5;
+    font-size: 12px;
+  }
+  body.dark-mode .toggle-row {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(148, 163, 184, 0.24);
+  }
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 22px 0 24px;
+  }
+  button {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: white;
+  }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-secondary {
+    background: white;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+  }
+  .btn-secondary:hover { background: #f8fafc; }
+  .btn-ghost {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+  }
+  .btn-ghost:hover { background: #dbeafe; }
+  .result-shell {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+  .result-head {
+    padding: 22px 24px;
+    border-bottom: 1px solid #e5edf6;
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  }
+  .result-head h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+  .result-head p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .result-body {
+    padding: 24px;
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .summary-card {
+    border-radius: 18px;
+    padding: 16px 18px;
+    border: 1px solid #dbe4f0;
+    background: #f8fafc;
+  }
+  .summary-card .kicker {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .summary-card strong {
+    display: block;
+    font-size: 24px;
+    line-height: 1.15;
+  }
+  .summary-card.good { background: var(--good-soft); border-color: #bbf7d0; }
+  .summary-card.good strong { color: var(--good); }
+  .summary-card.danger { background: var(--danger-soft); border-color: #fecaca; }
+  .summary-card.danger strong { color: var(--danger); }
+  .summary-card.brand { background: var(--brand-soft); border-color: #bfdbfe; }
+  .summary-card.brand strong { color: #1d4ed8; }
+  .summary-card.neutral strong { color: #0f172a; }
+  body.dark-mode .summary-card.neutral strong { color: #f8fafc; }
+  .trct-stack {
+    display: grid;
+    gap: 18px;
+  }
+  .sheet,
+  .trct-document {
+    border: 1px solid #dbe4f0;
+    border-radius: 18px;
+    background: white;
+    overflow: hidden;
+  }
+  .trct-document {
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  }
+  .sheet-head,
+  .trct-head {
+    padding: 14px 18px;
+    background: #eff6ff;
+    border-bottom: 1px solid #dbeafe;
+  }
+  .sheet-head h3,
+  .trct-head h3 {
+    margin: 0;
+    font-size: 15px;
+  }
+  .sheet-head p,
+  .trct-head p {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: #475569;
+  }
+  body.dark-mode .card,
+  body.dark-mode .result-shell,
+  body.dark-mode .sheet,
+  body.dark-mode .trct-document {
+    background: var(--surface-card);
+    border-color: var(--border);
+    box-shadow: 0 18px 40px rgba(2, 6, 23, 0.35);
+  }
+  body.dark-mode .card-head,
+  body.dark-mode .result-head {
+    border-bottom-color: var(--border);
+  }
+  body.dark-mode .result-head,
+  body.dark-mode .sheet-head,
+  body.dark-mode .trct-head {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.92) 0%, rgba(23, 32, 54, 0.92) 100%);
+    border-bottom-color: rgba(96, 165, 250, 0.18);
+  }
+  body.dark-mode .sheet-head p,
+  body.dark-mode .trct-head p,
+  body.dark-mode .result-head p {
+    color: #cbd5e1;
+  }
+  .sheet-body {
+    padding: 18px;
+  }
+  .trct-body {
+    padding: 18px;
+    display: grid;
+    gap: 16px;
+  }
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+    margin-bottom: 18px;
+  }
+  .doc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .mini-item {
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+  }
+  .mini-item span {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+  }
+  .mini-item strong {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  body.dark-mode .mini-item {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(148, 163, 184, 0.22);
+  }
+  body.dark-mode .mini-item strong { color: #f8fafc; }
+  body.dark-mode .mini-item span { color: #cbd5e1; }
+  .doc-section {
+    border: 1px solid #dbe4f0;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .doc-section h4 {
+    margin: 0;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #334155;
+  }
+  .doc-section .doc-grid {
+    padding: 14px;
+  }
+  .doc-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #ffffff;
+    min-height: 72px;
+  }
+  .doc-item span {
+    display: block;
+    margin-bottom: 6px;
+    color: #64748b;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .doc-item strong {
+    display: block;
+    color: #0f172a;
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  body.dark-mode .doc-section {
+    border-color: rgba(148, 163, 184, 0.22);
+  }
+  body.dark-mode .doc-section h4 {
+    background: rgba(15, 23, 42, 0.72);
+    border-bottom-color: rgba(148, 163, 184, 0.22);
+    color: #e2e8f0;
+  }
+  body.dark-mode .doc-item {
+    background: rgba(15, 23, 42, 0.5);
+    border-color: rgba(148, 163, 184, 0.18);
+  }
+  body.dark-mode .doc-item span { color: #cbd5e1; }
+  body.dark-mode .doc-item strong { color: #f8fafc; }
+  .doc-table-wrap {
+    border: 1px solid #dbe4f0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .doc-table-title {
+    margin: 0;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    color: #334155;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  body.dark-mode .doc-table-wrap {
+    border-color: rgba(148, 163, 184, 0.22);
+    background: rgba(15, 23, 42, 0.44);
+  }
+  body.dark-mode .doc-table-title {
+    background: rgba(15, 23, 42, 0.72);
+    border-bottom-color: rgba(148, 163, 184, 0.22);
+    color: #e2e8f0;
+  }
+  .doc-footnote {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #475569;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 14px 16px;
+    background: #fcfdff;
+  }
+  body.dark-mode .doc-footnote {
+    color: #cbd5e1;
+    border-color: rgba(148, 163, 184, 0.24);
+    background: rgba(15, 23, 42, 0.5);
+  }
+  .doc-footnote strong { color: #0f172a; }
+  body.dark-mode .doc-footnote strong { color: #f8fafc; }
+  .row-note {
+    color: #64748b;
+    font-size: 12px;
+  }
+  body.dark-mode .row-note { color: #cbd5e1; }
+  .highlight-row td {
+    background: #f8fafc;
+    font-weight: 700;
+  }
+  body.dark-mode .highlight-row td {
+    background: rgba(148, 163, 184, 0.12);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #f8fafc;
+    color: #475569;
+    border-bottom: 1px solid #e5edf6;
+  }
+  tbody td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #edf2f7;
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.money, th.money { text-align: right; white-space: nowrap; }
+  .code-col {
+    width: 76px;
+    white-space: nowrap;
+    color: #334155;
+    font-weight: 700;
+  }
+  body.dark-mode .code-col { color: #e2e8f0; }
+  .total-row td {
+    font-weight: 700;
+    background: #f8fafc;
+    color: #0f172a;
+  }
+  body.dark-mode .total-row td {
+    background: #f8fafc;
+    color: #0f172a;
+  }
+  .doc-table-wrap .total-row td,
+  .trct-document .total-row td,
+  body.dark-mode .doc-table-wrap .total-row td,
+  body.dark-mode .trct-document .total-row td {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+  }
+  .observations {
+    margin-top: 18px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 14px 16px;
+    background: #fcfdff;
+  }
+  .observations h4 {
+    margin: 0 0 10px;
+    font-size: 14px;
+  }
+  .observations ul {
+    margin: 0;
+    padding-left: 18px;
+    color: #475569;
+    line-height: 1.55;
+  }
+  .signature-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 24px;
+  }
+  .signature-box {
+    padding-top: 36px;
+    border-top: 1px solid #94a3b8;
+    text-align: center;
+    color: #475569;
+    font-size: 12px;
+  }
+  .empty-state {
+    padding: 42px 28px;
+    text-align: center;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .pill {
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #eef2ff;
+    color: #3730a3;
+  }
+  .pill.warn {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .pill.good {
+    background: #dcfce7;
+    color: #166534;
+  }
+  body.dark-mode .pill {
+    background: rgba(99, 102, 241, 0.22);
+    color: #e0e7ff;
+  }
+  body.dark-mode .pill.warn {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fde68a;
+  }
+  body.dark-mode .pill.good {
+    background: rgba(34, 197, 94, 0.18);
+    color: #bbf7d0;
+  }
+  @media (max-width: 980px) {
+    .grid.two, .grid.three, .field-grid, .field-grid.three, .summary-grid, .signature-row, .mini-grid, .doc-grid, .calc-config-grid {
+      grid-template-columns: 1fr;
+    }
+    label { min-height: 0; }
+  }
+  @media print {
+    body {
+      background: white !important;
+    }
+    header, .hero-note, .legal-note, .helper-note, form, #calcForm, .toolbar, .modal-backdrop {
+      display: none !important;
+    }
+    .container {
+      max-width: none;
+      padding: 0;
+    }
+    .result-shell {
+      border: none;
+      box-shadow: none;
+      border-radius: 0;
+    }
+    .result-head,
+    .summary-grid,
+    .sheet {
+      display: none !important;
+    }
+    .result-body {
+      padding: 0;
+    }
+    .trct-document {
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      break-inside: avoid;
+    }
+    .trct-head {
+      background: white !important;
+      padding: 0 0 12px !important;
+      border-bottom: 2px solid #0f172a !important;
+    }
+    .trct-body {
+      padding: 12px 0 0 !important;
+      gap: 10px !important;
+    }
+    .doc-section,
+    .doc-table-wrap,
+    .doc-footnote {
+      border-color: #cbd5e1 !important;
+      background: white !important;
+      box-shadow: none !important;
+    }
+    .doc-section h4,
+    .doc-table-title,
+    .doc-item,
+    .mini-item,
+    .doc-item strong,
+    .doc-item span,
+    .doc-footnote,
+    .doc-footnote strong,
+    .signature-box {
+      color: #0f172a !important;
+      background: white !important;
+    }
+    .doc-section h4 {
+      border-bottom-color: #cbd5e1 !important;
+    }
+    .doc-table-title {
+      border-bottom-color: #cbd5e1 !important;
+    }
+    .doc-item,
+    .mini-item {
+      border-color: #dbe4f0 !important;
+    }
+    .signature-row {
+      margin-top: 18px;
+    }
+    .signature-box {
+      padding-top: 28px;
+      border-top-color: #64748b !important;
+    }
+    table, thead th, tbody td, .total-row td, .highlight-row td, .doc-table-title {
+      color: #0f172a !important;
+      background: white !important;
+      border-color: #dbe4f0 !important;
+    }
+    @page {
+      size: A4 portrait;
+      margin: 7mm;
+    }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Simulador de Rescisão</h1>
+    <p>Preencha os dados manualmente para estimar as verbas rescisórias, descontos e o líquido final. O resultado pode ser impresso em PDF em um layout próximo ao TRCT para conferência interna.</p>
+  </header>
+
+  <div class="container">
+    <div class="hero-note"><strong>Fluxo sugerido:</strong> preencha os dados contratuais, revise os avos sugeridos, informe o saldo base de FGTS se quiser calcular multa e só então gere o PDF final para conferência.</div>
+    <div class="legal-note"><strong>Atenção:</strong> este simulador entrega uma estimativa operacional. Convenções coletivas, médias de variáveis, descontos específicos, verbas judiciais, bases de incidência e regras internas podem alterar o valor oficial da rescisão.</div>
+
+    <div id="calcForm" role="form">
+      <div class="grid two">
+        <section class="card">
+          <div class="card-head">
+            <h2>Identificação e contrato</h2>
+            <p>Campos principais para montar uma ficha próxima ao TRCT atual.</p>
+          </div>
+          <div class="card-body">
+            <div class="field-grid three">
+              <div class="field full">
+                <label for="razaoSocial">Razão social / nome do empregador</label>
+                <input id="razaoSocial" type="text" placeholder="Ex.: Superfrio Logística Frigorificada Ltda.">
+              </div>
+              <div class="field">
+                <label for="cnpj">CNPJ / CEI</label>
+                <input id="cnpj" type="text" placeholder="00.000.000/0000-00">
+              </div>
+              <div class="field">
+                <label for="cidadeUf">Município / UF</label>
+                <input id="cidadeUf" type="text" placeholder="Ex.: Guarulhos / SP">
+              </div>
+              <div class="field">
+                <label for="tipoContrato">Tipo de contrato</label>
+                <input id="tipoContrato" type="text" placeholder="Ex.: Prazo indeterminado">
+              </div>
+              <div class="field full">
+                <label for="nome">Nome do colaborador</label>
+                <input id="nome" type="text" placeholder="Ex.: Maria Aparecida Souza">
+              </div>
+              <div class="field">
+                <label for="cpf">CPF</label>
+                <input id="cpf" type="text" placeholder="000.000.000-00">
+              </div>
+              <div class="field">
+                <label for="cargo">Cargo</label>
+                <input id="cargo" type="text" placeholder="Ex.: Assistente Administrativo">
+              </div>
+              <div class="field">
+                <label for="pis">PIS / PASEP</label>
+                <input id="pis" type="text" placeholder="000.00000.00-0">
+              </div>
+              <div class="field">
+                <label for="admissao">Data de admissão</label>
+                <input id="admissao" type="date">
+              </div>
+              <div class="field">
+                <label for="desligamento">Data de desligamento</label>
+                <input id="desligamento" type="date">
+              </div>
+              <div class="field">
+                <label for="dataAviso">Data do aviso prévio</label>
+                <input id="dataAviso" type="date">
+              </div>
+              <div class="field">
+                <label for="motivo">Motivo da rescisão</label>
+                <select id="motivo">
+                  <option value="sem_justa_causa">Sem justa causa</option>
+                  <option value="pedido_demissao">Pedido de demissão</option>
+                  <option value="termino_prazo">Término de contrato a prazo</option>
+                  <option value="acordo_484a">Acordo art. 484-A</option>
+                  <option value="justa_causa">Justa causa</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="avisoTipo">Aviso prévio</label>
+                <select id="avisoTipo">
+                  <option value="indenizado">Indenizado</option>
+                  <option value="trabalhado">Trabalhado</option>
+                  <option value="desconto_empregado">Desconto do empregado</option>
+                  <option value="nao_aplica">Não se aplica</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="codigoAfastamento">Código / descrição do afastamento</label>
+                <input id="codigoAfastamento" type="text" placeholder="Ex.: SJ2 - Dispensa sem justa causa">
+              </div>
+              <div class="field">
+                <label for="sindicato">Entidade sindical laboral</label>
+                <input id="sindicato" type="text" placeholder="Opcional para o PDF">
+              </div>
+              <div class="field full">
+                <label for="observacoes">Observações da simulação</label>
+                <textarea id="observacoes" placeholder="Ex.: considerar convenção interna, desconto de adiantamento ou premissas específicas deste cálculo."></textarea>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Bases de cálculo</h2>
+            <p>Os avos e dias podem ser ajustados manualmente antes do cálculo final.</p>
+          </div>
+          <div class="card-body">
+            <div class="field-grid three">
+              <div class="field">
+                <label for="salarioBase">Salário base (R$)</label>
+                <input id="salarioBase" type="number" min="0" step="0.01" placeholder="0,00">
+              </div>
+              <div class="field">
+                <label for="diasSaldo">Dias de saldo salário</label>
+                <input id="diasSaldo" type="number" min="0" max="30" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label for="avisoDias">Dias de aviso</label>
+                <input id="avisoDias" type="number" min="0" max="90" step="1" placeholder="30">
+              </div>
+              <div class="field">
+                <label for="avos13">13º proporcional (avos)</label>
+                <input id="avos13" type="number" min="0" max="12" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label for="avosFerias">Férias proporcionais (avos)</label>
+                <input id="avosFerias" type="number" min="0" max="12" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label for="feriasVencidas">Períodos de férias vencidas</label>
+                <input id="feriasVencidas" type="number" min="0" max="5" step="1" value="0">
+              </div>
+              <div class="field">
+                <label for="fgtsBase">Saldo base do FGTS (R$)</label>
+                <input id="fgtsBase" type="number" min="0" step="0.01" placeholder="Informe se quiser multa do FGTS">
+              </div>
+              <div class="field">
+                <label for="dependentes">Dependentes IRRF</label>
+                <input id="dependentes" type="number" min="0" max="20" step="1" value="0">
+              </div>
+              <div class="field">
+                <label for="outrosDescontos">Outros descontos (R$)</label>
+                <input id="outrosDescontos" type="number" min="0" step="0.01" value="0">
+              </div>
+              <div class="field full">
+                <div class="toggle-row">
+                  <input id="considerarDataBase" type="checkbox">
+                  <div class="toggle-copy">
+                    <strong>Considerar indenização adicional da data-base</strong>
+                    <span>Quando marcada, a simulação adiciona 1 salário nominal como verba estimada de indenização adicional da data-base.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="helper-note" id="autoHint">Preencha admissão, desligamento e motivo para sugerir automaticamente saldo de salário, avos e aviso prévio.</div>
+            <div class="pill-row" id="rulePills"></div>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="toolbar">
+        <button type="button" class="btn-primary" id="btnCalc">Calcular rescisão</button>
+        <button type="button" class="btn-secondary" id="btnNova">Nova simulação</button>
+        <button type="button" class="btn-ghost" id="btnPdf">Gerar PDF</button>
+        <button type="button" class="btn-ghost" id="btnMemoria">Exportar memória</button>
+        <button type="button" class="btn-ghost" id="btnOpenCalcConfig">Configurações de cálculo</button>
+      </div>
+
+      <div class="modal-backdrop hidden" id="calcConfigModal">
+        <section class="config-modal" role="dialog" aria-modal="true" aria-labelledby="calcConfigTitle">
+          <div class="config-modal-head">
+            <div>
+              <h2 id="calcConfigTitle">Configurações de cálculo</h2>
+              <p>Atualize as tabelas quando houver mudança oficial. As premissas salvas ficam no navegador e aparecem na memória da simulação.</p>
+            </div>
+            <button type="button" class="btn-secondary" id="btnCloseCalcConfig">Fechar</button>
+          </div>
+          <div class="config-modal-body">
+            <div class="field-grid three">
+              <div class="field">
+                <label for="calcConfigName">Nome da tabela</label>
+                <input id="calcConfigName" type="text" placeholder="Ex.: INSS/IRRF 2026">
+              </div>
+              <div class="field">
+                <label for="cfgIrrfDependente">Dedução por dependente (R$)</label>
+                <input id="cfgIrrfDependente" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgIrrfSimplificado">Desconto simplificado (R$)</label>
+                <input id="cfgIrrfSimplificado" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgReducaoIsencaoAte">Redução isenta até (R$)</label>
+                <input id="cfgReducaoIsencaoAte" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgReducaoFaixaAte">Redução progressiva até (R$)</label>
+                <input id="cfgReducaoFaixaAte" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgReducaoValorBase">Valor base da redução (R$)</label>
+                <input id="cfgReducaoValorBase" type="number" min="0" step="0.01">
+              </div>
+              <div class="field">
+                <label for="cfgReducaoFator">Fator da redução</label>
+                <input id="cfgReducaoFator" type="number" min="0" step="0.000001">
+              </div>
+            </div>
+            <div class="calc-config-grid" style="margin-top:16px;">
+              <div class="calc-table-wrap">
+                <h3>Tabela INSS</h3>
+                <table class="calc-table">
+                  <thead><tr><th>Limite até</th><th>Alíquota %</th></tr></thead>
+                  <tbody id="inssConfigRows"></tbody>
+                </table>
+              </div>
+              <div class="calc-table-wrap">
+                <h3>Tabela IRRF</h3>
+                <table class="calc-table">
+                  <thead><tr><th>Limite até</th><th>Alíquota %</th><th>Dedução</th></tr></thead>
+                  <tbody id="irrfConfigRows"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="calc-config-actions">
+              <button type="button" class="btn-primary" id="btnSaveCalcConfig">Salvar configuração</button>
+              <button type="button" class="btn-secondary" id="btnResetCalcConfig">Restaurar padrão 2026</button>
+            </div>
+            <div class="calc-config-status" id="calcConfigStatus"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="result-shell">
+      <div class="result-head">
+        <h2>Resumo da simulação</h2>
+        <p>Os valores abaixo consideram as premissas informadas no formulário. A memória de cálculo detalha bases, percentuais e descontos estimados.</p>
+      </div>
+      <div class="result-body" id="resultadoWrap">
+        <div class="empty-state">Preencha os dados acima e clique em <strong>Calcular rescisão</strong> para montar a simulação.</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    var RESCISAO_CONFIG_STORAGE_KEY = 'checkFolhaIA_rescisaoCalcConfig_v1';
+    var DEFAULT_CALC_CONFIG = {
+      name: 'INSS/IRRF 2026',
+      inssBrackets: [
+        { limit: 1621.00, rate: 0.075 },
+        { limit: 2902.84, rate: 0.09 },
+        { limit: 4354.27, rate: 0.12 },
+        { limit: 8475.55, rate: 0.14 }
+      ],
+      irrfBrackets: [
+        { limit: 2428.80, rate: 0, deduction: 0 },
+        { limit: 2826.65, rate: 0.075, deduction: 182.16 },
+        { limit: 3751.05, rate: 0.15, deduction: 394.16 },
+        { limit: 4664.68, rate: 0.225, deduction: 675.49 },
+        { limit: Infinity, rate: 0.275, deduction: 908.73 }
+      ],
+      irrfDependente: 189.59,
+      irrfSimplificado: 607.20,
+      reducaoIsencaoAte: 5000,
+      reducaoFaixaAte: 7350,
+      reducaoValorBase: 978.62,
+      reducaoFator: 0.133145
+    };
+    var calcConfig = loadCalcConfig();
+    var lastSimulation = null;
+
+    function cloneCalcConfig(config) {
+      var source = config || DEFAULT_CALC_CONFIG;
+      return {
+        name: source.name,
+        inssBrackets: (source.inssBrackets || []).map(function(row) {
+          return { limit: row.limit === Infinity ? Infinity : Number(row.limit || 0), rate: Number(row.rate || 0) };
+        }),
+        irrfBrackets: (source.irrfBrackets || []).map(function(row) {
+          return { limit: row.limit === Infinity ? Infinity : Number(row.limit || 0), rate: Number(row.rate || 0), deduction: Number(row.deduction || 0) };
+        }),
+        irrfDependente: Number(source.irrfDependente || 0),
+        irrfSimplificado: Number(source.irrfSimplificado || 0),
+        reducaoIsencaoAte: Number(source.reducaoIsencaoAte || 0),
+        reducaoFaixaAte: Number(source.reducaoFaixaAte || 0),
+        reducaoValorBase: Number(source.reducaoValorBase || 0),
+        reducaoFator: Number(source.reducaoFator || 0)
+      };
+    }
+
+    function normalizeConfigLimit(value) {
+      if (value === Infinity || value === 'Infinity') return Infinity;
+      if (value == null || value === '') return Infinity;
+      var text = String(value).trim().toLowerCase();
+      if (text === 'infinito' || text === 'sem teto' || text === 'inf') return Infinity;
+      var n = parseFloat(text.replace(',', '.'));
+      return isNaN(n) ? Infinity : Math.max(0, n);
+    }
+
+    function sanitizeCalcConfig(input) {
+      var source = input || {};
+      var base = cloneCalcConfig(DEFAULT_CALC_CONFIG);
+      base.name = String(source.name || base.name || 'Tabela personalizada').trim() || 'Tabela personalizada';
+      base.irrfDependente = round2(source.irrfDependente != null ? source.irrfDependente : base.irrfDependente);
+      base.irrfSimplificado = round2(source.irrfSimplificado != null ? source.irrfSimplificado : base.irrfSimplificado);
+      base.reducaoIsencaoAte = round2(source.reducaoIsencaoAte != null ? source.reducaoIsencaoAte : base.reducaoIsencaoAte);
+      base.reducaoFaixaAte = round2(source.reducaoFaixaAte != null ? source.reducaoFaixaAte : base.reducaoFaixaAte);
+      base.reducaoValorBase = round2(source.reducaoValorBase != null ? source.reducaoValorBase : base.reducaoValorBase);
+      base.reducaoFator = Math.max(0, Number(source.reducaoFator != null ? source.reducaoFator : base.reducaoFator) || 0);
+
+      function cleanBrackets(rows, withDeduction) {
+        var cleaned = (rows || []).map(function(row) {
+          return {
+            limit: normalizeConfigLimit(row.limit),
+            rate: Math.max(0, Number(row.rate) || 0),
+            deduction: withDeduction ? round2(row.deduction || 0) : 0
+          };
+        }).filter(function(row) { return row.limit > 0 || row.limit === Infinity; });
+        cleaned.sort(function(a, b) { return a.limit - b.limit; });
+        if (!cleaned.length) cleaned = withDeduction ? cloneCalcConfig(DEFAULT_CALC_CONFIG).irrfBrackets : cloneCalcConfig(DEFAULT_CALC_CONFIG).inssBrackets;
+        return cleaned;
+      }
+
+      base.inssBrackets = cleanBrackets(source.inssBrackets || base.inssBrackets, false);
+      base.irrfBrackets = cleanBrackets(source.irrfBrackets || base.irrfBrackets, true);
+      return base;
+    }
+
+    function loadCalcConfig() {
+      try {
+        var raw = localStorage.getItem(RESCISAO_CONFIG_STORAGE_KEY);
+        if (raw) return sanitizeCalcConfig(JSON.parse(raw));
+      } catch (e) {}
+      return sanitizeCalcConfig(DEFAULT_CALC_CONFIG);
+    }
+
+    function persistCalcConfig() {
+      try {
+        localStorage.setItem(RESCISAO_CONFIG_STORAGE_KEY, JSON.stringify(calcConfig));
+      } catch (e) {}
+    }
+
+    function formatConfigLimit(value) {
+      return value === Infinity ? 'Infinito' : String(Number(value || 0).toFixed(2)).replace('.', ',');
+    }
+
+    function setConfigStatus(message) {
+      var status = document.getElementById('calcConfigStatus');
+      if (status) status.textContent = message || '';
+    }
+
+    function renderCalcConfigPanel() {
+      var name = document.getElementById('calcConfigName');
+      if (!name) return;
+      name.value = calcConfig.name || '';
+      document.getElementById('cfgIrrfDependente').value = calcConfig.irrfDependente;
+      document.getElementById('cfgIrrfSimplificado').value = calcConfig.irrfSimplificado;
+      document.getElementById('cfgReducaoIsencaoAte').value = calcConfig.reducaoIsencaoAte;
+      document.getElementById('cfgReducaoFaixaAte').value = calcConfig.reducaoFaixaAte;
+      document.getElementById('cfgReducaoValorBase').value = calcConfig.reducaoValorBase;
+      document.getElementById('cfgReducaoFator').value = calcConfig.reducaoFator;
+
+      document.getElementById('inssConfigRows').innerHTML = calcConfig.inssBrackets.map(function(row, idx) {
+        return '<tr>' +
+          '<td><input data-inss-limit="' + idx + '" type="text" value="' + escapeHtml(formatConfigLimit(row.limit)) + '"></td>' +
+          '<td><input data-inss-rate="' + idx + '" type="number" min="0" step="0.01" value="' + escapeHtml((row.rate * 100).toFixed(2)) + '"></td>' +
+        '</tr>';
+      }).join('');
+      document.getElementById('irrfConfigRows').innerHTML = calcConfig.irrfBrackets.map(function(row, idx) {
+        return '<tr>' +
+          '<td><input data-irrf-limit="' + idx + '" type="text" value="' + escapeHtml(formatConfigLimit(row.limit)) + '"></td>' +
+          '<td><input data-irrf-rate="' + idx + '" type="number" min="0" step="0.01" value="' + escapeHtml((row.rate * 100).toFixed(2)) + '"></td>' +
+          '<td><input data-irrf-deduction="' + idx + '" type="number" min="0" step="0.01" value="' + escapeHtml(row.deduction.toFixed(2)) + '"></td>' +
+        '</tr>';
+      }).join('');
+      setConfigStatus('Configuração ativa: ' + calcConfig.name + '.');
+    }
+
+    function readCalcConfigPanel() {
+      var next = cloneCalcConfig(calcConfig);
+      next.name = document.getElementById('calcConfigName').value.trim() || 'Tabela personalizada';
+      next.irrfDependente = parseMoney(document.getElementById('cfgIrrfDependente').value);
+      next.irrfSimplificado = parseMoney(document.getElementById('cfgIrrfSimplificado').value);
+      next.reducaoIsencaoAte = parseMoney(document.getElementById('cfgReducaoIsencaoAte').value);
+      next.reducaoFaixaAte = parseMoney(document.getElementById('cfgReducaoFaixaAte').value);
+      next.reducaoValorBase = parseMoney(document.getElementById('cfgReducaoValorBase').value);
+      next.reducaoFator = Number(document.getElementById('cfgReducaoFator').value || 0) || 0;
+      next.inssBrackets = calcConfig.inssBrackets.map(function(row, idx) {
+        return {
+          limit: normalizeConfigLimit((document.querySelector('[data-inss-limit="' + idx + '"]') || {}).value),
+          rate: (Number((document.querySelector('[data-inss-rate="' + idx + '"]') || {}).value || 0) || 0) / 100
+        };
+      });
+      next.irrfBrackets = calcConfig.irrfBrackets.map(function(row, idx) {
+        return {
+          limit: normalizeConfigLimit((document.querySelector('[data-irrf-limit="' + idx + '"]') || {}).value),
+          rate: (Number((document.querySelector('[data-irrf-rate="' + idx + '"]') || {}).value || 0) || 0) / 100,
+          deduction: parseMoney((document.querySelector('[data-irrf-deduction="' + idx + '"]') || {}).value)
+        };
+      });
+      return sanitizeCalcConfig(next);
+    }
+
+    function saveCalcConfigFromPanel() {
+      calcConfig = readCalcConfigPanel();
+      persistCalcConfig();
+      renderCalcConfigPanel();
+      setConfigStatus('Configuração salva. O próximo cálculo já usa essas premissas.');
+    }
+
+    function resetCalcConfigPanel() {
+      calcConfig = sanitizeCalcConfig(DEFAULT_CALC_CONFIG);
+      persistCalcConfig();
+      renderCalcConfigPanel();
+      setConfigStatus('Tabela padrão 2026 restaurada.');
+    }
+
+    function openCalcConfigModal() {
+      renderCalcConfigPanel();
+      document.getElementById('calcConfigModal').classList.remove('hidden');
+      syncParentHeight();
+    }
+
+    function closeCalcConfigModal() {
+      document.getElementById('calcConfigModal').classList.add('hidden');
+      syncParentHeight();
+    }
+
+    function handleModalKeydown(event) {
+      if (event.key === 'Escape') closeCalcConfigModal();
+    }
+
+    function parseDate(value) {
+      if (!value) return null;
+      var parts = String(value).split('-');
+      if (parts.length !== 3) return null;
+      return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    }
+
+    function isValidDate(date) {
+      return date instanceof Date && !isNaN(date.getTime());
+    }
+
+    function diffDaysInclusive(start, end) {
+      if (!isValidDate(start) || !isValidDate(end) || end < start) return 0;
+      var ms = end.getTime() - start.getTime();
+      return Math.floor(ms / 86400000) + 1;
+    }
+
+    function cloneDate(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function addYears(date, years) {
+      return new Date(date.getFullYear() + years, date.getMonth(), date.getDate());
+    }
+
+    function addMonths(date, months) {
+      return new Date(date.getFullYear(), date.getMonth() + months, date.getDate());
+    }
+
+    function fullYearsBetween(start, end) {
+      if (!isValidDate(start) || !isValidDate(end) || end < start) return 0;
+      var years = end.getFullYear() - start.getFullYear();
+      var anniversary = new Date(end.getFullYear(), start.getMonth(), start.getDate());
+      if (anniversary > end) years -= 1;
+      return Math.max(0, years);
+    }
+
+    function monthStart(date) {
+      return new Date(date.getFullYear(), date.getMonth(), 1);
+    }
+
+    function monthEnd(date) {
+      return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    }
+
+    function computeAvos13(admission, dismissal) {
+      if (!isValidDate(admission) || !isValidDate(dismissal) || dismissal < admission) return 0;
+      var start = admission.getFullYear() === dismissal.getFullYear() ? cloneDate(admission) : new Date(dismissal.getFullYear(), 0, 1);
+      var count = 0;
+      for (var month = 0; month <= dismissal.getMonth(); month++) {
+        var currentStart = new Date(dismissal.getFullYear(), month, 1);
+        var currentEnd = new Date(dismissal.getFullYear(), month + 1, 0);
+        var activeStart = currentStart > start ? currentStart : start;
+        var activeEnd = currentEnd < dismissal ? currentEnd : dismissal;
+        if (activeEnd >= activeStart && diffDaysInclusive(activeStart, activeEnd) >= 15) count += 1;
+      }
+      return Math.max(0, Math.min(12, count));
+    }
+
+    function computeAvosFerias(admission, dismissal) {
+      if (!isValidDate(admission) || !isValidDate(dismissal) || dismissal < admission) return 0;
+      var years = fullYearsBetween(admission, dismissal);
+      var periodStart = addYears(admission, years);
+      if (periodStart > dismissal) periodStart = addYears(admission, Math.max(0, years - 1));
+      var count = 0;
+      for (var i = 0; i < 12; i++) {
+        var sliceStart = addMonths(periodStart, i);
+        if (sliceStart > dismissal) break;
+        var sliceEnd = addMonths(periodStart, i + 1);
+        sliceEnd = new Date(sliceEnd.getFullYear(), sliceEnd.getMonth(), sliceEnd.getDate() - 1);
+        var activeStart = sliceStart > admission ? sliceStart : admission;
+        var activeEnd = sliceEnd < dismissal ? sliceEnd : dismissal;
+        if (activeEnd >= activeStart && diffDaysInclusive(activeStart, activeEnd) >= 15) count += 1;
+      }
+      return Math.max(0, Math.min(11, count));
+    }
+
+    function computeNoticeDays(admission, dismissal, motivo) {
+      if (motivo === 'pedido_demissao') return 30;
+      if (!isValidDate(admission) || !isValidDate(dismissal) || dismissal < admission) return 30;
+      var fullYears = fullYearsBetween(admission, dismissal);
+      return Math.min(90, 30 + (fullYears * 3));
+    }
+
+    function parseMoney(value) {
+      var num = parseFloat(String(value == null ? '' : value).replace(',', '.'));
+      return isNaN(num) ? 0 : num;
+    }
+
+    function round2(value) {
+      return Math.round((Number(value) || 0) * 100) / 100;
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0);
+    }
+
+    function formatDate(value) {
+      var date = value instanceof Date ? value : parseDate(value);
+      return isValidDate(date) ? date.toLocaleDateString('pt-BR') : '—';
+    }
+
+    function computeDataBaseFine(enabled, salary) {
+      if (!enabled) return { value: 0, note: 'Não considerada na simulação.' };
+      return { value: round2(salary), note: 'Indenização adicional incluída manualmente para fins de simulação interna.' };
+    }
+
+    function calcINSS(base) {
+      var remaining = Math.max(0, Number(base) || 0);
+      var previousLimit = 0;
+      var total = 0;
+      calcConfig.inssBrackets.forEach(function(bracket) {
+        if (remaining <= 0) return;
+        var taxable = Math.min(bracket.limit - previousLimit, remaining);
+        if (taxable > 0) total += taxable * bracket.rate;
+        remaining -= taxable;
+        previousLimit = bracket.limit;
+      });
+      return round2(total);
+    }
+
+    function calcIRRFGross(base) {
+      var taxable = Math.max(0, Number(base) || 0);
+      for (var i = 0; i < calcConfig.irrfBrackets.length; i++) {
+        var bracket = calcConfig.irrfBrackets[i];
+        if (taxable <= bracket.limit) {
+          return round2((taxable * bracket.rate) - bracket.deduction);
+        }
+      }
+      return 0;
+    }
+
+    function calcIRRF(baseComInss, dependentes, baseBruta) {
+      var taxable = Math.max(0, Number(baseComInss) || 0);
+      var gross = Math.max(0, Number(baseBruta != null ? baseBruta : baseComInss) || 0);
+      if (taxable <= 0 && gross <= 0) return 0;
+      var deducaoDependentes = Math.max(0, Number(dependentes) || 0) * calcConfig.irrfDependente;
+      var baseComDependentes = Math.max(0, taxable - deducaoDependentes);
+      var baseComSimplificado = Math.max(0, gross - calcConfig.irrfSimplificado);
+      var baseFinal = Math.min(baseComDependentes, baseComSimplificado);
+      var bruto = calcIRRFGross(baseFinal);
+      var reducao = 0;
+      if (gross <= calcConfig.reducaoIsencaoAte) {
+        reducao = bruto;
+      } else if (gross < calcConfig.reducaoFaixaAte) {
+        reducao = Math.max(0, calcConfig.reducaoValorBase - (calcConfig.reducaoFator * gross));
+      }
+      return round2(Math.max(0, bruto - reducao));
+    }
+
+    function motivoConfig(motivo) {
+      var config = {
+        label: 'Sem justa causa',
+        permiteFeriasProp: true,
+        permite13: true,
+        multaFgts: 0.4,
+        avisoMetade: false,
+        descontoAvisoEmpregado: false,
+        descricao: 'Inclui férias proporcionais, 13º proporcional, multa de 40% do FGTS e aviso quando aplicável.'
+      };
+
+      if (motivo === 'pedido_demissao') {
+        config.label = 'Pedido de demissão';
+        config.multaFgts = 0;
+        config.descontoAvisoEmpregado = true;
+        config.descricao = 'Não calcula multa de FGTS. O aviso pode virar desconto se a empresa descontar do empregado.';
+      } else if (motivo === 'termino_prazo') {
+        config.label = 'Término de contrato a prazo';
+        config.multaFgts = 0;
+        config.descricao = 'Considera férias e 13º proporcionais, sem multa de FGTS e sem aviso padrão.';
+      } else if (motivo === 'acordo_484a') {
+        config.label = 'Acordo art. 484-A';
+        config.multaFgts = 0.2;
+        config.avisoMetade = true;
+        config.descricao = 'Aplica metade do aviso indenizado e multa de 20% do FGTS, conforme art. 484-A.';
+      } else if (motivo === 'justa_causa') {
+        config.label = 'Justa causa';
+        config.permiteFeriasProp = false;
+        config.permite13 = false;
+        config.multaFgts = 0;
+        config.descricao = 'Mantém saldo de salário e férias vencidas. Não inclui férias proporcionais, 13º proporcional nem multa de FGTS.';
+      }
+      return config;
+    }
+
+    function updateAutomaticFields() {
+      var admission = parseDate(document.getElementById('admissao').value);
+      var dismissal = parseDate(document.getElementById('desligamento').value);
+      var motivo = document.getElementById('motivo').value;
+      var avisoTipo = document.getElementById('avisoTipo').value;
+      var considerarDataBase = document.getElementById('considerarDataBase').checked;
+      var hint = [];
+
+      if (isValidDate(dismissal)) {
+        document.getElementById('diasSaldo').value = dismissal.getDate();
+        hint.push('Saldo salário sugerido com ' + dismissal.getDate() + ' dia(s).');
+      }
+
+      if (isValidDate(admission) && isValidDate(dismissal) && dismissal >= admission) {
+        var avos13 = computeAvos13(admission, dismissal);
+        var avosFerias = computeAvosFerias(admission, dismissal);
+        var avisoDias = computeNoticeDays(admission, dismissal, motivo);
+        document.getElementById('avos13').value = avos13;
+        document.getElementById('avosFerias').value = avosFerias;
+        document.getElementById('avisoDias').value = avisoDias;
+        hint.push('13º proporcional sugerido em ' + avos13 + '/12.');
+        hint.push('Férias proporcionais sugeridas em ' + avosFerias + '/12.');
+        hint.push('Aviso prévio sugerido em ' + avisoDias + ' dia(s).');
+      }
+
+      var config = motivoConfig(motivo);
+      var pills = [
+        '<span class="pill">' + config.label + '</span>',
+        '<span class="pill warn">Aviso: ' + labelAviso(avisoTipo) + '</span>'
+      ];
+      if (config.multaFgts > 0) pills.push('<span class="pill">Multa FGTS: ' + (config.multaFgts * 100).toFixed(0) + '%</span>');
+      if (!config.permite13) pills.push('<span class="pill warn">13º proporcional bloqueado</span>');
+      if (!config.permiteFeriasProp) pills.push('<span class="pill warn">Férias proporcionais bloqueadas</span>');
+      if (considerarDataBase) {
+        pills.push('<span class="pill good">Multa data-base ativa</span>');
+      }
+      document.getElementById('rulePills').innerHTML = pills.join('');
+      if (considerarDataBase) {
+        hint.push('A indenização adicional da data-base será incluída nesta simulação.');
+      }
+      document.getElementById('autoHint').textContent = hint.length ? hint.join(' ') : 'Preencha admissão, desligamento e motivo para sugerir automaticamente saldo de salário, avos e aviso prévio.';
+    }
+
+    function labelAviso(avisoTipo) {
+      if (avisoTipo === 'indenizado') return 'Indenizado';
+      if (avisoTipo === 'trabalhado') return 'Trabalhado';
+      if (avisoTipo === 'desconto_empregado') return 'Desconto do empregado';
+      return 'Não se aplica';
+    }
+
+    function buildLine(code, label, value, note, highlight) {
+      return { code: code || '—', label: label, value: round2(value), note: note || '', highlight: !!highlight };
+    }
+
+    function recalculate() {
+      var salary = parseMoney(document.getElementById('salarioBase').value);
+      var fgtsBase = parseMoney(document.getElementById('fgtsBase').value);
+      var outrosDescontos = parseMoney(document.getElementById('outrosDescontos').value);
+      var dependentes = parseInt(document.getElementById('dependentes').value || '0', 10) || 0;
+      var diasSaldo = Math.max(0, Math.min(30, parseInt(document.getElementById('diasSaldo').value || '0', 10) || 0));
+      var avisoDias = Math.max(0, Math.min(90, parseInt(document.getElementById('avisoDias').value || '0', 10) || 0));
+      var avos13 = Math.max(0, Math.min(12, parseInt(document.getElementById('avos13').value || '0', 10) || 0));
+      var avosFerias = Math.max(0, Math.min(12, parseInt(document.getElementById('avosFerias').value || '0', 10) || 0));
+      var feriasVencidas = Math.max(0, parseInt(document.getElementById('feriasVencidas').value || '0', 10) || 0);
+      var motivo = document.getElementById('motivo').value;
+      var avisoTipo = document.getElementById('avisoTipo').value;
+      var considerarDataBase = document.getElementById('considerarDataBase').checked;
+      var dataAviso = document.getElementById('dataAviso').value;
+      var config = motivoConfig(motivo);
+
+      var saldoSalario = round2((salary / 30) * diasSaldo);
+      var avisoBase = round2((salary / 30) * avisoDias);
+      var avisoIndenizado = 0;
+      var descontoAviso = 0;
+
+      if (avisoTipo === 'indenizado' && motivo !== 'pedido_demissao' && motivo !== 'termino_prazo' && motivo !== 'justa_causa') {
+        avisoIndenizado = config.avisoMetade ? round2(avisoBase * 0.5) : avisoBase;
+      }
+
+      if (avisoTipo === 'desconto_empregado' && config.descontoAvisoEmpregado) {
+        descontoAviso = round2(Math.min(avisoBase, salary));
+      }
+
+      var feriasVencidasValor = round2(salary * feriasVencidas);
+      var tercoVencidas = round2(feriasVencidasValor / 3);
+      var feriasProporcionais = config.permiteFeriasProp ? round2(salary * (avosFerias / 12)) : 0;
+      var tercoProporcional = round2(feriasProporcionais / 3);
+      var decimoTerceiro = config.permite13 ? round2(salary * (avos13 / 12)) : 0;
+      var multaFgts = round2(fgtsBase * config.multaFgts);
+      var multaDataBase = computeDataBaseFine(considerarDataBase, salary);
+
+      var proventos = [
+        buildLine('50', 'Saldo de salário', saldoSalario, diasSaldo + ' dia(s)'),
+        buildLine('66.1', 'Férias vencidas', feriasVencidasValor, feriasVencidas + ' período(s)'),
+        buildLine('68', '1/3 sobre férias vencidas', tercoVencidas, 'Adicional constitucional'),
+        buildLine('65', 'Férias proporcionais', feriasProporcionais, avosFerias + '/12'),
+        buildLine('68', '1/3 sobre férias proporcionais', tercoProporcional, 'Adicional constitucional'),
+        buildLine('63', '13º proporcional', decimoTerceiro, avos13 + '/12'),
+        buildLine('69', 'Aviso prévio indenizado', avisoIndenizado, avisoIndenizado > 0 ? avisoDias + ' dia(s)' : 'Sem incidência'),
+        buildLine('FGTS', 'Multa FGTS / Rescisão indenizada', multaFgts, fgtsBase > 0 ? (config.multaFgts * 100).toFixed(0) + '% sobre saldo base informado' : 'Informe o saldo base do FGTS para calcular', multaFgts > 0),
+        buildLine('ADB', 'Indenização adicional da data-base', multaDataBase.value, multaDataBase.note)
+      ];
+
+      var inssFolha = calcINSS(saldoSalario);
+      var inssDecimoTerceiro = calcINSS(decimoTerceiro);
+      var descontoINSS = round2(inssFolha + inssDecimoTerceiro);
+      var baseIRRFFolha = Math.max(0, saldoSalario - inssFolha);
+      var baseIRRFDecimo = Math.max(0, decimoTerceiro - inssDecimoTerceiro);
+      var irrfFolha = calcIRRF(baseIRRFFolha, dependentes, saldoSalario);
+      var irrfDecimo = calcIRRF(baseIRRFDecimo, 0, decimoTerceiro);
+      var descontoIRRF = round2(irrfFolha + irrfDecimo);
+
+      var descontos = [
+        buildLine('112.1', 'Previdência social', inssFolha, 'Incidência estimada sobre saldo salarial'),
+        buildLine('112.2', 'Previdência social sobre 13º', inssDecimoTerceiro, 'Incidência estimada sobre 13º proporcional'),
+        buildLine('114.1', 'IRRF', irrfFolha, 'Incidência estimada sobre verbas salariais'),
+        buildLine('114.2', 'IRRF sobre 13º', irrfDecimo, 'Incidência estimada sobre 13º proporcional'),
+        buildLine('103', 'Desconto de aviso', descontoAviso, descontoAviso > 0 ? 'Aplicado ao pedido de demissão' : 'Sem desconto'),
+        buildLine('999', 'Outros descontos', outrosDescontos, 'Campo manual')
+      ];
+
+      var totalProventos = round2(proventos.reduce(function(sum, item) { return sum + item.value; }, 0));
+      var totalDescontos = round2(descontos.reduce(function(sum, item) { return sum + item.value; }, 0));
+      var liquido = round2(totalProventos - totalDescontos);
+
+      lastSimulation = {
+        geradoEm: new Date().toISOString(),
+        empregador: {
+          razaoSocial: document.getElementById('razaoSocial').value.trim(),
+          cnpj: document.getElementById('cnpj').value.trim(),
+          cidadeUf: document.getElementById('cidadeUf').value.trim(),
+          sindicato: document.getElementById('sindicato').value.trim()
+        },
+        colaborador: {
+          nome: document.getElementById('nome').value.trim(),
+          cpf: document.getElementById('cpf').value.trim(),
+          cargo: document.getElementById('cargo').value.trim(),
+          pis: document.getElementById('pis').value.trim(),
+          admissao: document.getElementById('admissao').value,
+          desligamento: document.getElementById('desligamento').value
+        },
+        parametros: {
+          motivo: config.label,
+          aviso: labelAviso(avisoTipo),
+          dataAviso: dataAviso,
+          considerarDataBase: considerarDataBase,
+          codigoAfastamento: document.getElementById('codigoAfastamento').value.trim(),
+          tipoContrato: document.getElementById('tipoContrato').value.trim(),
+          salarioBase: salary,
+          diasSaldo: diasSaldo,
+          avisoDias: avisoDias,
+          avos13: avos13,
+          avosFerias: avosFerias,
+          feriasVencidas: feriasVencidas,
+          fgtsBase: fgtsBase,
+          dependentes: dependentes,
+          outrosDescontos: outrosDescontos,
+          observacoes: document.getElementById('observacoes').value.trim()
+        },
+        bases: {
+          baseINSSFolha: saldoSalario,
+          baseINSSDecimoTerceiro: decimoTerceiro,
+          baseIRRFFolha: round2(baseIRRFFolha),
+          baseIRRFDecimoTerceiro: round2(baseIRRFDecimo),
+          tabelaINSS: calcConfig.name,
+          tabelaIRRF: calcConfig.name,
+          configCalculo: cloneCalcConfig(calcConfig),
+          multaDataBase: multaDataBase
+        },
+        proventos: proventos,
+        descontos: descontos,
+        totalProventos: totalProventos,
+        totalDescontos: totalDescontos,
+        liquido: liquido
+      };
+
+      renderSimulation(lastSimulation, config);
+    }
+
+    function renderRows(items, isDiscount) {
+      return items.map(function(item) {
+        return '<tr' + (item.highlight ? ' class="highlight-row"' : '') + '>' +
+          '<td class="code-col">' + escapeHtml(item.code || '—') + '</td>' +
+          '<td><strong>' + escapeHtml(item.label) + '</strong><br><span class="row-note">' + escapeHtml(item.note || '') + '</span></td>' +
+          '<td class="money">' + formatMoney(isDiscount ? -item.value : item.value) + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function renderSimulation(data, config) {
+      var html =
+        '<div class="summary-grid">' +
+          '<div class="summary-card good"><span class="kicker">Total de proventos</span><strong>' + formatMoney(data.totalProventos) + '</strong></div>' +
+          '<div class="summary-card danger"><span class="kicker">Total de descontos</span><strong>' + formatMoney(data.totalDescontos) + '</strong></div>' +
+          '<div class="summary-card brand"><span class="kicker">Líquido estimado</span><strong>' + formatMoney(data.liquido) + '</strong></div>' +
+          '<div class="summary-card neutral"><span class="kicker">Motivo</span><strong style="font-size:18px;">' + escapeHtml(config.label) + '</strong></div>' +
+        '</div>' +
+        '<div class="trct-stack">' +
+          '<div class="trct-document">' +
+            '<div class="trct-head"><h3>Termo de Rescisão do Contrato de Trabalho - Simulação</h3><p>Layout inspirado no modelo oficial do TRCT disponível no portal gov.br/eSocial, adaptado para conferência interna.</p></div>' +
+            '<div class="trct-body">' +
+              '<div class="doc-section">' +
+                '<h4>Identificação do empregador</h4>' +
+                '<div class="doc-grid">' +
+                  docItem('01 Razão social / nome', data.empregador.razaoSocial || '—') +
+                  docItem('02 CNPJ / CEI', data.empregador.cnpj || '—') +
+                  docItem('03 Município / UF', data.empregador.cidadeUf || '—') +
+                  docItem('32 Entidade sindical laboral', data.empregador.sindicato || '—') +
+                '</div>' +
+              '</div>' +
+              '<div class="doc-section">' +
+                '<h4>Identificação do trabalhador</h4>' +
+                '<div class="doc-grid">' +
+                  docItem('10 Nome', data.colaborador.nome || '—') +
+                  docItem('11 CPF', data.colaborador.cpf || '—') +
+                  docItem('12 PIS / PASEP', data.colaborador.pis || '—') +
+                  docItem('13 Cargo', data.colaborador.cargo || '—') +
+                '</div>' +
+              '</div>' +
+              '<div class="doc-section">' +
+                '<h4>Dados do contrato</h4>' +
+                '<div class="doc-grid">' +
+                  docItem('21 Tipo de contrato', data.parametros.tipoContrato || '—') +
+                  docItem('22 Causa do afastamento', data.parametros.motivo) +
+                  docItem('23 Remuneração mês anterior', formatMoney(data.parametros.salarioBase)) +
+                  docItem('24 Data de admissão', formatDate(data.colaborador.admissao)) +
+                  docItem('25 Data do aviso prévio', formatDate(data.parametros.dataAviso)) +
+                  docItem('26 Data de afastamento', formatDate(data.colaborador.desligamento)) +
+                  docItem('27 Código / descrição do afastamento', data.parametros.codigoAfastamento || '—') +
+                  docItem('29 Aviso', data.parametros.aviso) +
+                '</div>' +
+              '</div>' +
+              '<div class="doc-table-wrap">' +
+                '<h4 class="doc-table-title">Discriminação das verbas rescisórias</h4>' +
+                '<table>' +
+                  '<thead><tr><th class="code-col">Rubrica</th><th>Verbas rescisórias</th><th class="money">Valor</th></tr></thead>' +
+                  '<tbody>' + renderRows(data.proventos, false) +
+                    '<tr class="total-row"><td colspan="2">Total bruto</td><td class="money">' + formatMoney(data.totalProventos) + '</td></tr>' +
+                  '</tbody>' +
+                '</table>' +
+              '</div>' +
+              '<div class="doc-table-wrap">' +
+                '<h4 class="doc-table-title">Deduções</h4>' +
+                '<table>' +
+                  '<thead><tr><th class="code-col">Rubrica</th><th>Deduções</th><th class="money">Valor</th></tr></thead>' +
+                  '<tbody>' + renderRows(data.descontos, true) +
+                    '<tr class="total-row"><td colspan="2">Total de deduções</td><td class="money">' + formatMoney(-data.totalDescontos) + '</td></tr>' +
+                    '<tr class="total-row"><td colspan="2">Valor líquido estimado</td><td class="money">' + formatMoney(data.liquido) + '</td></tr>' +
+                  '</tbody>' +
+                '</table>' +
+              '</div>' +
+              '<div class="doc-footnote"><strong>Premissas desta simulação:</strong> ' + escapeHtml(config.descricao) + ' INSS/IRRF calculados com a configuração "' + escapeHtml(data.bases.tabelaINSS || 'Tabela não identificada') + '". ' + escapeHtml(data.bases.multaDataBase.note || '') + ' Observações: ' + escapeHtml(data.parametros.observacoes || 'Nenhuma observação adicional.') + '<br><strong>Documento gerado para fins de simulação. Não substitui o TRCT oficial.</strong></div>' +
+              '<div class="signature-row">' +
+                '<div class="signature-box">Responsável pela conferência</div>' +
+                '<div class="signature-box">Ciência do colaborador</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="sheet">' +
+            '<div class="sheet-head"><h3>Memória de cálculo</h3><p>Resumo das bases e incidências usadas nesta estimativa.</p></div>' +
+            '<div class="sheet-body">' +
+              '<div class="mini-grid">' +
+                miniItem('Base INSS - verbas salariais', formatMoney(data.bases.baseINSSFolha)) +
+                miniItem('Base INSS - 13º', formatMoney(data.bases.baseINSSDecimoTerceiro)) +
+                miniItem('Base IRRF - verbas salariais', formatMoney(data.bases.baseIRRFFolha)) +
+                miniItem('Base IRRF - 13º', formatMoney(data.bases.baseIRRFDecimoTerceiro)) +
+                miniItem('Saldo base FGTS informado', formatMoney(data.parametros.fgtsBase)) +
+                miniItem('Multa data-base', data.parametros.considerarDataBase ? 'Considerada' : 'Não considerada') +
+              '</div>' +
+              '<div class="observations">' +
+                '<h4>Bases e premissas desta simulação</h4>' +
+                '<ul>' +
+                  '<li>INSS calculado com a configuração: ' + escapeHtml(data.bases.tabelaINSS || 'Tabela não identificada') + '.</li>' +
+                  '<li>IRRF calculado com dependente de ' + formatMoney((data.bases.configCalculo || {}).irrfDependente || 0) + ', desconto simplificado de ' + formatMoney((data.bases.configCalculo || {}).irrfSimplificado || 0) + ' e redutor configurável.</li>' +
+                  '<li>Data-base: ' + escapeHtml(data.bases.multaDataBase.note || 'Não considerada.') + '</li>' +
+                  '<li>Observações informadas: ' + escapeHtml(data.parametros.observacoes || 'Nenhuma observação adicional.') + '</li>' +
+                  '<li>Descrição do motivo: ' + escapeHtml(config.descricao) + '</li>' +
+                '</ul>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('resultadoWrap').innerHTML = html;
+      syncParentHeight();
+    }
+
+    function miniItem(label, value) {
+      return '<div class="mini-item"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '—') + '</strong></div>';
+    }
+
+    function docItem(label, value) {
+      return '<div class="doc-item"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '—') + '</strong></div>';
+    }
+
+    function pdfDisplayValue(value) {
+      var text = value == null ? '' : String(value).trim();
+      return text ? text : '—';
+    }
+
+    function pdfMoneyOrDash(value) {
+      return Number(value) ? formatMoney(value) : '—';
+    }
+
+    function pdfNormalizeText(value) {
+      var text = String(value == null ? '' : value).replace(/\\s+/g, ' ').trim();
+      return text || '—';
+    }
+
+    function pdfWinAnsiByte(code) {
+      var map = {
+        8364: 128, 8218: 130, 402: 131, 8222: 132, 8230: 133, 8224: 134, 8225: 135,
+        710: 136, 8240: 137, 352: 138, 8249: 139, 338: 140, 381: 142, 8216: 145,
+        8217: 146, 8220: 147, 8221: 148, 8226: 149, 8211: 150, 8212: 151, 732: 152,
+        8482: 153, 353: 154, 8250: 155, 339: 156, 382: 158, 376: 159
+      };
+      if (map[code] != null) return map[code];
+      if (code >= 0 && code <= 127) return code;
+      if (code >= 160 && code <= 255) return code;
+      return null;
+    }
+
+    function pdfToWinAnsi(text) {
+      var value = pdfNormalizeText(text);
+      var out = '';
+      for (var i = 0; i < value.length; i++) {
+        var ch = value.charAt(i);
+        var code = value.charCodeAt(i);
+        var byte = pdfWinAnsiByte(code);
+        if (byte == null && ch && ch.normalize) {
+          var normalized = ch.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');
+          if (normalized && normalized !== ch) {
+            byte = pdfWinAnsiByte(normalized.charCodeAt(0));
+          }
+        }
+        if (byte == null) byte = 63;
+        out += String.fromCharCode(byte);
+      }
+      return out || String.fromCharCode(151);
+    }
+
+    function pdfLiteral(text) {
+      var value = pdfToWinAnsi(text);
+      var out = '';
+      for (var i = 0; i < value.length; i++) {
+        var code = value.charCodeAt(i) & 255;
+        out += String.fromCharCode(92) + ('000' + code.toString(8)).slice(-3);
+      }
+      return out;
+    }
+
+    function wrapPdfText(text, maxWidth, fontSize) {
+      var content = String(text == null ? '' : text).replace(/\\s+/g, ' ').trim();
+      if (!content) return ['—'];
+      var maxChars = Math.max(1, Math.floor(maxWidth / Math.max(3.8, fontSize * 0.52)));
+      var words = content.split(' ');
+      var lines = [];
+      var current = '';
+
+      function pushWordChunks(word) {
+        if (word.length <= maxChars) return [word];
+        var chunks = [];
+        for (var idx = 0; idx < word.length; idx += maxChars) {
+          chunks.push(word.slice(idx, idx + maxChars));
+        }
+        return chunks;
+      }
+
+      for (var i = 0; i < words.length; i++) {
+        var parts = pushWordChunks(words[i]);
+        for (var j = 0; j < parts.length; j++) {
+          var candidate = current ? current + ' ' + parts[j] : parts[j];
+          if (candidate.length <= maxChars) {
+            current = candidate;
+          } else {
+            if (current) lines.push(current);
+            current = parts[j];
+          }
+        }
+      }
+      if (current) lines.push(current);
+      return lines.length ? lines : ['—'];
+    }
+
+    function estimatePdfTextWidth(text, fontSize) {
+      return pdfNormalizeText(text).length * Math.max(3.5, fontSize * 0.5);
+    }
+
+    function createSimplePdfDocument() {
+      var LF = String.fromCharCode(10);
+      return {
+        width: 595.28,
+        height: 841.89,
+        pages: [],
+        page: null,
+        addPage: function() {
+          this.page = { commands: [] };
+          this.pages.push(this.page);
+          return this.page;
+        },
+        ensurePage: function() {
+          if (!this.page) this.addPage();
+          return this.page;
+        },
+        push: function(command) {
+          this.ensurePage().commands.push(command);
+        },
+        rectTop: function(x, top, width, height, options) {
+          options = options || {};
+          var y = this.height - top - height;
+          if (options.fillColor) {
+            this.push(options.fillColor.join(' ') + ' rg');
+            this.push(x.toFixed(2) + ' ' + y.toFixed(2) + ' ' + width.toFixed(2) + ' ' + height.toFixed(2) + ' re f');
+          }
+          this.push((options.strokeColor || [0.75, 0.75, 0.75]).join(' ') + ' RG');
+          this.push((options.lineWidth || 0.6).toFixed(2) + ' w');
+          this.push(x.toFixed(2) + ' ' + y.toFixed(2) + ' ' + width.toFixed(2) + ' ' + height.toFixed(2) + ' re S');
+        },
+        lineTop: function(x1, top1, x2, top2, options) {
+          options = options || {};
+          var y1 = this.height - top1;
+          var y2 = this.height - top2;
+          this.push((options.strokeColor || [0.75, 0.75, 0.75]).join(' ') + ' RG');
+          this.push((options.lineWidth || 0.6).toFixed(2) + ' w');
+          this.push(x1.toFixed(2) + ' ' + y1.toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' l S');
+        },
+        textTop: function(x, top, text, options) {
+          options = options || {};
+          var y = this.height - top - (options.fontSize || 10);
+          this.push('BT');
+          this.push('/' + (options.font || 'F1') + ' ' + (options.fontSize || 10).toFixed(2) + ' Tf');
+          this.push((options.color || [0, 0, 0]).join(' ') + ' rg');
+          this.push('1 0 0 1 ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' Tm');
+          this.push('(' + pdfLiteral(text) + ') Tj');
+          this.push('ET');
+        },
+        textRightTop: function(rightX, top, text, options) {
+          options = options || {};
+          var width = estimatePdfTextWidth(text, options.fontSize || 10);
+          this.textTop(rightX - width, top, text, options);
+        },
+        textCenterTop: function(centerX, top, text, options) {
+          options = options || {};
+          var width = estimatePdfTextWidth(text, options.fontSize || 10);
+          this.textTop(centerX - (width / 2), top, text, options);
+        },
+        save: function(filename) {
+          var objects = [];
+          function addObject(body) {
+            objects.push(body);
+            return objects.length;
+          }
+
+          var fontRegularId = addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+          var fontBoldId = addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+          var pageIds = [];
+
+          for (var i = 0; i < this.pages.length; i++) {
+            var stream = this.pages[i].commands.join(LF);
+            var contentId = addObject('<< /Length ' + stream.length + ' >>' + LF + 'stream' + LF + stream + LF + 'endstream');
+            pageIds.push(addObject('<< /Type /Page /Parent PAGES_REF 0 R /MediaBox [0 0 ' + this.width.toFixed(2) + ' ' + this.height.toFixed(2) + '] /Resources << /Font << /F1 ' + fontRegularId + ' 0 R /F2 ' + fontBoldId + ' 0 R >> >> /Contents ' + contentId + ' 0 R >>'));
+          }
+
+          var kids = pageIds.map(function(id) { return id + ' 0 R'; }).join(' ');
+          var pagesId = addObject('<< /Type /Pages /Count ' + pageIds.length + ' /Kids [' + kids + '] >>');
+          var catalogId = addObject('<< /Type /Catalog /Pages ' + pagesId + ' 0 R >>');
+
+          for (var p = 0; p < pageIds.length; p++) {
+            objects[pageIds[p] - 1] = objects[pageIds[p] - 1].replace('PAGES_REF', pagesId);
+          }
+
+          var pdf = '%PDF-1.4' + LF;
+          var offsets = [0];
+          for (var n = 0; n < objects.length; n++) {
+            offsets.push(pdf.length);
+            pdf += (n + 1) + ' 0 obj' + LF + objects[n] + LF + 'endobj' + LF;
+          }
+          var xrefStart = pdf.length;
+          pdf += 'xref' + LF + '0 ' + (objects.length + 1) + LF;
+          pdf += '0000000000 65535 f ' + LF;
+          for (var o = 1; o < offsets.length; o++) {
+            pdf += ('0000000000' + offsets[o]).slice(-10) + ' 00000 n ' + LF;
+          }
+          pdf += 'trailer' + LF + '<< /Size ' + (objects.length + 1) + ' /Root ' + catalogId + ' 0 R >>' + LF + 'startxref' + LF + xrefStart + LF + '%%EOF';
+
+          var bytes = new Uint8Array(pdf.length);
+          for (var b = 0; b < pdf.length; b++) bytes[b] = pdf.charCodeAt(b) & 255;
+          var blob = new Blob([bytes], { type: 'application/pdf' });
+          var link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = filename;
+          link.click();
+          setTimeout(function() { URL.revokeObjectURL(link.href); }, 1000);
+        }
+      };
+    }
+
+    var TrctSimulationPdfTemplate = {
+      create: function(data, config) {
+        var empregador = [
+          [
+            { label: '01 CNPJ / CEI', value: pdfDisplayValue(data.empregador && data.empregador.cnpj), width: 0.32 },
+            { label: '02 Razão Social / Nome', value: pdfDisplayValue(data.empregador && data.empregador.razaoSocial), width: 0.68 }
+          ],
+          [
+            { label: '03 Endereço', value: '—', width: 0.46 },
+            { label: '04 Município / UF', value: pdfDisplayValue(data.empregador && data.empregador.cidadeUf), width: 0.30 },
+            { label: '05 CEP', value: '—', width: 0.24 }
+          ],
+          [
+            { label: '32 Entidade Sindical Laboral', value: pdfDisplayValue(data.empregador && data.empregador.sindicato), width: 1 }
+          ]
+        ];
+        var trabalhador = [
+          [
+            { label: '10 PIS / PASEP', value: pdfDisplayValue(data.colaborador && data.colaborador.pis), width: 0.28 },
+            { label: '11 Nome', value: pdfDisplayValue(data.colaborador && data.colaborador.nome), width: 0.72 }
+          ],
+          [
+            { label: '12 CPF', value: pdfDisplayValue(data.colaborador && data.colaborador.cpf), width: 0.28 },
+            { label: '13 CTPS', value: '—', width: 0.24 },
+            { label: '14 Cargo', value: pdfDisplayValue(data.colaborador && data.colaborador.cargo), width: 0.48 }
+          ]
+        ];
+        var contrato = [
+          [
+            { label: '21 Tipo de Contrato', value: pdfDisplayValue(data.parametros && data.parametros.tipoContrato), width: 0.30 },
+            { label: '22 Causa do Afastamento', value: pdfDisplayValue(data.parametros && data.parametros.motivo), width: 0.42 },
+            { label: '23 Remuneração do Mês Anterior', value: formatMoney(data.parametros && data.parametros.salarioBase || 0), width: 0.28 }
+          ],
+          [
+            { label: '24 Data de Admissão', value: formatDate(data.colaborador && data.colaborador.admissao), width: 0.20 },
+            { label: '25 Data do Aviso Prévio', value: formatDate(data.parametros && data.parametros.dataAviso), width: 0.20 },
+            { label: '26 Data de Afastamento', value: formatDate(data.colaborador && data.colaborador.desligamento), width: 0.20 },
+            { label: '27 Código de Afastamento', value: pdfDisplayValue(data.parametros && data.parametros.codigoAfastamento), width: 0.24 },
+            { label: '29 Aviso', value: pdfDisplayValue(data.parametros && data.parametros.aviso), width: 0.16 }
+          ]
+        ];
+        var verbas = (data.proventos || []).map(function(item) {
+          var description = item.label;
+          if (item.note && item.code !== 'FGTS') description += ' - ' + item.note;
+          var value = item.value > 0 ? formatMoney(item.value) : '—';
+          if (item.code === 'FGTS' && item.value <= 0 && item.note) {
+            value = item.note;
+          }
+          return {
+            code: item.code || '—',
+            description: description,
+            value: value,
+            highlight: !!item.highlight
+          };
+        });
+        var deducoes = (data.descontos || []).map(function(item) {
+          var description = item.label;
+          if (item.note) description += ' - ' + item.note;
+          return {
+            code: item.code || '—',
+            description: description,
+            value: item.value > 0 ? formatMoney(item.value) : '—'
+          };
+        });
+        return {
+          title: 'TERMO DE RESCISÃO DO CONTRATO DE TRABALHO - SIMULAÇÃO',
+          empregadorRows: empregador,
+          trabalhadorRows: trabalhador,
+          contratoRows: contrato,
+          verbas: verbas,
+          deducoes: deducoes,
+          totalBruto: formatMoney(data.totalProventos || 0),
+          totalDeducoes: formatMoney(data.totalDescontos || 0),
+          liquido: formatMoney(data.liquido || 0),
+          notaFgts: pdfDisplayValue(data.bases && data.bases.multaDataBase && data.bases.multaDataBase.note),
+          observacoes: pdfDisplayValue(data.parametros && data.parametros.observacoes),
+          rodape: 'Documento gerado para fins de simulação. Não substitui o TRCT oficial. Premissas: ' + pdfDisplayValue(data.bases && data.bases.tabelaINSS) + '.'
+        };
+      }
+    };
+
+    function drawPdfSectionTitle(pdf, top, title) {
+      pdf.rectTop(32, top, 531, 18, { fillColor: [0.92, 0.92, 0.92], strokeColor: [0.75, 0.75, 0.75] });
+      pdf.textCenterTop(297.5, top + 4, title, { font: 'F2', fontSize: 9.3, color: [0, 0, 0] });
+      return top + 18;
+    }
+
+    function drawPdfFieldRows(pdf, top, rows) {
+      var x = 32;
+      var tableWidth = 531;
+      for (var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+        var row = rows[rowIdx];
+        var maxLines = 1;
+        for (var cellIdx = 0; cellIdx < row.length; cellIdx++) {
+          var cellWidth = tableWidth * row[cellIdx].width;
+          var cellLines = wrapPdfText(row[cellIdx].value, cellWidth - 12, 8.1).slice(0, 3);
+          row[cellIdx]._lines = cellLines;
+          if (cellLines.length > maxLines) maxLines = cellLines.length;
+        }
+        var rowHeight = Math.max(26, 17 + (maxLines * 7.8));
+        var cursorX = x;
+        for (var i = 0; i < row.length; i++) {
+          var width = tableWidth * row[i].width;
+          pdf.rectTop(cursorX, top, width, rowHeight, { strokeColor: [0.76, 0.76, 0.76], lineWidth: 0.55 });
+          pdf.textTop(cursorX + 4, top + 4, row[i].label, { font: 'F2', fontSize: 6.8, color: [0.28, 0.28, 0.28] });
+          for (var lineIdx = 0; lineIdx < row[i]._lines.length; lineIdx++) {
+            pdf.textTop(cursorX + 4, top + 12 + (lineIdx * 7.6), row[i]._lines[lineIdx], { font: 'F1', fontSize: 8.1, color: [0, 0, 0] });
+          }
+          cursorX += width;
+        }
+        top += rowHeight;
+      }
+      return top;
+    }
+
+    function drawPdfTable(pdf, top, title, rows, totals) {
+      var tableWidth = 531;
+      var x = 32;
+      var codeWidth = 56;
+      var valueWidth = 128;
+      var descWidth = tableWidth - codeWidth - valueWidth;
+      top = drawPdfSectionTitle(pdf, top, title);
+      pdf.rectTop(x, top, tableWidth, 18, { fillColor: [0.97, 0.97, 0.97], strokeColor: [0.75, 0.75, 0.75] });
+      pdf.lineTop(x + codeWidth, top, x + codeWidth, top + 18);
+      pdf.lineTop(x + codeWidth + descWidth, top, x + codeWidth + descWidth, top + 18);
+      pdf.textTop(x + 5, top + 4, 'Rubrica', { font: 'F2', fontSize: 8.2 });
+      pdf.textTop(x + codeWidth + 5, top + 4, 'Descrição', { font: 'F2', fontSize: 8.2 });
+      pdf.textRightTop(x + tableWidth - 6, top + 4, 'Valor', { font: 'F2', fontSize: 8.2 });
+      top += 18;
+
+      for (var i = 0; i < rows.length; i++) {
+        var descLines = wrapPdfText(rows[i].description, descWidth - 10, 8.0).slice(0, 3);
+        var valueLines = wrapPdfText(rows[i].value, valueWidth - 10, 8.0).slice(0, 3);
+        var rowHeight = Math.max(21, 9 + (Math.max(descLines.length, valueLines.length) * 8));
+        pdf.rectTop(x, top, tableWidth, rowHeight, { fillColor: rows[i].highlight ? [0.95, 0.95, 0.95] : null, strokeColor: [0.80, 0.80, 0.80] });
+        pdf.lineTop(x + codeWidth, top, x + codeWidth, top + rowHeight);
+        pdf.lineTop(x + codeWidth + descWidth, top, x + codeWidth + descWidth, top + rowHeight);
+        pdf.textTop(x + 5, top + 5, rows[i].code, { font: 'F2', fontSize: 8.0 });
+        for (var dl = 0; dl < descLines.length; dl++) {
+          pdf.textTop(x + codeWidth + 5, top + 5 + (dl * 7.8), descLines[dl], { font: rows[i].highlight ? 'F2' : 'F1', fontSize: rows[i].highlight ? 8.0 : 7.9 });
+        }
+        for (var vl = 0; vl < valueLines.length; vl++) {
+          pdf.textRightTop(x + tableWidth - 6, top + 5 + (vl * 7.8), valueLines[vl], { font: rows[i].highlight ? 'F2' : 'F1', fontSize: rows[i].highlight ? 8.0 : 7.9 });
+        }
+        top += rowHeight;
+      }
+
+      for (var t = 0; t < totals.length; t++) {
+        pdf.rectTop(x, top, tableWidth, 18, { fillColor: [0.97, 0.97, 0.97], strokeColor: [0.75, 0.75, 0.75] });
+        pdf.lineTop(x + codeWidth + descWidth, top, x + codeWidth + descWidth, top + 18);
+        pdf.textTop(x + 5, top + 4, totals[t][0], { font: 'F2', fontSize: 8.3 });
+        pdf.textRightTop(x + tableWidth - 6, top + 4, totals[t][1], { font: 'F2', fontSize: 8.3 });
+        top += 18;
+      }
+      return top;
+    }
+
+    function generateSimulationPdf() {
+      if (!lastSimulation) {
+        alert('Calcule a simulação antes de gerar o PDF.');
+        return;
+      }
+
+      var template = TrctSimulationPdfTemplate.create(lastSimulation, motivoConfig(document.getElementById('motivo').value));
+      var pdf = createSimplePdfDocument();
+      pdf.addPage();
+
+      var top = 28;
+      var titleSize = 11.5;
+      var titleX = Math.max(32, (pdf.width - estimatePdfTextWidth(template.title, titleSize)) / 2);
+      pdf.textCenterTop(pdf.width / 2, top, template.title, { font: 'F2', fontSize: titleSize, color: [0, 0, 0] });
+      top += 22;
+
+      top = drawPdfSectionTitle(pdf, top, 'Identificação do Empregador');
+      top = drawPdfFieldRows(pdf, top, template.empregadorRows) + 10;
+
+      top = drawPdfSectionTitle(pdf, top, 'Identificação do Trabalhador');
+      top = drawPdfFieldRows(pdf, top, template.trabalhadorRows) + 10;
+
+      top = drawPdfSectionTitle(pdf, top, 'Dados do Contrato');
+      top = drawPdfFieldRows(pdf, top, template.contratoRows) + 10;
+
+      top = drawPdfTable(pdf, top, 'Discriminação das Verbas Rescisórias', template.verbas, [['Total Bruto', template.totalBruto]]) + 10;
+      top = drawPdfTable(pdf, top, 'Deduções', template.deducoes, [['Total de Deduções', template.totalDeducoes], ['Valor Líquido Estimado', template.liquido]]) + 10;
+
+      top = drawPdfSectionTitle(pdf, top, 'Conferência');
+      pdf.lineTop(44, top + 26, 280, top + 26, { strokeColor: [0.62, 0.62, 0.62], lineWidth: 0.8 });
+      pdf.lineTop(315, top + 26, 551, top + 26, { strokeColor: [0.62, 0.62, 0.62], lineWidth: 0.8 });
+      pdf.textTop(86, top + 30, 'Responsável pela conferência', { font: 'F1', fontSize: 8.1 });
+      pdf.textTop(370, top + 30, 'Ciência do colaborador', { font: 'F1', fontSize: 8.1 });
+
+      var footerTop = 802;
+      pdf.lineTop(32, footerTop - 4, 563, footerTop - 4, { strokeColor: [0.70, 0.70, 0.70], lineWidth: 0.7 });
+      pdf.textTop(36, footerTop, template.rodape, { font: 'F1', fontSize: 8, color: [0.20, 0.20, 0.20] });
+
+      var fileName = 'trct_simulacao_' + (lastSimulation.colaborador.nome || 'colaborador').toLowerCase().replace(/[^a-z0-9]+/gi, '_') + '.pdf';
+      pdf.save(fileName);
+    }
+
+    function escapeHtml(value) {
+      var div = document.createElement('div');
+      div.textContent = value == null ? '' : String(value);
+      return div.innerHTML;
+    }
+
+    function exportMemory() {
+      if (!lastSimulation) {
+        alert('Calcule a simulação antes de exportar a memória de cálculo.');
+        return;
+      }
+      var blob = new Blob([JSON.stringify(lastSimulation, null, 2)], { type: 'application/json' });
+      var fileName = 'memoria_rescisao_' + (lastSimulation.colaborador.nome || 'colaborador').toLowerCase().replace(/[^a-z0-9]+/gi, '_') + '.json';
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function clearForm() {
+      document.getElementById('calcForm').reset();
+      document.getElementById('motivo').value = 'sem_justa_causa';
+      document.getElementById('avisoTipo').value = 'indenizado';
+      document.getElementById('feriasVencidas').value = '0';
+      document.getElementById('dependentes').value = '0';
+      document.getElementById('outrosDescontos').value = '0';
+      document.getElementById('considerarDataBase').checked = false;
+      document.getElementById('resultadoWrap').innerHTML = '<div class="empty-state">Preencha os dados acima e clique em <strong>Calcular rescisão</strong> para montar a simulação.</div>';
+      lastSimulation = null;
+      updateAutomaticFields();
+      syncParentHeight();
+    }
+
+    function syncParentHeight() {
+      try {
+        if (window.parent && typeof window.parent.syncIframes === 'function') {
+          setTimeout(function() { window.parent.syncIframes(); }, 40);
+        }
+      } catch (e) {}
+    }
+
+    document.getElementById('btnCalc').addEventListener('click', recalculate);
+    document.getElementById('btnNova').addEventListener('click', clearForm);
+    document.getElementById('btnPdf').addEventListener('click', function() {
+      generateSimulationPdf();
+    });
+    document.getElementById('btnMemoria').addEventListener('click', exportMemory);
+    document.getElementById('btnOpenCalcConfig').addEventListener('click', openCalcConfigModal);
+    document.getElementById('btnCloseCalcConfig').addEventListener('click', closeCalcConfigModal);
+    document.getElementById('calcConfigModal').addEventListener('click', function(event) {
+      if (event.target === this) closeCalcConfigModal();
+    });
+    document.addEventListener('keydown', handleModalKeydown);
+    document.getElementById('btnSaveCalcConfig').addEventListener('click', saveCalcConfigFromPanel);
+    document.getElementById('btnResetCalcConfig').addEventListener('click', resetCalcConfigPanel);
+    ['admissao', 'desligamento', 'motivo', 'avisoTipo', 'considerarDataBase'].forEach(function(id) {
+      document.getElementById(id).addEventListener('change', updateAutomaticFields);
+    });
+    renderCalcConfigPanel();
+    updateAutomaticFields();
+    syncParentHeight();
+  ${RESCISAO_SCRIPT_CLOSE}
+</body>
+</html>`;
+
+  function bootDashboardFolhaFrame(frame) {
+    return frame;
+  }
+
+  function hydrateDashboardFolhaModule() {
+    var frame = document.getElementById('dashboard-folha-frame');
+    if (!frame) return;
+    if (!frame.dataset.dashboardFolhaMounted) {
+      frame.dataset.dashboardFolhaMounted = '1';
+      frame.src = 'dashboard_folha_mod.html';
+    }
+  }
+
+  function shellDarkModeEnabled() {
+    return document.body.classList.contains('dark-mode') || document.documentElement.classList.contains('dark-mode');
+  }
+
+  function postDashboardIframeTheme(frame, isDark) {
+    try {
+      if (frame && frame.contentWindow && typeof frame.contentWindow.postMessage === 'function') {
+        frame.contentWindow.postMessage({ type: 'hub-theme-sync', dark: !!isDark }, '*');
+      }
+    } catch (e) {}
+  }
+
+  function syncDashboardIframeTheme(frame, doc) {
+    if (!frame || !doc) return;
+    const isDark = shellDarkModeEnabled();
+    if (doc.documentElement) {
+      doc.documentElement.classList.toggle('dark-mode', isDark);
+      doc.documentElement.setAttribute('data-shell-theme', isDark ? 'dark' : 'light');
+    }
+    if (doc.body) {
+      doc.body.classList.toggle('dark-mode', isDark);
+      doc.body.setAttribute('data-shell-theme', isDark ? 'dark' : 'light');
+    }
+    try {
+      if (frame.contentWindow && typeof frame.contentWindow.syncThemeFromParent === 'function') {
+        frame.contentWindow.syncThemeFromParent();
+      }
+    } catch (e) {}
+    postDashboardIframeTheme(frame, isDark);
+  }
+
+  function bootRescisaoFrame(frame) {
+    if (!frame) return;
+    try {
+      var win = frame.contentWindow;
+      if (!win || win.__rescisaoBootstrapped) return;
+      if (typeof win.recalculate === 'function') { win.__rescisaoBootstrapped = true; return; }
+      var scriptStartMarker = '<script>';
+      var scriptEndMarker = RESCISAO_SCRIPT_CLOSE;
+      var start = RESCISAO_SRCDOC.indexOf(scriptStartMarker);
+      var end = RESCISAO_SRCDOC.lastIndexOf(scriptEndMarker);
+      if (start < 0 || end <= start) return;
+      var scriptContent = RESCISAO_SRCDOC.slice(start + scriptStartMarker.length, end);
+      if (!scriptContent.trim()) return;
+      var ifrDoc = frame.contentDocument;
+      if (!ifrDoc || !ifrDoc.body) return;
+      var scriptEl = ifrDoc.createElement('script');
+      scriptEl.text = scriptContent;
+      ifrDoc.body.appendChild(scriptEl);
+      win.__rescisaoBootstrapped = true;
+    } catch (e) {
+      try {
+        var errDoc = frame.contentDocument;
+        var wrap = errDoc && errDoc.getElementById && errDoc.getElementById('resultadoWrap');
+        if (wrap) {
+          wrap.innerHTML = '<div class="empty-state"><strong>Erro ao iniciar o simulador:</strong> ' + String((e && e.message) ? e.message : e) + '</div>';
+        }
+      } catch (_) {}
+    }
+  }
+
+  function renderRescisaoFrame(frame) {
+    if (!frame) return false;
+    try {
+      frame.srcdoc = RESCISAO_SRCDOC;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function hydrateRescisaoModule() {
+    var frame = document.getElementById('rescisao-frame');
+    if (!frame) return;
+    if (!frame.dataset.rescisaoMounted) {
+      frame.dataset.rescisaoMounted = '1';
+      frame.srcdoc = RESCISAO_SRCDOC;
+      frame.addEventListener('load', function() {
+        bootRescisaoFrame(frame);
+      }, { once: true });
+      setTimeout(function() { bootRescisaoFrame(frame); }, 400);
+    }
+  }
+
+  hydrateDashboardFolhaModule();
+  hydrateRescisaoModule();
+
   // Dark mode ativo por padrão
   document.body.classList.add('dark-mode');
+  document.documentElement.classList.add('dark-mode');
   const themeBtnInit = document.getElementById('theme-btn');
   if(themeBtnInit) { themeBtnInit.innerHTML = '<i data-lucide="sun"></i>'; }
 
@@ -8405,7 +10715,10 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   function applyIframeSkin(frame) {
     try {
       const doc = frame.contentDocument;
-      if (!doc || !doc.head || !doc.body) return;
+      if (!doc || !doc.head || !doc.body) {
+        postDashboardIframeTheme(frame, shellDarkModeEnabled());
+        return;
+      }
       if (!doc.querySelector('link[data-shell-inter]')) {
         const link = doc.createElement('link');
         link.rel = 'stylesheet';
@@ -8420,7 +10733,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         doc.head.appendChild(style);
       }
       style.textContent = iframeVisualCSS;
-      doc.body.classList.toggle('dark-mode', document.body.classList.contains('dark-mode'));
+      syncDashboardIframeTheme(frame, doc);
       enableUploadBoxClicks(doc);
       enableMobileTabToggle(doc);
       enableMobileWideTables(doc);
@@ -8556,9 +10869,12 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 
   function toggleDarkMode() {
     const body = document.body;
-    body.classList.toggle('dark-mode');
+    const html = document.documentElement;
+    const nextDark = !shellDarkModeEnabled();
+    body.classList.toggle('dark-mode', nextDark);
+    html.classList.toggle('dark-mode', nextDark);
     const themeBtn = document.getElementById('theme-btn');
-    if (body.classList.contains('dark-mode')) {
+    if (nextDark) {
       themeBtn.innerHTML = '<i data-lucide="sun"></i>';
     } else {
       themeBtn.innerHTML = '<i data-lucide="moon"></i>';
@@ -8596,8 +10912,8 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 </script>
 
   <script>
-    const HUB_RH_VERSION = '1.1.1';
-    const HUB_RH_VERSION_DATE = '21/04/2026';
+const HUB_RH_VERSION = '1.2.0';
+const HUB_RH_VERSION_DATE = '30/04/2026';
     window.HUB_RH_VERSION = HUB_RH_VERSION;
     window.HUB_RH_VERSION_DATE = HUB_RH_VERSION_DATE;
 
@@ -8719,6 +11035,17 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
           { icon: 'list-filter', title: 'Status E no filtro', summary: 'Não é uma coluna original; é o filtro de dias com indício.', details: ['Mostra registros que pertencem a dias classificados com indício pela análise.'] }
         ]
       },
+      'dashboardFolha:default': {
+        kicker: 'Dashboard Folha',
+        title: 'O que este modulo acompanha',
+        intro: 'Consolida a PLANILHA 30 em visão gerencial para comparação mês a mês da folha.',
+        note: 'O painel trabalha em nível agregado. Colaborador entra apenas como base técnica para contagem de pessoas, entradas, saídas e consolidação dos valores.',
+        groups: [
+          { icon: 'layout-dashboard', title: 'Visão macro da folha', summary: 'Compara competência atual x mês anterior.', details: ['Mostra total da folha, variação absoluta e percentual, custo médio e composição por categoria.', 'Destaques relevantes aparecem em cards e alertas gerenciais.'] },
+          { icon: 'building-2', title: 'Cortes agregados', summary: 'Setor, centro de custo, rubrica e categoria.', details: ['Permite enxergar aumentos e reduções por área e por código de seção.', 'Não exibe ranking ou tabela principal por colaborador.'] },
+          { icon: 'triangle-alert', title: 'Anomalias e bases', summary: 'Sinaliza desvios e separa bases de cálculo.', details: ['Rubricas de base ficam segregadas para não inflar o custo total.', 'Quando o mês anterior é zero e o atual tem valor, o painel marca como Novo valor.'] }
+        ]
+      },
       'folha:default': {
         kicker: 'Conferencia de Folha',
         title: 'O que este modulo confere',
@@ -8764,6 +11091,17 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         groups: [
           { icon: 'shield-check', title: 'Exceção ativa', summary: 'Justifica uma chapa/regra conhecida.', details: ['Pode ser carregada por JSON ou removida da lista.', 'A Conferência de Folha usa essas exceções para suprimir casos justificados.'] },
           { icon: 'save', title: 'Arquivo de exceções', summary: 'Gera JSON para reaproveitar depois.', details: ['O navegador baixa o arquivo; ele não grava sozinho no OneDrive.'] }
+        ]
+      },
+      'rescisao:default': {
+        kicker: 'Simulador de Rescisão',
+        title: 'O que este modulo simula',
+        intro: 'Monta uma estimativa manual das verbas rescisórias para conferência interna.',
+        note: 'Os resultados dependem das premissas preenchidas manualmente e não substituem o cálculo oficial da folha ou da homologação.',
+        groups: [
+          { icon: 'calculator', title: 'Entradas principais', summary: 'Salário, datas, aviso, avos e saldo de FGTS.', details: ['O módulo não lê arquivos externos: todos os dados são preenchidos manualmente.', 'Saldo salário, avos de férias/13º e aviso são sugeridos automaticamente, mas continuam editáveis.'] },
+          { icon: 'calculator', title: 'Saídas da simulação', summary: 'Verbas, descontos, líquido e termo estimado.', details: ['Exibe saldo de salário, férias, 13º, aviso, multa do FGTS e descontos estimados em tela.', 'Organiza um layout próximo ao TRCT para conferência e impressão em PDF.'] },
+          { icon: 'file-json', title: 'Memória de cálculo', summary: 'Exporta os detalhes da estimativa.', details: ['Permite baixar um arquivo JSON com bases, parâmetros e valores calculados.', 'Ajuda a guardar a trilha da conferência junto com observações da simulação.'] }
         ]
       }
     };
@@ -8870,10 +11208,10 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   " id="lgpdBar">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     <span class="footer-full" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Check da Folha IA v1.1.0</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
+<span data-hub-version>Check da Folha IA v1.2.0</span> &nbsp;·&nbsp; Arquivos processados localmente &nbsp;·&nbsp; Zero armazenamento em nuvem &nbsp;·&nbsp; Compliance LGPD
     </span>
     <span class="footer-mobile" style="font-size:11px; color: rgba(255,255,255,0.55); letter-spacing:0.03em;">
-      <span data-hub-version>Check da Folha IA v1.1.0</span> · Processamento local · LGPD
+<span data-hub-version>Check da Folha IA v1.2.0</span> · Processamento local · LGPD
     </span>
     <button type="button" class="footer-help-btn" onclick="openTeamFlowModal()">Fluxo de equipe</button>
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -8887,7 +11225,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
         <div class="flow-step"><div class="num">1</div><div><strong>Centralize os arquivos JSON</strong><span>Crie ou use uma pasta compartilhada no OneDrive, por exemplo: RH / Check da Folha IA / Fechamentos JSON.</span></div></div>
         <div class="flow-step"><div class="num">2</div><div><strong>Antes de uma nova conferencia</strong><span>Na aba Historico &amp; Excecoes, carregue os fechamentos anteriores e o arquivo de excecoes ativo, se existir.</span></div></div>
         <div class="flow-step"><div class="num">3</div><div><strong>Depois de salvar o fechamento</strong><span>Guarde o JSON gerado na mesma pasta do OneDrive e mantenha o nome por competencia, como conferencia_03-2026.json.</span></div></div>
-        <div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Check da Folha IA v1.1.0</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
+<div class="flow-step"><div class="num">4</div><div><strong>Controle a versao do HTML</strong><span>Confira no rodape se todos estao usando <span data-hub-version>Check da Folha IA v1.2.0</span>. Evite misturar versoes diferentes na equipe.</span></div></div>
       </div>
       <div class="flow-note">O navegador nao salva automaticamente direto no OneDrive. Baixe o JSON e mova/salve na pasta compartilhada combinada pela equipe.</div>
       <div class="flow-actions">
@@ -8958,4 +11296,3 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   </script>
 </body>
 </html>
-
