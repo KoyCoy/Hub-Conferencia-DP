@@ -1,7 +1,7 @@
 ﻿$ErrorActionPreference = "Stop"
 
-$VersionName = "1.1.1"
-$VersionCode = "9"
+$VersionName = "1.2.0"
+$VersionCode = "10"
 $PackageName = "br.com.koycoy.hubrh"
 
 $SourceProjectDir = $PSScriptRoot
@@ -61,6 +61,7 @@ $Alias = "hubrh"
 
 New-Item -ItemType Directory -Force -Path $AssetsDir, $BuildDir, $DistDir, $SourceKeystoreDir, $StageKeystoreDir | Out-Null
 Copy-Item -LiteralPath (Join-Path $RepoRoot "hub_rh_v7.html") -Destination (Join-Path $AssetsDir "hub_rh_v7.html") -Force
+Copy-Item -LiteralPath (Join-Path $RepoRoot "dashboard_folha_mod.html") -Destination (Join-Path $AssetsDir "dashboard_folha_mod.html") -Force
 if (Test-Path $SourceKeystore) {
   Copy-Item -LiteralPath $SourceKeystore -Destination $Keystore -Force
 }

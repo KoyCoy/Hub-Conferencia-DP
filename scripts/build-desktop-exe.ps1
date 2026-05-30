@@ -84,6 +84,7 @@ Copy-Item -LiteralPath $IconPath -Destination (Join-Path $AppDist "check-da-folh
 $AppFiles = @(
   "index.html",
   "hub_rh_v7.html",
+  "dashboard_folha_mod.html",
   "manifest.webmanifest",
   "service-worker.js"
 )
@@ -97,7 +98,15 @@ Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\check-da-folha-ia-512.
 if (Test-Path -LiteralPath $ZipPath) {
   Remove-Item -LiteralPath $ZipPath -Force
 }
-Compress-Archive -Path (Join-Path $AppDist "*") -DestinationPath $ZipPath -Force
+
+$ZipStage = Join-Path $env:TEMP "CheckDaFolhaIA-Windows-zip"
+if (Test-Path -LiteralPath $ZipStage) {
+  Remove-Item -LiteralPath $ZipStage -Recurse -Force
+}
+New-Item -ItemType Directory -Force -Path $ZipStage | Out-Null
+Copy-Item -LiteralPath (Join-Path $AppDist "*") -Destination $ZipStage -Recurse -Force
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::CreateFromDirectory($ZipStage, $ZipPath, [System.IO.Compression.CompressionLevel]::Optimal, $false)
 
 Write-Host "EXE gerado em: $ExePath"
 Write-Host "Pacote ZIP gerado em: $ZipPath"

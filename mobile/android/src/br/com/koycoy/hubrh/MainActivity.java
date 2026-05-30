@@ -117,7 +117,7 @@ public class MainActivity extends Activity {
                 request.addRequestHeader("User-Agent", userAgent);
                 request.addRequestHeader("Cookie", CookieManager.getInstance().getCookie(url));
                 request.setTitle(fileName);
-                request.setDescription("Baixando arquivo do Hub RH");
+                request.setDescription("Baixando arquivo do Check da Folha IA");
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
                 DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
@@ -192,7 +192,7 @@ public class MainActivity extends Activity {
                         .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
                         .setColorMode(PrintAttributes.COLOR_MODE_COLOR)
                         .build();
-                printManager.print("Hub RH", webView.createPrintDocumentAdapter("Hub RH"), attributes);
+                printManager.print("Check da Folha IA", webView.createPrintDocumentAdapter("Check da Folha IA"), attributes);
             });
         }
 
