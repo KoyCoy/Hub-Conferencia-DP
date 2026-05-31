@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = "Stop"
 
-$VersionName = "1.2.0"
+$VersionName = "1.3.0"
 $VersionCode = "10"
 $PackageName = "br.com.koycoy.hubrh"
 
@@ -62,6 +62,8 @@ $Alias = "hubrh"
 New-Item -ItemType Directory -Force -Path $AssetsDir, $BuildDir, $DistDir, $SourceKeystoreDir, $StageKeystoreDir | Out-Null
 Copy-Item -LiteralPath (Join-Path $RepoRoot "hub_rh_v7.html") -Destination (Join-Path $AssetsDir "hub_rh_v7.html") -Force
 Copy-Item -LiteralPath (Join-Path $RepoRoot "dashboard_folha_mod.html") -Destination (Join-Path $AssetsDir "dashboard_folha_mod.html") -Force
+New-Item -ItemType Directory -Force -Path (Join-Path $AssetsDir "vendor") | Out-Null
+Copy-Item -LiteralPath (Join-Path $RepoRoot "vendor\xlsx.full.min.js") -Destination (Join-Path $AssetsDir "vendor\xlsx.full.min.js") -Force
 if (Test-Path $SourceKeystore) {
   Copy-Item -LiteralPath $SourceKeystore -Destination $Keystore -Force
 }
@@ -139,4 +141,3 @@ Invoke-Tool $ApkSigner @(
 Invoke-Tool $ApkSigner @("verify", "--verbose", $FinalApk)
 
 Write-Host "APK gerado em: $FinalApk"
-

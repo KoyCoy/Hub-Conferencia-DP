@@ -13,13 +13,13 @@ Na pasta raiz do projeto, execute:
 O APK gerado fica em:
 
 ```text
-mobile/android/dist/check-da-folha-ia-1.2.0.apk
+mobile/android/dist/check-da-folha-ia-1.3.0.apk
 ```
 
 ## Instalar na equipe
 
 1. Envie o APK para o celular, por OneDrive, WhatsApp, e-mail ou cabo USB.
-2. Toque no arquivo `check-da-folha-ia-1.2.0.apk`.
+2. Toque no arquivo `check-da-folha-ia-1.3.0.apk`.
 3. Se o Android pedir permissao, permita instalar apps desta fonte.
 4. Abra o app `Check da Folha IA`.
 
@@ -36,4 +36,3 @@ Na pratica, depois da primeira instalacao, a equipe baixa o APK novo e instala p
 ## Observacao
 
 Esta primeira versao usa internet para carregar bibliotecas externas usadas pelo HTML, como `xlsx`, `mammoth` e `lucide`.
-

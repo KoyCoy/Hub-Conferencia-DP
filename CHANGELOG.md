@@ -1,5 +1,18 @@
 # Changelog
 
+## Em desenvolvimento
+
+- Nenhuma mudanca pendente registrada.
+
+## 1.3.0 - 2026-05-31
+
+- Adiciona o novo modulo de dashboard comparativo da folha com leitura da PLANILHA 30.
+- Refina o layout do dashboard de folha, filtros, KPIs, tabela, cascata, matriz e cards de composicao.
+- Integra o dashboard da folha ao Hub com sincronizacao de tema claro/escuro.
+- Ajusta o estado inicial do modulo para seguir o mesmo estilo visual dos outros modulos.
+- Atualiza a versao geral do Hub para `1.3.0`.
+- Atualiza o APK Android para `1.3.0` com `versionCode` 10.
+
 ## 1.1.1 - 2026-04-21
 
 - Melhora a Conferencia de Espelho de Ponto com leitura da coluna Falta no DOCX.
