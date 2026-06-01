@@ -681,12 +681,25 @@
     if (existing) return Promise.resolve(existing);
     return Promise.reject(new Error('Biblioteca XLSX não foi carregada no módulo.'));
   }
+  function applyShellTheme(dark){
+    const isDark = !!dark;
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    document.body.classList.toggle('dark-mode', isDark);
+    document.documentElement.setAttribute('data-shell-theme', isDark ? 'dark' : 'light');
+    document.body.setAttribute('data-shell-theme', isDark ? 'dark' : 'light');
+  }
   function syncThemeFromParent(){
     try {
       const parentDoc = window.parent && window.parent.document;
       const dark = !!(parentDoc && (parentDoc.body.classList.contains('dark-mode') || parentDoc.documentElement.classList.contains('dark-mode')));
-      document.documentElement.classList.toggle('dark-mode', dark);
-      document.body.classList.toggle('dark-mode', dark);
+      applyShellTheme(dark);
+      return;
+    } catch (e) {}
+    try {
+      const storedTheme = window.localStorage && localStorage.getItem('hub-shell-theme');
+      if (storedTheme === 'dark' || storedTheme === 'light') {
+        applyShellTheme(storedTheme === 'dark');
+      }
     } catch (e) {}
   }
   const syncParentHeight = () => {
@@ -2084,10 +2097,14 @@
   window.addEventListener('message', event => {
     const data = event && event.data;
     if (!data || data.type !== 'hub-theme-sync') return;
-    const dark = !!data.dark;
-    document.documentElement.classList.toggle('dark-mode', dark);
-    document.body.classList.toggle('dark-mode', dark);
+    applyShellTheme(!!data.dark);
+    if (state.rows.length) renderDashboard();
   });
+  window.syncThemeFromParent = syncThemeFromParent;
+  window.applyDashboardTheme = function(dark){
+    applyShellTheme(!!dark);
+    if (state.rows.length) renderDashboard();
+  };
   syncParentHeight();
 })();
 </script>

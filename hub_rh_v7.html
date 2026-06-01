@@ -9433,6 +9433,8 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
           syncDashboardIframeTheme(frame, doc);
           enableMobileFrameResize(frame, doc);
           setTimeout(function() { resizeMobileFrame(frame, doc); }, 80);
+          setTimeout(function() { postDashboardIframeTheme(frame, shellDarkModeEnabled()); }, 120);
+          setTimeout(function() { postDashboardIframeTheme(frame, shellDarkModeEnabled()); }, 420);
         } else {
           postDashboardIframeTheme(frame, shellDarkModeEnabled());
         }
@@ -9457,6 +9459,14 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 
   function postDashboardIframeTheme(frame, isDark) {
     try {
+      try {
+        localStorage.setItem('hub-shell-theme', isDark ? 'dark' : 'light');
+      } catch (storageError) {}
+      try {
+        if (frame && frame.contentWindow && typeof frame.contentWindow.applyDashboardTheme === 'function') {
+          frame.contentWindow.applyDashboardTheme(!!isDark);
+        }
+      } catch (directApplyError) {}
       if (frame && frame.contentWindow && typeof frame.contentWindow.postMessage === 'function') {
         frame.contentWindow.postMessage({ type: 'hub-theme-sync', dark: !!isDark }, '*');
       }
@@ -9541,6 +9551,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
   // Dark mode ativo por padrão
   document.body.classList.add('dark-mode');
   document.documentElement.classList.add('dark-mode');
+  try { localStorage.setItem('hub-shell-theme', 'dark'); } catch (e) {}
   const themeBtnInit = document.getElementById('theme-btn');
   if(themeBtnInit) { themeBtnInit.innerHTML = '<i data-lucide="sun"></i>'; }
 
@@ -10908,6 +10919,7 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
     const nextDark = !shellDarkModeEnabled();
     body.classList.toggle('dark-mode', nextDark);
     html.classList.toggle('dark-mode', nextDark);
+    try { localStorage.setItem('hub-shell-theme', nextDark ? 'dark' : 'light'); } catch (e) {}
     const themeBtn = document.getElementById('theme-btn');
     if (nextDark) {
       themeBtn.innerHTML = '<i data-lucide="sun"></i>';

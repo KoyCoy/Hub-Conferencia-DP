@@ -545,6 +545,15 @@
   .tab.active { display: flex; flex-direction: column; animation: fadeUp 0.3s ease forwards; }
 
   iframe { width: 100%; flex: 1; min-height: 0; border: none; background: transparent; }
+  .iframe-card.dashboard-folha-shell {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  .iframe-card.dashboard-folha-shell #dashboardFolha,
+  .iframe-card.dashboard-folha-shell #dashboard-folha-frame {
+    background: transparent;
+  }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(10px); }
@@ -945,7 +954,7 @@
   </header>
 
   <main class="content-container">
-    <div class="iframe-card">
+    <div class="iframe-card dashboard-folha-shell">
       
       <div class="tab active" id="dashboardFolha">
         <iframe id="dashboard-folha-frame" title="Dashboard Comparativo da Folha"></iframe>
@@ -7220,1445 +7229,8 @@ window.addFechamento = function(data){ fechamentos.push(data); fechamentos.sort(
 </div>
 
 <script>
-  const DASHBOARD_FOLHA_SCRIPT_CLOSE = '</' + 'script>';
-  const DASHBOARD_FOLHA_SRCDOC = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Comparativo da Folha</title>
-${'<scr' + 'ipt src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></scr' + 'ipt>'}
-<style>
-  :root {
-    --bg: #eef2ff;
-    --surface: #ffffff;
-    --surface-soft: #f8fafc;
-    --border: #d9e2ec;
-    --text: #0f172a;
-    --muted: #64748b;
-    --brand: #2563eb;
-    --brand-soft: rgba(37, 99, 235, 0.10);
-    --good: #15803d;
-    --good-soft: rgba(22, 163, 74, 0.12);
-    --warn: #b45309;
-    --warn-soft: rgba(245, 158, 11, 0.14);
-    --danger: #b91c1c;
-    --danger-soft: rgba(239, 68, 68, 0.12);
-    --neutral-soft: #f1f5f9;
-  }
-  body.dark-mode {
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --surface-soft: #0f172a;
-    --border: #334155;
-    --text: #f8fafc;
-    --muted: #cbd5e1;
-    --brand: #60a5fa;
-    --brand-soft: rgba(59, 130, 246, 0.18);
-    --good: #4ade80;
-    --good-soft: rgba(34, 197, 94, 0.18);
-    --warn: #fbbf24;
-    --warn-soft: rgba(245, 158, 11, 0.18);
-    --danger: #f87171;
-    --danger-soft: rgba(239, 68, 68, 0.18);
-    --neutral-soft: rgba(148, 163, 184, 0.10);
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(180deg, var(--surface-soft) 0%, var(--bg) 100%);
-    color: var(--text);
-  }
-  header {
-    padding: 26px 30px;
-    background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
-    color: #fff;
-  }
-  header h1 { margin: 0; font-size: 24px; }
-  header p { margin: 8px 0 0; max-width: 920px; line-height: 1.6; opacity: .88; font-size: 14px; }
-  .container { max-width: 1320px; margin: 0 auto; padding: 22px; }
-  .note {
-    margin-bottom: 18px;
-    padding: 14px 16px;
-    border-radius: 16px;
-    background: var(--brand-soft);
-    border: 1px solid rgba(37, 99, 235, 0.16);
-    line-height: 1.6;
-    font-size: 13px;
-  }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
-    margin-bottom: 18px;
-    overflow: hidden;
-  }
-  .card-head {
-    padding: 16px 18px 10px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
-  }
-  .card-head h2 { margin: 0; font-size: 17px; }
-  .card-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
-  .card-body { padding: 18px; }
-  .hidden { display: none; }
-  .upload-row {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .btn {
-    border: none;
-    border-radius: 12px;
-    padding: 11px 16px;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform .15s ease, background .15s ease;
-  }
-  .btn:hover { transform: translateY(-1px); }
-  .btn-primary { background: var(--brand); color: #fff; }
-  .btn-secondary { background: var(--neutral-soft); color: var(--text); border: 1px solid rgba(148, 163, 184, 0.18); }
-  .meta-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 10px;
-    border-radius: 999px;
-    background: var(--neutral-soft);
-    border: 1px solid rgba(148, 163, 184, 0.16);
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .pill.good { background: var(--good-soft); color: var(--good); }
-  .pill.warn { background: var(--warn-soft); color: var(--warn); }
-  .pill.danger { background: var(--danger-soft); color: var(--danger); }
-  .filters-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px 16px;
-  }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .field input,
-  .field select {
-    width: 100%;
-    border-radius: 12px;
-    border: 1px solid rgba(148, 163, 184, 0.24);
-    background: #fff;
-    color: var(--text);
-    padding: 10px 12px;
-    min-height: 42px;
-    font: inherit;
-  }
-  body.dark-mode .field input,
-  body.dark-mode .field select {
-    background: #0f172a;
-    border-color: #475569;
-    color: #f8fafc;
-  }
-  .field small { color: var(--muted); font-size: 11px; line-height: 1.5; }
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 18px;
-  }
-  .kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px 15px;
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
-  }
-  .kpi-card .kicker {
-    display: block;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--muted);
-    margin-bottom: 7px;
-  }
-  .kpi-card strong {
-    display: block;
-    font-size: 22px;
-    line-height: 1.15;
-    margin-bottom: 6px;
-  }
-  .kpi-card .sub { font-size: 11px; color: var(--muted); line-height: 1.45; }
-  .kpi-card.good { background: var(--good-soft); border-color: rgba(34, 197, 94, 0.22); }
-  .kpi-card.warn { background: var(--warn-soft); border-color: rgba(245, 158, 11, 0.20); }
-  .kpi-card.danger { background: var(--danger-soft); border-color: rgba(239, 68, 68, 0.20); }
-  .kpi-card.brand { background: var(--brand-soft); border-color: rgba(37, 99, 235, 0.18); }
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-    margin-bottom: 18px;
-  }
-  .dashboard-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .chart-note { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
-  .chart-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    min-height: 220px;
-    padding-top: 16px;
-  }
-  .chart-col {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-  .chart-col .bar {
-    width: 100%;
-    border-radius: 8px 8px 0 0;
-    background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
-    position: relative;
-    min-height: 10px;
-  }
-  .chart-col .bar .tip {
-    position: absolute;
-    top: -28px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #020617;
-    color: #f8fafc;
-    padding: 4px 7px;
-    border-radius: 6px;
-    font-size: 10px;
-    white-space: nowrap;
-    display: none;
-  }
-  .chart-col .bar:hover .tip { display: block; }
-  .chart-col .bar-label { font-size: 10px; color: var(--muted); text-align: center; }
-  .chart-col .bar-val { font-size: 11px; font-weight: 700; text-align: center; }
-  .h-bars { display: grid; gap: 10px; }
-  .h-item { display: grid; gap: 5px; }
-  .h-meta {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    font-size: 12px;
-    font-weight: 700;
-  }
-  .h-meta .label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .h-track {
-    height: 12px;
-    background: rgba(148, 163, 184, 0.14);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-  .h-fill {
-    height: 100%;
-    border-radius: 999px;
-  }
-  .h-fill.pos { background: linear-gradient(90deg, #93c5fd 0%, #2563eb 100%); }
-  .h-fill.neg { background: linear-gradient(90deg, #fca5a5 0%, #dc2626 100%); }
-  .stack {
-    display: flex;
-    height: 20px;
-    border-radius: 999px;
-    overflow: hidden;
-    background: rgba(148, 163, 184, 0.14);
-    margin-bottom: 14px;
-  }
-  .stack span { display: block; height: 100%; }
-  .legend { display: grid; gap: 10px; }
-  .legend-item {
-    display: grid;
-    grid-template-columns: 12px 1fr auto;
-    gap: 10px;
-    align-items: center;
-    font-size: 12px;
-  }
-  .legend-dot { width: 12px; height: 12px; border-radius: 999px; }
-  .ranking-block {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  .ranking-col h3 {
-    margin: 0 0 10px;
-    font-size: 13px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .05em;
-  }
-  .rank-list { display: grid; gap: 9px; }
-  .rank-item {
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    border-radius: 14px;
-    padding: 10px 12px;
-    background: var(--surface-soft);
-  }
-  .rank-item strong { display: block; font-size: 13px; margin-bottom: 4px; }
-  .rank-item span { font-size: 11px; color: var(--muted); line-height: 1.45; }
-  .rank-item.up { border-color: rgba(37, 99, 235, 0.18); }
-  .rank-item.down { border-color: rgba(239, 68, 68, 0.18); }
-  .table-toolbar {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-  }
-  .table-toolbar .summary { font-size: 12px; color: var(--muted); }
-  .table-wrap { overflow: auto; border: 1px solid rgba(148, 163, 184, 0.18); border-radius: 16px; }
-  table { width: 100%; border-collapse: collapse; min-width: 980px; }
-  thead th {
-    position: sticky;
-    top: 0;
-    background: #eff6ff;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: #334155;
-    padding: 12px 10px;
-    text-align: left;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.20);
-  }
-  tbody td {
-    padding: 11px 10px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
-    vertical-align: top;
-    font-size: 12px;
-  }
-  tbody tr:hover td { background: rgba(37, 99, 235, 0.05); }
-  td.money, th.money { text-align: right; white-space: nowrap; }
-  .delta-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    border-radius: 999px;
-    padding: 4px 8px;
-    font-size: 10px;
-    font-weight: 700;
-  }
-  .delta-pill.up { background: var(--brand-soft); color: var(--brand); }
-  .delta-pill.down { background: var(--danger-soft); color: var(--danger); }
-  .delta-pill.flat { background: var(--neutral-soft); color: var(--muted); }
-  .alerts { display: grid; gap: 12px; }
-  .alert-item {
-    border-radius: 14px;
-    padding: 12px 14px;
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    background: var(--surface-soft);
-  }
-  .alert-item strong { display: block; margin-bottom: 5px; font-size: 13px; }
-  .alert-item span { display: block; font-size: 12px; color: var(--muted); line-height: 1.55; }
-  .alert-item.good { background: var(--good-soft); border-color: rgba(34, 197, 94, 0.18); }
-  .alert-item.warn { background: var(--warn-soft); border-color: rgba(245, 158, 11, 0.18); }
-  .alert-item.danger { background: var(--danger-soft); border-color: rgba(239, 68, 68, 0.18); }
-  .validation-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-  }
-  .validation-box {
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    border-radius: 14px;
-    padding: 12px;
-    background: var(--surface-soft);
-  }
-  .validation-box .label {
-    display: block;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--muted);
-    margin-bottom: 6px;
-    font-weight: 700;
-  }
-  .validation-box strong {
-    display: block;
-    font-size: 13px;
-    line-height: 1.45;
-  }
-  .empty-state {
-    padding: 32px 24px;
-    text-align: center;
-    color: var(--muted);
-    line-height: 1.65;
-  }
-  @media (max-width: 1120px) {
-    .filters-grid,
-    .kpi-grid,
-    .dashboard-grid,
-    .dashboard-grid.two,
-    .validation-grid,
-    .ranking-block {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  @media (max-width: 760px) {
-    .filters-grid,
-    .kpi-grid,
-    .dashboard-grid,
-    .dashboard-grid.two,
-    .validation-grid,
-    .ranking-block {
-      grid-template-columns: 1fr;
-    }
-    .chart-bars { min-height: 170px; }
-  }
-</style>
-</head>
-<body>
-  <header>
-    <h1>Dashboard Comparativo da Folha</h1>
-    <p>Painel gerencial mês a mês a partir da PLANILHA 30, com visão macro por competência, setor, centro de custo, rubrica e categoria. A leitura é agregada: colaborador entra apenas como base técnica para consolidar pessoas e valores.</p>
-  </header>
-
-  <div class="container">
-    <div class="note"><strong>Leitura do módulo:</strong> o custo total considera <strong>Proventos + Encargos + Benefícios</strong>. Rubricas identificadas como <strong>Base de cálculo</strong> ficam separadas para não inflar o comparativo gerencial. Quando o mês anterior é zero e o atual tem valor, a variação aparece como <strong>Novo valor</strong>.</div>
-
-    <section class="card">
-      <div class="card-head">
-        <h2>Fonte de dados</h2>
-        <p>Carregue a PLANILHA 30 para montar o comparativo mês a mês. O módulo detecta automaticamente a aba mais aderente e tenta sugerir a competência mais recente com volume consistente.</p>
-      </div>
-      <div class="card-body">
-        <div class="upload-row">
-          <button class="btn btn-primary" type="button" id="btnSelectFile">Selecionar PLANILHA 30</button>
-          <button class="btn btn-secondary hidden" type="button" id="btnReloadFile">Trocar arquivo</button>
-          <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
-          <div id="loadStatus" class="summary">Nenhum arquivo carregado.</div>
-        </div>
-        <div class="meta-pills" id="sourceMeta">
-          <span class="pill">Esperando arquivo</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="card hidden" id="filtersCard">
-      <div class="card-head">
-        <h2>Filtros e sensibilidade</h2>
-        <p>Setor é lido da coluna <strong>Desc Seção</strong>. Como a base não traz uma coluna explícita de centro de custo, o painel usa a coluna <strong>Seção</strong> como identificador operacional do centro.</p>
-      </div>
-      <div class="card-body">
-        <div class="filters-grid">
-          <div class="field">
-            <label for="competenciaAtual">Competência atual</label>
-            <select id="competenciaAtual"></select>
-          </div>
-          <div class="field">
-            <label for="competenciaAnterior">Competência anterior</label>
-            <input id="competenciaAnterior" type="text" readonly>
-          </div>
-          <div class="field">
-            <label for="filtroSetor">Setor</label>
-            <select id="filtroSetor"><option value="">Todos</option></select>
-          </div>
-          <div class="field">
-            <label for="filtroCentro">Centro de custo</label>
-            <select id="filtroCentro"><option value="">Todos</option></select>
-          </div>
-          <div class="field">
-            <label for="filtroRubrica">Tipo de verba</label>
-            <select id="filtroRubrica"><option value="">Todas</option></select>
-          </div>
-          <div class="field">
-            <label for="filtroCategoria">Categoria de custo</label>
-            <select id="filtroCategoria"><option value="">Todas</option></select>
-          </div>
-          <div class="field">
-            <label for="visaoTabela">Visão da tabela</label>
-            <select id="visaoTabela">
-              <option value="setor">Por setor</option>
-              <option value="centro">Por centro de custo</option>
-              <option value="tipo">Por tipo de verba</option>
-              <option value="categoria">Por categoria de custo</option>
-              <option value="competencia">Por competência</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="limiteFolha">Alerta folha total (%)</label>
-            <input id="limiteFolha" type="number" min="0" step="1" value="10">
-          </div>
-          <div class="field">
-            <label for="limiteGrupo">Alerta setor/centro (%)</label>
-            <input id="limiteGrupo" type="number" min="0" step="1" value="15">
-          </div>
-          <div class="field">
-            <label for="limiteRubrica">Alerta rubrica (%)</label>
-            <input id="limiteRubrica" type="number" min="0" step="1" value="25">
-          </div>
-          <div class="field">
-            <label for="limiteBeneficio">Alerta benefícios (%)</label>
-            <input id="limiteBeneficio" type="number" min="0" step="1" value="12">
-          </div>
-          <div class="field">
-            <label for="limiteColaboradores">Alerta headcount (%)</label>
-            <input id="limiteColaboradores" type="number" min="0" step="1" value="10">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="kpi-grid hidden" id="kpiGrid"></div>
-
-    <div class="dashboard-grid hidden" id="chartGrid">
-      <section class="card">
-        <div class="card-head">
-          <h2>Evolução mensal da folha</h2>
-          <p>Mostra o custo total consolidado por competência dentro do filtro atual.</p>
-        </div>
-        <div class="card-body">
-          <div class="chart-bars" id="evolutionChart"></div>
-          <div class="chart-note">A competência destacada como padrão pode recuar automaticamente um mês quando o arquivo mais recente estiver com volume muito abaixo da competência anterior.</div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Composição da folha por categoria</h2>
-          <p>Separa custo total, descontos e bases para leitura executiva.</p>
-        </div>
-        <div class="card-body">
-          <div class="stack" id="compositionStack"></div>
-          <div class="legend" id="compositionLegend"></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Variação por setor</h2>
-          <p>Top cortes agregados por <strong>Desc Seção</strong>.</p>
-        </div>
-        <div class="card-body">
-          <div class="h-bars" id="sectorChart"></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Variação por centro de custo</h2>
-          <p>Leitura agregada usando a coluna <strong>Seção</strong> como centro operacional.</p>
-        </div>
-        <div class="card-body">
-          <div class="h-bars" id="centerChart"></div>
-        </div>
-      </section>
-    </div>
-
-    <div class="dashboard-grid two hidden" id="rankingGrid">
-      <section class="card">
-        <div class="card-head">
-          <h2>Ranking de setores</h2>
-          <p>Áreas com maior aumento e maior redução no recorte atual.</p>
-        </div>
-        <div class="card-body">
-          <div class="ranking-block" id="sectorRanking"></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Ranking de centros de custo</h2>
-          <p>Identifica movimentos mais relevantes pelo código de seção.</p>
-        </div>
-        <div class="card-body">
-          <div class="ranking-block" id="centerRanking"></div>
-        </div>
-      </section>
-    </div>
-
-    <section class="card hidden" id="tableCard">
-      <div class="card-head">
-        <h2>Tabela comparativa agregada</h2>
-        <p>Sem foco individual: a tabela trabalha apenas com agrupamentos gerenciais.</p>
-      </div>
-      <div class="card-body">
-        <div class="table-toolbar">
-          <div class="summary" id="tableSummary">Sem dados carregados.</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Categoria / Agrupamento</th>
-                <th class="money">Valor mês anterior</th>
-                <th class="money">Valor mês atual</th>
-                <th class="money">Diferença</th>
-                <th class="money">Variação %</th>
-                <th class="money">Participação</th>
-                <th>Tipo de alteração</th>
-                <th>Observação gerencial</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody">
-              <tr><td colspan="8" class="empty-state">Carregue a PLANILHA 30 para visualizar a tabela agregada.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section class="card hidden" id="alertsCard">
-      <div class="card-head">
-        <h2>Alertas gerenciais de anomalias</h2>
-        <p>Os alertas usam os limites percentuais configurados acima e sempre trabalham em nível agregado.</p>
-      </div>
-      <div class="card-body">
-        <div class="alerts" id="alertsList"></div>
-      </div>
-    </section>
-
-    <section class="card hidden" id="validationCard">
-      <div class="card-head">
-        <h2>Validação da PLANILHA 30</h2>
-        <p>Resumo da leitura aplicada no arquivo para facilitar teste e auditoria do novo módulo.</p>
-      </div>
-      <div class="card-body">
-        <div class="validation-grid" id="validationMeta"></div>
-      </div>
-    </section>
-  </div>
-
-  <script>
-  (function(){
-    if (window.__dashboardFolhaRuntimeStarted) return;
-    window.__dashboardFolhaRuntimeStarted = true;
-
-    var state = {
-      rows: [],
-      rawRows: 0,
-      validRows: 0,
-      sheetName: '',
-      headerRow: 0,
-      fileName: '',
-      months: [],
-      countsByMonth: {},
-      currentKey: '',
-      previousKey: ''
-    };
-
-    var categoryColors = {
-      'Proventos': '#2563eb',
-      'Descontos': '#dc2626',
-      'Encargos': '#7c3aed',
-      'Benefícios': '#059669',
-      'Base de cálculo': '#f59e0b',
-      'Outros': '#64748b',
-      'Salário bruto consolidado': '#2563eb',
-      'Salário líquido consolidado': '#0f766e',
-      'Custo total consolidado': '#1d4ed8'
-    };
-
-    var categoryOrder = ['Proventos', 'Descontos', 'Encargos', 'Benefícios', 'Base de cálculo', 'Outros'];
-    var requiredHeaders = ['CHAPA', 'NOME', 'SECAO', 'DESC SECAO', 'MES COMP', 'ANO COMP', 'EVENTO', 'DESC EVENTO', 'TIPO', 'VALOR'];
-
-    function byId(id){ return document.getElementById(id); }
-    function syncParentHeight() {
-      try {
-        if (window.parent && typeof window.parent.syncIframes === 'function') {
-          setTimeout(function(){ window.parent.syncIframes(); }, 50);
-        }
-      } catch (e) {}
-    }
-    function toStr(v){ return v == null ? '' : String(v).trim(); }
-    function parseMoney(v){
-      if (v == null || v === '') return 0;
-      if (typeof v === 'number') return isFinite(v) ? v : 0;
-      var s = String(v).trim().replace(/\\s/g, '');
-      if (!s) return 0;
-      s = s.replace(/[^\\d,.-]/g, '');
-      if (s.indexOf(',') > -1) s = s.replace(/\\./g, '').replace(',', '.');
-      var n = parseFloat(s);
-      return isNaN(n) ? 0 : n;
-    }
-    function fmtMoney(v){
-      return 'R$ ' + (Number(v || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-    function fmtInt(v){
-      return Number(v || 0).toLocaleString('pt-BR');
-    }
-    function fmtPct(v){
-      if (v == null || !isFinite(v)) return 'Novo valor';
-      return (v >= 0 ? '+' : '') + v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
-    }
-    function normalizeHeader(v){
-      return String(v || '')
-        .normalize('NFD')
-        .replace(/[\\u0300-\\u036f]/g, '')
-        .toUpperCase()
-        .replace(/\\s+/g, ' ')
-        .trim();
-    }
-    function monthKey(month, year){
-      var mm = String(parseInt(month, 10) || 0).padStart(2, '0');
-      var yy = String(parseInt(year, 10) || 0);
-      return yy + '-' + mm;
-    }
-    function monthLabel(key){
-      if (!key || key.indexOf('-') < 0) return 'Sem base anterior';
-      var parts = key.split('-');
-      return parts[1] + '/' + parts[0];
-    }
-    function parseMonthFromDate(value){
-      var s = toStr(value);
-      if (!s) return '';
-      var match = s.match(/(\\d{4})-(\\d{2})/);
-      if (match) return match[1] + '-' + match[2];
-      return '';
-    }
-    function escHtml(value){
-      var div = document.createElement('div');
-      div.textContent = value == null ? '' : String(value);
-      return div.innerHTML;
-    }
-    function safeLabel(value, fallback){
-      var s = toStr(value);
-      return s || fallback;
-    }
-    function calcVariation(previous, current){
-      previous = Number(previous || 0);
-      current = Number(current || 0);
-      var diff = current - previous;
-      if (previous === 0 && current > 0) {
-        return { diff: diff, pct: null, label: 'Novo valor', type: 'new' };
-      }
-      if (previous === 0 && current === 0) {
-        return { diff: 0, pct: 0, label: '0,0%', type: 'flat' };
-      }
-      var pct = previous === 0 ? 0 : (diff / previous) * 100;
-      return {
-        diff: diff,
-        pct: pct,
-        label: fmtPct(pct),
-        type: diff > 0 ? 'up' : (diff < 0 ? 'down' : 'flat')
-      };
-    }
-    function classifyCategory(desc, tipo){
-      var t = toStr(tipo).toUpperCase();
-      var d = normalizeHeader(desc);
-      if (!d && !t) return 'Outros';
-      if (d.indexOf('BASE ') === 0 || d.indexOf('REMUNERACAO BASE') >= 0 || d.indexOf('BASE TRIBUTADA') >= 0) return 'Base de cálculo';
-      if (/(FGTS|I\\.N\\.S\\.S|INSS|PATRONAL|RAT|TERCEIROS|FAP|SEST|SENAT)/.test(d)) return 'Encargos';
-      if (/(VALE|UNIMED|PLANO|SEGURO|ASSISTENCIA MEDICA|BENEFICIO|FRETADO|REFEICAO|ALIMENTAC|ALIMENTAÇ|TRANSPORTE|COMBUSTIVEL|COMBUSTI|FARMACIA|ODONTO|DASA|BRADESCO)/.test(d)) return 'Benefícios';
-      if (t === 'D') return 'Descontos';
-      if (t === 'P') return 'Proventos';
-      if (t === 'B') return 'Outros';
-      return 'Outros';
-    }
-    function classifyNature(desc, category){
-      var d = normalizeHeader(desc);
-      if (category === 'Base de cálculo') return 'Base técnica';
-      if (/(FERIAS|13O|13º|PLR|PARTICIPACAO|PARTICIPAÇÃO|ABONO|PROVISAO|RESCISAO|RESCISAO|INDEN|DIFERENCA|PERNOITE|DIARIA|MATERNIDADE|HONORARIOS|SERVICOS PRESTADOS|SERVIÇOS PRESTADOS|EMPRESTIMO|EMPRÉSTIMO|BONUS|BÔNUS)/.test(d)) return 'Eventual';
-      return 'Recorrente';
-    }
-    function metricValueForRow(row, activeCategory){
-      if (activeCategory) return row.valor;
-      return row.category === 'Proventos' || row.category === 'Encargos' || row.category === 'Benefícios' ? row.valor : 0;
-    }
-    function getXlsxLib(){
-      return window.XLSX || (window.parent && window.parent.XLSX) || null;
-    }
-    function decodePreviewRows(ws, maxRows, maxCols){
-      var XLSX = getXlsxLib();
-      var range = ws && ws['!ref'] && XLSX ? XLSX.utils.decode_range(ws['!ref']) : null;
-      if (!range) return [];
-      var rows = [];
-      var endRow = Math.min(range.e.r, maxRows - 1);
-      var endCol = Math.min(range.e.c, maxCols - 1);
-      for (var r = range.s.r; r <= endRow; r++) {
-        var row = [];
-        for (var c = range.s.c; c <= endCol; c++) {
-          var cell = ws[XLSX.utils.encode_cell({ r: r, c: c })];
-          row.push(cell ? cell.v : '');
-        }
-        rows.push(row);
-      }
-      return rows;
-    }
-    function detectHeaderRow(raw){
-      var bestIndex = -1;
-      var bestScore = -1;
-      for (var i = 0; i < Math.min(raw.length, 18); i++) {
-        var headers = (raw[i] || []).map(normalizeHeader);
-        var score = 0;
-        requiredHeaders.forEach(function(name){
-          if (headers.indexOf(name) >= 0) score += 1;
-        });
-        if (score > bestScore) {
-          bestScore = score;
-          bestIndex = i;
-        }
-      }
-      return bestScore >= 7 ? bestIndex : -1;
-    }
-    function scoreSheet(ws){
-      var preview = decodePreviewRows(ws, 18, 24);
-      var best = -1;
-      for (var i = 0; i < preview.length; i++) {
-        var headers = (preview[i] || []).map(normalizeHeader);
-        var score = 0;
-        requiredHeaders.forEach(function(name){
-          if (headers.indexOf(name) >= 0) score += 4;
-        });
-        if (headers.indexOf('VALOR') >= 0) score += 6;
-        if (headers.indexOf('TIPO') >= 0) score += 6;
-        if (headers.indexOf('DESC EVENTO') >= 0) score += 8;
-        best = Math.max(best, score);
-      }
-      return best;
-    }
-    function pickBestSheet(wb){
-      var bestName = wb.SheetNames[0];
-      var bestScore = -1;
-      wb.SheetNames.forEach(function(name){
-        var score = scoreSheet(wb.Sheets[name]);
-        if (score > bestScore) {
-          bestScore = score;
-          bestName = name;
-        }
-      });
-      return bestName;
-    }
-    function updateSourceMeta(items){
-      byId('sourceMeta').innerHTML = items.map(function(item){
-        return '<span class="pill ' + escHtml(item.cls || '') + '">' + escHtml(item.label) + '</span>';
-      }).join('');
-      syncParentHeight();
-    }
-    function showDashboardSections(show){
-      ['filtersCard', 'kpiGrid', 'chartGrid', 'rankingGrid', 'tableCard', 'alertsCard', 'validationCard'].forEach(function(id){
-        byId(id).classList.toggle('hidden', !show);
-      });
-      byId('btnReloadFile').classList.toggle('hidden', !show);
-    }
-    function loadWorkbook(file){
-      var reader = new FileReader();
-      byId('loadStatus').textContent = 'Lendo arquivo e identificando a base da folha...';
-      updateSourceMeta([{ label: 'Processando arquivo...', cls: 'warn' }]);
-      reader.onload = function(ev){
-        try {
-          var XLSX = getXlsxLib();
-          if (!XLSX) throw new Error('Biblioteca XLSX não foi carregada no módulo.');
-          var wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array', cellDates: true });
-          var sheetName = pickBestSheet(wb);
-          var ws = wb.Sheets[sheetName];
-          var raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-          var headerRow = detectHeaderRow(raw);
-          if (headerRow < 0) throw new Error('Não foi possível localizar os cabeçalhos esperados da PLANILHA 30.');
-          var headers = (raw[headerRow] || []).map(normalizeHeader);
-          var rows = [];
-          var countsByMonth = {};
-          for (var i = headerRow + 1; i < raw.length; i++) {
-            var source = raw[i];
-            if (!source || !source.length) continue;
-            var hasValue = false;
-            for (var z = 0; z < source.length; z++) {
-              if (source[z] !== '' && source[z] != null) { hasValue = true; break; }
-            }
-            if (!hasValue) continue;
-            var obj = {};
-            for (var c = 0; c < headers.length; c++) obj[headers[c]] = source[c];
-            var month = toStr(obj['MES COMP']);
-            var year = toStr(obj['ANO COMP']);
-            var tipo = toStr(obj['TIPO']).toUpperCase();
-            var period = toStr(obj['NRO PERIODO']);
-            var valor = parseMoney(obj['VALOR']);
-            var descEvento = safeLabel(obj['DESC EVENTO'], 'Sem rubrica');
-            if (!month || !year || !tipo || (tipo !== 'P' && tipo !== 'D' && tipo !== 'B')) continue;
-            if (period && period !== '5') continue;
-            if (!isFinite(valor)) continue;
-            var key = monthKey(month, year);
-            var category = classifyCategory(descEvento, tipo);
-            var sector = safeLabel(obj['DESC SECAO'], 'Sem setor');
-            var centerCode = safeLabel(obj['SECAO'], 'Sem centro');
-            var entry = {
-              competenceKey: key,
-              competenceLabel: monthLabel(key),
-              year: parseInt(year, 10) || 0,
-              month: parseInt(month, 10) || 0,
-              chapa: toStr(obj['CHAPA']),
-              sector: sector,
-              center: centerCode,
-              centerLabel: centerCode + ' · ' + sector,
-              eventCode: toStr(obj['EVENTO']),
-              eventDesc: descEvento,
-              tipo: tipo,
-              valor: valor,
-              category: category,
-              nature: classifyNature(descEvento, category),
-              admissionMonth: parseMonthFromDate(obj['ADMISSAO']),
-              desligamentoMonth: parseMonthFromDate(obj['DESLIGAMENTO'])
-            };
-            rows.push(entry);
-            countsByMonth[key] = (countsByMonth[key] || 0) + 1;
-          }
-          var months = Object.keys(countsByMonth).sort();
-          if (!months.length) throw new Error('O arquivo não trouxe linhas válidas com competência, tipo e valor no período 5.');
-          state.rows = rows;
-          state.rawRows = raw.length - (headerRow + 1);
-          state.validRows = rows.length;
-          state.sheetName = sheetName;
-          state.headerRow = headerRow + 1;
-          state.fileName = file.name;
-          state.months = months;
-          state.countsByMonth = countsByMonth;
-          state.currentKey = suggestCurrentMonth(months, countsByMonth);
-          state.previousKey = findPreviousMonth(state.currentKey);
-          byId('loadStatus').textContent = file.name + ' carregado com sucesso.';
-          updateSourceMeta([
-            { label: 'Aba detectada: ' + sheetName, cls: 'good' },
-            { label: 'Competências: ' + months.map(monthLabel).join(', ') },
-            { label: 'Linhas válidas: ' + fmtInt(rows.length), cls: 'good' }
-          ]);
-          populateFilters();
-          showDashboardSections(true);
-          renderAll();
-        } catch (err) {
-          showDashboardSections(false);
-          updateSourceMeta([{ label: 'Falha ao ler o arquivo', cls: 'danger' }]);
-          byId('loadStatus').textContent = 'Erro ao processar a PLANILHA 30.';
-          if (window.parent && typeof window.parent.showErrorModal === 'function') {
-            window.parent.showErrorModal('Falha ao montar o Dashboard Folha.', String(err && err.message ? err.message : err), 'Valide se o arquivo é a PLANILHA 30 e se contém as colunas padrão de folha.');
-          } else {
-            alert('Falha ao montar o Dashboard Folha: ' + String(err && err.message ? err.message : err));
-          }
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-    var pickerLock = false;
-    var pickerOpenedAt = 0;
-    function openFilePicker(){
-      var now = Date.now();
-      if (pickerLock && (now - pickerOpenedAt) < 900) return;
-      pickerLock = true;
-      pickerOpenedAt = now;
-      byId('fileInput').click();
-      setTimeout(function(){ pickerLock = false; }, 900);
-    }
-    function suggestCurrentMonth(months, countsByMonth){
-      if (months.length === 1) return months[0];
-      var latest = months[months.length - 1];
-      var prev = months[months.length - 2];
-      var latestCount = countsByMonth[latest] || 0;
-      var prevCount = countsByMonth[prev] || 0;
-      if (prevCount > 0 && latestCount < prevCount * 0.35) return prev;
-      return latest;
-    }
-    function findPreviousMonth(key){
-      var idx = state.months.indexOf(key);
-      if (idx <= 0) return '';
-      return state.months[idx - 1];
-    }
-    function uniqueSorted(rows, field){
-      var map = {};
-      rows.forEach(function(row){ map[row[field]] = 1; });
-      return Object.keys(map).sort(function(a, b){ return a.localeCompare(b, 'pt-BR'); });
-    }
-    function populateFilters(){
-      var compSel = byId('competenciaAtual');
-      compSel.innerHTML = state.months.map(function(key){
-        return '<option value="' + escHtml(key) + '">' + escHtml(monthLabel(key)) + '</option>';
-      }).join('');
-      compSel.value = state.currentKey;
-      byId('competenciaAnterior').value = state.previousKey ? monthLabel(state.previousKey) : 'Sem base anterior';
-
-      var setorSel = byId('filtroSetor');
-      setorSel.innerHTML = '<option value="">Todos</option>' + uniqueSorted(state.rows, 'sector').map(function(value){
-        return '<option value="' + escHtml(value) + '">' + escHtml(value) + '</option>';
-      }).join('');
-
-      var centroSel = byId('filtroCentro');
-      centroSel.innerHTML = '<option value="">Todos</option>' + uniqueSorted(state.rows, 'centerLabel').map(function(value){
-        return '<option value="' + escHtml(value) + '">' + escHtml(value) + '</option>';
-      }).join('');
-
-      var rubricaSel = byId('filtroRubrica');
-      rubricaSel.innerHTML = '<option value="">Todas</option>' + uniqueSorted(state.rows, 'eventDesc').map(function(value){
-        return '<option value="' + escHtml(value) + '">' + escHtml(value) + '</option>';
-      }).join('');
-
-      var categoriaSel = byId('filtroCategoria');
-      categoriaSel.innerHTML = '<option value="">Todas</option>' + categoryOrder.filter(function(cat){
-        return state.rows.some(function(row){ return row.category === cat; });
-      }).map(function(cat){
-        return '<option value="' + escHtml(cat) + '">' + escHtml(cat) + '</option>';
-      }).join('');
-    }
-    function buildMapComparison(prevMap, currMap, totalCurrent, labels){
-      var map = {};
-      (labels || []).forEach(function(label){ map[label] = 1; });
-      Object.keys(prevMap).forEach(function(label){ map[label] = 1; });
-      Object.keys(currMap).forEach(function(label){ map[label] = 1; });
-      return Object.keys(map).map(function(label){
-        var previous = Number(prevMap[label] || 0);
-        var current = Number(currMap[label] || 0);
-        var variation = calcVariation(previous, current);
-        return {
-          label: label,
-          previous: previous,
-          current: current,
-          diff: variation.diff,
-          pct: variation.pct,
-          pctLabel: variation.label,
-          type: variation.type,
-          participation: totalCurrent > 0 ? (current / totalCurrent) * 100 : 0
-        };
-      });
-    }
-    function renderAll(){
-      state.currentKey = byId('competenciaAtual').value || state.currentKey;
-      state.previousKey = findPreviousMonth(state.currentKey);
-      byId('competenciaAnterior').value = state.previousKey ? monthLabel(state.previousKey) : 'Sem base anterior';
-      var dashboard = computeDashboard();
-      renderKpis(dashboard);
-      renderEvolutionChart(dashboard.evolution);
-      renderComposition(dashboard.categorySummary);
-      renderHorizontalChart('sectorChart', dashboard.topSectorChart, 'setor');
-      renderHorizontalChart('centerChart', dashboard.topCenterChart, 'centro');
-      renderRanking('sectorRanking', dashboard.sectorComparisons, 'setor');
-      renderRanking('centerRanking', dashboard.centerComparisons, 'centro');
-      renderTable(dashboard);
-      renderAlerts(dashboard.alerts);
-      renderValidation(dashboard);
-      syncParentHeight();
-    }
-    function computeDashboard(){
-      var filtroSetor = byId('filtroSetor').value;
-      var filtroCentro = byId('filtroCentro').value;
-      var filtroRubrica = byId('filtroRubrica').value;
-      var filtroCategoria = byId('filtroCategoria').value;
-      var currentKey = state.currentKey;
-      var previousKey = state.previousKey;
-      var currentEmployees = {};
-      var previousEmployees = {};
-      var entryCandidates = {};
-      var exitCandidates = {};
-      var monthly = {};
-      var currentSector = {}, previousSector = {};
-      var currentCenter = {}, previousCenter = {};
-      var currentEvent = {}, previousEvent = {};
-      var currentCategory = {}, previousCategory = {};
-
-      function add(map, key, value){
-        if (!key) return;
-        map[key] = (map[key] || 0) + value;
-      }
-      function ensureMonth(key){
-        if (!monthly[key]) monthly[key] = { proventos: 0, descontos: 0, encargos: 0, beneficios: 0, bases: 0, outros: 0, bruto: 0, liquido: 0, custo: 0 };
-        return monthly[key];
-      }
-
-      state.rows.forEach(function(row){
-        if (filtroSetor && row.sector !== filtroSetor) return;
-        if (filtroCentro && row.centerLabel !== filtroCentro) return;
-        if (filtroRubrica && row.eventDesc !== filtroRubrica) return;
-        if (filtroCategoria && row.category !== filtroCategoria) return;
-
-        var bucket = ensureMonth(row.competenceKey);
-        if (row.category === 'Proventos') bucket.proventos += row.valor;
-        else if (row.category === 'Descontos') bucket.descontos += row.valor;
-        else if (row.category === 'Encargos') bucket.encargos += row.valor;
-        else if (row.category === 'Benefícios') bucket.beneficios += row.valor;
-        else if (row.category === 'Base de cálculo') bucket.bases += row.valor;
-        else bucket.outros += row.valor;
-        bucket.bruto = bucket.proventos;
-        bucket.liquido = bucket.proventos - bucket.descontos;
-        bucket.custo = bucket.proventos + bucket.encargos + bucket.beneficios;
-
-        var groupValue = metricValueForRow(row, filtroCategoria);
-        if (row.competenceKey === currentKey) {
-          currentEmployees[row.chapa || ('sem-chapa-' + row.eventCode + '-' + row.eventDesc)] = 1;
-          if (row.admissionMonth === currentKey) entryCandidates[row.chapa || ('adm-' + row.eventCode)] = 1;
-          if (row.desligamentoMonth === currentKey) exitCandidates[row.chapa || ('des-' + row.eventCode)] = 1;
-          add(currentSector, row.sector, groupValue);
-          add(currentCenter, row.centerLabel, groupValue);
-          add(currentEvent, row.eventDesc, row.valor);
-          add(currentCategory, row.category, row.valor);
-        } else if (row.competenceKey === previousKey) {
-          previousEmployees[row.chapa || ('sem-chapa-' + row.eventCode + '-' + row.eventDesc)] = 1;
-          add(previousSector, row.sector, groupValue);
-          add(previousCenter, row.centerLabel, groupValue);
-          add(previousEvent, row.eventDesc, row.valor);
-          add(previousCategory, row.category, row.valor);
-        }
-      });
-
-      Object.keys(currentEmployees).forEach(function(chapa){
-        if (!previousEmployees[chapa]) entryCandidates[chapa] = 1;
-      });
-      Object.keys(previousEmployees).forEach(function(chapa){
-        if (!currentEmployees[chapa]) exitCandidates[chapa] = 1;
-      });
-
-      var currentMonth = monthly[currentKey] || { proventos: 0, descontos: 0, encargos: 0, beneficios: 0, bases: 0, outros: 0, bruto: 0, liquido: 0, custo: 0 };
-      var previousMonth = monthly[previousKey] || { proventos: 0, descontos: 0, encargos: 0, beneficios: 0, bases: 0, outros: 0, bruto: 0, liquido: 0, custo: 0 };
-      var folhaVariation = calcVariation(previousMonth.custo, currentMonth.custo);
-      var colaboradoresAtual = Object.keys(currentEmployees).length;
-      var colaboradoresAnterior = Object.keys(previousEmployees).length;
-      var headcountVariation = calcVariation(colaboradoresAnterior, colaboradoresAtual);
-      var avgPerEmployee = colaboradoresAtual ? currentMonth.custo / colaboradoresAtual : 0;
-
-      var sectorComparisons = buildMapComparison(previousSector, currentSector, currentMonth.custo);
-      var centerComparisons = buildMapComparison(previousCenter, currentCenter, currentMonth.custo);
-      var eventComparisons = buildMapComparison(previousEvent, currentEvent, currentMonth.custo);
-      var categoryComparisons = buildMapComparison(previousCategory, currentCategory, currentMonth.custo, categoryOrder);
-
-      categoryComparisons.push({
-        label: 'Salário bruto consolidado',
-        previous: previousMonth.bruto,
-        current: currentMonth.bruto,
-        diff: currentMonth.bruto - previousMonth.bruto,
-        pct: calcVariation(previousMonth.bruto, currentMonth.bruto).pct,
-        pctLabel: calcVariation(previousMonth.bruto, currentMonth.bruto).label,
-        type: calcVariation(previousMonth.bruto, currentMonth.bruto).type,
-        participation: currentMonth.custo > 0 ? (currentMonth.bruto / currentMonth.custo) * 100 : 0
-      });
-      categoryComparisons.push({
-        label: 'Salário líquido consolidado',
-        previous: previousMonth.liquido,
-        current: currentMonth.liquido,
-        diff: currentMonth.liquido - previousMonth.liquido,
-        pct: calcVariation(previousMonth.liquido, currentMonth.liquido).pct,
-        pctLabel: calcVariation(previousMonth.liquido, currentMonth.liquido).label,
-        type: calcVariation(previousMonth.liquido, currentMonth.liquido).type,
-        participation: currentMonth.custo > 0 ? (currentMonth.liquido / currentMonth.custo) * 100 : 0
-      });
-      categoryComparisons.push({
-        label: 'Custo total consolidado',
-        previous: previousMonth.custo,
-        current: currentMonth.custo,
-        diff: currentMonth.custo - previousMonth.custo,
-        pct: folhaVariation.pct,
-        pctLabel: folhaVariation.label,
-        type: folhaVariation.type,
-        participation: 100
-      });
-
-      var topSector = sectorComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0] || null;
-      var topCenter = centerComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0] || null;
-      var topEvent = eventComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0] || null;
-
-      var evolution = state.months.map(function(key){
-        var bucket = monthly[key] || { custo: 0, proventos: 0, descontos: 0, encargos: 0, beneficios: 0, liquido: 0 };
-        return {
-          key: key,
-          label: monthLabel(key),
-          value: bucket.custo,
-          bruto: bucket.proventos,
-          liquido: bucket.liquido,
-          descontos: bucket.descontos
-        };
-      });
-
-      var categorySummary = [
-        { label: 'Proventos', value: currentMonth.proventos },
-        { label: 'Encargos', value: currentMonth.encargos },
-        { label: 'Benefícios', value: currentMonth.beneficios },
-        { label: 'Descontos', value: currentMonth.descontos },
-        { label: 'Base de cálculo', value: currentMonth.bases },
-        { label: 'Outros', value: currentMonth.outros }
-      ];
-
-      return {
-        currentKey: currentKey,
-        previousKey: previousKey,
-        currentMonth: currentMonth,
-        previousMonth: previousMonth,
-        folhaVariation: folhaVariation,
-        colaboradoresAtual: colaboradoresAtual,
-        colaboradoresAnterior: colaboradoresAnterior,
-        headcountVariation: headcountVariation,
-        entries: Object.keys(entryCandidates).length,
-        exits: Object.keys(exitCandidates).length,
-        avgPerEmployee: avgPerEmployee,
-        topSector: topSector,
-        topCenter: topCenter,
-        topEvent: topEvent,
-        categorySummary: categorySummary,
-        evolution: evolution,
-        sectorComparisons: sectorComparisons,
-        centerComparisons: centerComparisons,
-        eventComparisons: eventComparisons,
-        categoryComparisons: categoryComparisons,
-        topSectorChart: sectorComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 8),
-        topCenterChart: centerComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 8),
-        alerts: buildAlerts(currentMonth, previousMonth, folhaVariation, sectorComparisons, centerComparisons, eventComparisons, colaboradoresAtual, colaboradoresAnterior, Object.keys(entryCandidates).length, Object.keys(exitCandidates).length),
-        tableRows: buildTableRows(categoryComparisons, sectorComparisons, centerComparisons, eventComparisons, evolution, currentMonth),
-        validation: buildValidation(currentMonth, previousMonth),
-        activeFilters: {
-          setor: filtroSetor,
-          centro: filtroCentro,
-          rubrica: filtroRubrica,
-          categoria: filtroCategoria
-        }
-      };
-    }
-    function buildAlerts(currentMonth, previousMonth, folhaVariation, sectorComparisons, centerComparisons, eventComparisons, colaboradoresAtual, colaboradoresAnterior, entries, exits){
-      var limiteFolha = parseFloat(byId('limiteFolha').value || '10');
-      var limiteGrupo = parseFloat(byId('limiteGrupo').value || '15');
-      var limiteRubrica = parseFloat(byId('limiteRubrica').value || '25');
-      var limiteBeneficio = parseFloat(byId('limiteBeneficio').value || '12');
-      var limiteColaboradores = parseFloat(byId('limiteColaboradores').value || '10');
-      var alerts = [];
-      function push(cls, title, text){ alerts.push({ cls: cls, title: title, text: text }); }
-
-      if (!state.previousKey) {
-        push('warn', 'Sem mês anterior para comparação', 'A competência selecionada não possui base anterior no arquivo atual. O dashboard mantém os totais do mês, mas as variações ficam limitadas.');
-      } else if (folhaVariation.pct != null && Math.abs(folhaVariation.pct) >= limiteFolha) {
-        push(folhaVariation.pct > 0 ? 'danger' : 'warn', 'Folha total fora do limite', 'O custo total variou ' + fmtPct(folhaVariation.pct) + ' entre ' + monthLabel(state.previousKey) + ' e ' + monthLabel(state.currentKey) + '.');
-      }
-
-      var topSector = sectorComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0];
-      if (topSector && topSector.pct != null && Math.abs(topSector.pct) >= limiteGrupo) {
-        push(topSector.pct > 0 ? 'danger' : 'warn', 'Setor com variação relevante', topSector.label + ' mudou ' + fmtPct(topSector.pct) + ' (' + fmtMoney(topSector.diff) + ').');
-      }
-
-      var topCenter = centerComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0];
-      if (topCenter && topCenter.pct != null && Math.abs(topCenter.pct) >= limiteGrupo) {
-        push(topCenter.pct > 0 ? 'danger' : 'warn', 'Centro de custo com variação relevante', topCenter.label + ' mudou ' + fmtPct(topCenter.pct) + ' (' + fmtMoney(topCenter.diff) + ').');
-      }
-
-      var topEvent = eventComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); })[0];
-      if (topEvent && topEvent.pct != null && Math.abs(topEvent.pct) >= limiteRubrica) {
-        push(topEvent.pct > 0 ? 'danger' : 'warn', 'Rubrica com crescimento incomum', topEvent.label + ' variou ' + fmtPct(topEvent.pct) + ' em comparação com o mês anterior.');
-      } else if (topEvent && topEvent.type === 'new' && topEvent.current > 0) {
-        push('warn', 'Rubrica nova com impacto', topEvent.label + ' surgiu como novo valor em ' + monthLabel(state.currentKey) + ' com total de ' + fmtMoney(topEvent.current) + '.');
-      }
-
-      var beneficioVar = calcVariation(previousMonth.beneficios, currentMonth.beneficios);
-      if (beneficioVar.pct != null && Math.abs(beneficioVar.pct) >= limiteBeneficio) {
-        push(beneficioVar.pct > 0 ? 'danger' : 'warn', 'Benefícios fora do padrão', 'Benefícios variaram ' + fmtPct(beneficioVar.pct) + ' no recorte atual.');
-      }
-
-      var descontoVar = calcVariation(previousMonth.descontos, currentMonth.descontos);
-      if (descontoVar.pct != null && Math.abs(descontoVar.pct) >= limiteGrupo) {
-        push(descontoVar.pct > 0 ? 'warn' : 'good', 'Descontos com oscilação relevante', 'Descontos consolidados variaram ' + fmtPct(descontoVar.pct) + '.');
-      }
-
-      var encargoVar = calcVariation(previousMonth.encargos, currentMonth.encargos);
-      if (encargoVar.pct != null && Math.abs(encargoVar.pct) >= limiteGrupo) {
-        push(encargoVar.pct > 0 ? 'warn' : 'good', 'Encargos fora do padrão', 'Encargos consolidados variaram ' + fmtPct(encargoVar.pct) + '.');
-      }
-
-      var liquidoVar = calcVariation(previousMonth.liquido, currentMonth.liquido);
-      if (liquidoVar.pct != null && Math.abs(liquidoVar.pct) >= limiteFolha) {
-        push(liquidoVar.pct > 0 ? 'danger' : 'warn', 'Líquido total a pagar com diferença relevante', 'O líquido consolidado variou ' + fmtPct(liquidoVar.pct) + ' no mês atual.');
-      }
-
-      var headcountVar = calcVariation(colaboradoresAnterior, colaboradoresAtual);
-      if (headcountVar.pct != null && Math.abs(headcountVar.pct) >= limiteColaboradores) {
-        push(headcountVar.pct > 0 ? 'warn' : 'warn', 'Quantidade total de colaboradores variou acima do limite', 'A base mudou ' + fmtPct(headcountVar.pct) + ' com ' + fmtInt(entries) + ' entradas e ' + fmtInt(exits) + ' saídas agregadas.');
-      }
-
-      if (!alerts.length) {
-        push('good', 'Sem anomalias críticas no recorte atual', 'Os principais indicadores ficaram dentro dos limites configurados para o filtro selecionado.');
-      }
-      return alerts;
-    }
-    function buildTableRows(categoryComparisons, sectorComparisons, centerComparisons, eventComparisons, evolution, currentMonth){
-      var view = byId('visaoTabela').value;
-      if (view === 'setor') return sectorComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 80);
-      if (view === 'centro') return centerComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 80);
-      if (view === 'tipo') return eventComparisons.slice().sort(function(a, b){ return Math.abs(b.diff) - Math.abs(a.diff); }).slice(0, 120);
-      if (view === 'competencia') {
-        return evolution.map(function(item, idx){
-          var previous = idx > 0 ? evolution[idx - 1].value : 0;
-          var variation = calcVariation(previous, item.value);
-          return {
-            label: item.label,
-            previous: previous,
-            current: item.value,
-            diff: variation.diff,
-            pct: variation.pct,
-            pctLabel: variation.label,
-            type: variation.type,
-            participation: currentMonth.custo > 0 ? (item.value / currentMonth.custo) * 100 : 0,
-            note: idx === evolution.length - 1 ? 'Competência corrente do filtro.' : 'Histórico mensal consolidado.'
-          };
-        });
-      }
-      return categoryComparisons;
-    }
-    function pickKpiClass(type){
-      if (type === 'up') return 'danger';
-      if (type === 'down') return 'good';
-      if (type === 'new') return 'warn';
-      return 'brand';
-    }
-    function renderKpis(dashboard){
-      var cards = [
-        { kicker: 'Total da folha atual', value: fmtMoney(dashboard.currentMonth.custo), sub: monthLabel(dashboard.currentKey), cls: 'brand' },
-        { kicker: 'Total da folha anterior', value: fmtMoney(dashboard.previousMonth.custo), sub: dashboard.previousKey ? monthLabel(dashboard.previousKey) : 'Sem base anterior', cls: 'brand' },
-        { kicker: 'Diferença absoluta', value: fmtMoney(dashboard.folhaVariation.diff), sub: 'Atual - anterior', cls: pickKpiClass(dashboard.folhaVariation.type) },
-        { kicker: 'Variação percentual', value: dashboard.folhaVariation.label, sub: 'Comparação mês a mês', cls: pickKpiClass(dashboard.folhaVariation.type) },
-        { kicker: 'Total agregado de colaboradores', value: fmtInt(dashboard.colaboradoresAtual), sub: dashboard.colaboradoresAnterior ? 'Anterior: ' + fmtInt(dashboard.colaboradoresAnterior) : 'Sem base anterior', cls: 'brand' },
-        { kicker: 'Entradas no mês', value: fmtInt(dashboard.entries), sub: 'Admissões novas ou presença nova', cls: 'good' },
-        { kicker: 'Saídas no mês', value: fmtInt(dashboard.exits), sub: 'Desligamentos ou ausência frente ao mês anterior', cls: 'warn' },
-        { kicker: 'Média por colaborador', value: fmtMoney(dashboard.avgPerEmployee), sub: 'Custo total / quantidade agregada', cls: 'brand' },
-        { kicker: 'Setor com maior variação', value: dashboard.topSector ? dashboard.topSector.label : '—', sub: dashboard.topSector ? dashboard.topSector.pctLabel + ' · ' + fmtMoney(dashboard.topSector.diff) : 'Sem destaque', cls: dashboard.topSector ? pickKpiClass(dashboard.topSector.type) : 'brand' },
-        { kicker: 'Centro com maior variação', value: dashboard.topCenter ? dashboard.topCenter.label : '—', sub: dashboard.topCenter ? dashboard.topCenter.pctLabel + ' · ' + fmtMoney(dashboard.topCenter.diff) : 'Sem destaque', cls: dashboard.topCenter ? pickKpiClass(dashboard.topCenter.type) : 'brand' },
-        { kicker: 'Tipo de verba com maior impacto', value: dashboard.topEvent ? dashboard.topEvent.label : '—', sub: dashboard.topEvent ? dashboard.topEvent.pctLabel + ' · ' + fmtMoney(dashboard.topEvent.diff) : 'Sem destaque', cls: dashboard.topEvent ? pickKpiClass(dashboard.topEvent.type) : 'brand' },
-        { kicker: 'Total de proventos', value: fmtMoney(dashboard.currentMonth.proventos), sub: 'Salário bruto consolidado', cls: 'brand' },
-        { kicker: 'Total de descontos', value: fmtMoney(dashboard.currentMonth.descontos), sub: 'Descontos consolidados', cls: 'warn' },
-        { kicker: 'Total de encargos', value: fmtMoney(dashboard.currentMonth.encargos), sub: 'Encargos consolidados', cls: 'brand' },
-        { kicker: 'Total de benefícios', value: fmtMoney(dashboard.currentMonth.beneficios), sub: 'Benefícios consolidados', cls: 'good' },
-        { kicker: 'Custo total consolidado', value: fmtMoney(dashboard.currentMonth.custo), sub: 'Proventos + Encargos + Benefícios', cls: 'brand' }
-      ];
-      byId('kpiGrid').innerHTML = cards.map(function(card){
-        return '<div class="kpi-card ' + escHtml(card.cls || '') + '"><span class="kicker">' + escHtml(card.kicker) + '</span><strong>' + escHtml(card.value) + '</strong><div class="sub">' + escHtml(card.sub) + '</div></div>';
-      }).join('');
-    }
-    function renderEvolutionChart(items){
-      var chart = byId('evolutionChart');
-      if (!items.length) {
-        chart.innerHTML = '<div class="empty-state">Sem competências suficientes para o gráfico.</div>';
-        return;
-      }
-      var max = Math.max.apply(null, items.map(function(item){ return item.value; }).concat([1]));
-      chart.innerHTML = items.map(function(item){
-        var height = max > 0 ? Math.max((item.value / max) * 160, item.value > 0 ? 10 : 2) : 2;
-        var cls = item.key === state.currentKey ? ' style="background:linear-gradient(180deg,#93c5fd 0%,#1d4ed8 100%);box-shadow:0 0 0 2px rgba(37,99,235,0.18)"' : '';
-        return '<div class="chart-col"><div class="bar"' + cls + ' style="height:' + height.toFixed(1) + 'px"><span class="tip">' + escHtml(item.label) + ' · ' + escHtml(fmtMoney(item.value)) + '</span></div><div class="bar-val">' + escHtml(fmtMoney(item.value)) + '</div><div class="bar-label">' + escHtml(item.label) + '</div></div>';
-      }).join('');
-    }
-    function renderComposition(items){
-      var total = items.reduce(function(sum, item){ return sum + item.value; }, 0);
-      var stack = byId('compositionStack');
-      var legend = byId('compositionLegend');
-      if (!total) {
-        stack.innerHTML = '<span style="width:100%;background:#cbd5e1"></span>';
-        legend.innerHTML = '<div class="empty-state">Sem valores para montar a composição no recorte atual.</div>';
-        return;
-      }
-      stack.innerHTML = items.filter(function(item){ return item.value > 0; }).map(function(item){
-        var pct = (item.value / total) * 100;
-        return '<span style="width:' + pct.toFixed(4) + '%;background:' + escHtml(categoryColors[item.label] || '#64748b') + '"></span>';
-      }).join('');
-      legend.innerHTML = items.filter(function(item){ return item.value > 0; }).map(function(item){
-        var pct = total > 0 ? (item.value / total) * 100 : 0;
-        return '<div class="legend-item"><span class="legend-dot" style="background:' + escHtml(categoryColors[item.label] || '#64748b') + '"></span><span>' + escHtml(item.label) + '</span><strong>' + escHtml(fmtMoney(item.value)) + ' · ' + escHtml(pct.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })) + '%</strong></div>';
-      }).join('');
-    }
-    function renderHorizontalChart(targetId, items, kind){
-      var wrap = byId(targetId);
-      if (!items.length) {
-        wrap.innerHTML = '<div class="empty-state">Sem variações suficientes para exibir este gráfico.</div>';
-        return;
-      }
-      var max = Math.max.apply(null, items.map(function(item){ return Math.abs(item.diff); }).concat([1]));
-      wrap.innerHTML = items.map(function(item){
-        var width = Math.max((Math.abs(item.diff) / max) * 100, Math.abs(item.diff) > 0 ? 6 : 2);
-        return '<div class="h-item"><div class="h-meta"><span class="label">' + escHtml(item.label) + '</span><span>' + escHtml(fmtMoney(item.diff)) + ' · ' + escHtml(item.pctLabel) + '</span></div><div class="h-track"><div class="h-fill ' + (item.diff >= 0 ? 'pos' : 'neg') + '" style="width:' + width.toFixed(2) + '%"></div></div></div>';
-      }).join('');
-    }
-    function renderRanking(targetId, items, label){
-      var positives = items.filter(function(item){ return item.diff > 0; }).sort(function(a, b){ return b.diff - a.diff; }).slice(0, 5);
-      var negatives = items.filter(function(item){ return item.diff < 0; }).sort(function(a, b){ return a.diff - b.diff; }).slice(0, 5);
-      function renderCol(title, list, cls, emptyText){
-        if (!list.length) {
-          return '<div class="ranking-col"><h3>' + escHtml(title) + '</h3><div class="empty-state">' + escHtml(emptyText) + '</div></div>';
-        }
-        return '<div class="ranking-col"><h3>' + escHtml(title) + '</h3><div class="rank-list">' + list.map(function(item){
-          return '<div class="rank-item ' + cls + '"><strong>' + escHtml(item.label) + '</strong><span>' + escHtml(fmtMoney(item.diff)) + ' · ' + escHtml(item.pctLabel) + '<br>Atual: ' + escHtml(fmtMoney(item.current)) + ' | Anterior: ' + escHtml(fmtMoney(item.previous)) + '</span></div>';
-        }).join('') + '</div></div>';
-      }
-      byId(targetId).innerHTML =
-        renderCol('Maiores aumentos por ' + label, positives, 'up', 'Nenhum aumento relevante no recorte.') +
-        renderCol('Maiores reduções por ' + label, negatives, 'down', 'Nenhuma redução relevante no recorte.');
-    }
-    function alterationType(row){
-      if (row.type === 'new') return 'Novo valor';
-      if (row.diff > 0) return 'Aumento';
-      if (row.diff < 0) return 'Redução';
-      return 'Estável';
-    }
-    function observationForRow(row){
-      if (row.label === 'Base de cálculo') return 'Base segregada; não entra no custo total.';
-      if (row.label === 'Custo total consolidado') return 'Síntese executiva do recorte atual.';
-      if (row.type === 'new') return 'Sem base anterior para percentual.';
-      if (row.current === 0 && row.previous > 0) return 'Valor zerado frente ao mês anterior.';
-      if (row.pct != null && Math.abs(row.pct) >= parseFloat(byId('limiteGrupo').value || '15')) return 'Variação acima da sensibilidade configurada.';
-      if (row.pct != null && Math.abs(row.pct) < 1) return 'Oscilação residual.';
-      return 'Comportamento dentro do esperado no recorte.';
-    }
-    function renderTable(dashboard){
-      var rows = dashboard.tableRows || [];
-      var view = byId('visaoTabela').value;
-      byId('tableSummary').textContent = rows.length + ' linhas na visão ' + view + ' · competência atual ' + monthLabel(dashboard.currentKey) + (dashboard.previousKey ? ' comparada com ' + monthLabel(dashboard.previousKey) : '');
-      if (!rows.length) {
-        byId('tableBody').innerHTML = '<tr><td colspan="8" class="empty-state">Nenhum agrupamento encontrado para o filtro atual.</td></tr>';
-        return;
-      }
-      byId('tableBody').innerHTML = rows.map(function(row){
-        var badgeCls = row.type === 'up' ? 'up' : (row.type === 'down' ? 'down' : 'flat');
-        var part = isFinite(row.participation) ? row.participation.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%' : '—';
-        return '<tr>' +
-          '<td><strong>' + escHtml(row.label) + '</strong></td>' +
-          '<td class="money">' + escHtml(fmtMoney(row.previous)) + '</td>' +
-          '<td class="money">' + escHtml(fmtMoney(row.current)) + '</td>' +
-          '<td class="money">' + escHtml(fmtMoney(row.diff)) + '</td>' +
-          '<td class="money">' + escHtml(row.pctLabel) + '</td>' +
-          '<td class="money">' + escHtml(part) + '</td>' +
-          '<td><span class="delta-pill ' + badgeCls + '">' + escHtml(alterationType(row)) + '</span></td>' +
-          '<td>' + escHtml(row.note || observationForRow(row)) + '</td>' +
-        '</tr>';
-      }).join('');
-    }
-    function renderAlerts(alerts){
-      byId('alertsList').innerHTML = alerts.map(function(alert){
-        return '<div class="alert-item ' + escHtml(alert.cls) + '"><strong>' + escHtml(alert.title) + '</strong><span>' + escHtml(alert.text) + '</span></div>';
-      }).join('');
-    }
-    function buildValidation(currentMonth, previousMonth){
-      return [
-        { label: 'Arquivo', value: state.fileName || '—' },
-        { label: 'Aba detectada', value: state.sheetName + ' · cabeçalho na linha ' + state.headerRow },
-        { label: 'Linhas válidas', value: fmtInt(state.validRows) + ' de ' + fmtInt(state.rawRows) + ' linhas lidas' },
-        { label: 'Competências', value: state.months.map(monthLabel).join(', ') },
-        { label: 'Competência padrão', value: monthLabel(state.currentKey) + (state.previousKey ? ' comparada com ' + monthLabel(state.previousKey) : '') },
-        { label: 'Mapeamento operacional', value: 'Setor = Desc Seção | Centro = Seção' },
-        { label: 'Custo total atual', value: fmtMoney(currentMonth.custo) + ' (proventos + encargos + benefícios)' },
-        { label: 'Líquido consolidado', value: fmtMoney(currentMonth.liquido) + ' | anterior ' + fmtMoney(previousMonth.liquido) },
-        { label: 'Bases segregadas', value: fmtMoney(currentMonth.bases) + ' fora do custo total gerencial' }
-      ];
-    }
-    function renderValidation(dashboard){
-      byId('validationMeta').innerHTML = dashboard.validation.map(function(item){
-        return '<div class="validation-box"><span class="label">' + escHtml(item.label) + '</span><strong>' + escHtml(item.value) + '</strong></div>';
-      }).join('');
-    }
-
-    byId('btnSelectFile').addEventListener('click', function(){ openFilePicker(); });
-    byId('btnReloadFile').addEventListener('click', function(){ openFilePicker(); });
-    byId('fileInput').addEventListener('change', function(ev){
-      if (ev.target.files && ev.target.files[0]) loadWorkbook(ev.target.files[0]);
-      ev.target.value = '';
-    });
-    ['competenciaAtual', 'filtroSetor', 'filtroCentro', 'filtroRubrica', 'filtroCategoria', 'visaoTabela', 'limiteFolha', 'limiteGrupo', 'limiteRubrica', 'limiteBeneficio', 'limiteColaboradores'].forEach(function(id){
-      byId(id).addEventListener('change', renderAll);
-      byId(id).addEventListener('input', renderAll);
-    });
-    syncParentHeight();
-  })();
-  ${DASHBOARD_FOLHA_SCRIPT_CLOSE}
-</body>
-</html>`;
+  // Dashboard Folha agora vive apenas em dashboard_folha_mod.html.
+  // O hub mantém só o iframe e o loader para evitar duplicação de código.
 
   const RESCISAO_SCRIPT_CLOSE = '</' + 'script>';
   const RESCISAO_SRCDOC = `<!DOCTYPE html>
@@ -10852,16 +9424,72 @@ ${'<scr' + 'ipt src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.ful
 </html>`;
 
   function bootDashboardFolhaFrame(frame) {
+    if (!frame || frame.dataset.dashboardFolhaBootstrapped === '1') return frame;
+    frame.dataset.dashboardFolhaBootstrapped = '1';
+    frame.addEventListener('load', function() {
+      try {
+        var doc = frame.contentDocument;
+        if (doc && doc.documentElement && doc.body) {
+          syncDashboardIframeTheme(frame, doc);
+          enableMobileFrameResize(frame, doc);
+          setTimeout(function() { resizeMobileFrame(frame, doc); }, 80);
+          setTimeout(function() { postDashboardIframeTheme(frame, shellDarkModeEnabled()); }, 120);
+          setTimeout(function() { postDashboardIframeTheme(frame, shellDarkModeEnabled()); }, 420);
+        } else {
+          postDashboardIframeTheme(frame, shellDarkModeEnabled());
+        }
+      } catch (e) {}
+    });
     return frame;
   }
 
   function hydrateDashboardFolhaModule() {
     var frame = document.getElementById('dashboard-folha-frame');
     if (!frame) return;
+    bootDashboardFolhaFrame(frame);
     if (!frame.dataset.dashboardFolhaMounted) {
       frame.dataset.dashboardFolhaMounted = '1';
       frame.src = 'dashboard_folha_mod.html';
     }
+  }
+
+  function shellDarkModeEnabled() {
+    return document.body.classList.contains('dark-mode') || document.documentElement.classList.contains('dark-mode');
+  }
+
+  function postDashboardIframeTheme(frame, isDark) {
+    try {
+      try {
+        localStorage.setItem('hub-shell-theme', isDark ? 'dark' : 'light');
+      } catch (storageError) {}
+      try {
+        if (frame && frame.contentWindow && typeof frame.contentWindow.applyDashboardTheme === 'function') {
+          frame.contentWindow.applyDashboardTheme(!!isDark);
+        }
+      } catch (directApplyError) {}
+      if (frame && frame.contentWindow && typeof frame.contentWindow.postMessage === 'function') {
+        frame.contentWindow.postMessage({ type: 'hub-theme-sync', dark: !!isDark }, '*');
+      }
+    } catch (e) {}
+  }
+
+  function syncDashboardIframeTheme(frame, doc) {
+    if (!frame || !doc) return;
+    const isDark = shellDarkModeEnabled();
+    if (doc.documentElement) {
+      doc.documentElement.classList.toggle('dark-mode', isDark);
+      doc.documentElement.setAttribute('data-shell-theme', isDark ? 'dark' : 'light');
+    }
+    if (doc.body) {
+      doc.body.classList.toggle('dark-mode', isDark);
+      doc.body.setAttribute('data-shell-theme', isDark ? 'dark' : 'light');
+    }
+    try {
+      if (frame.contentWindow && typeof frame.contentWindow.syncThemeFromParent === 'function') {
+        frame.contentWindow.syncThemeFromParent();
+      }
+    } catch (e) {}
+    postDashboardIframeTheme(frame, isDark);
   }
 
   function bootRescisaoFrame(frame) {
@@ -10922,6 +9550,8 @@ ${'<scr' + 'ipt src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.ful
 
   // Dark mode ativo por padrão
   document.body.classList.add('dark-mode');
+  document.documentElement.classList.add('dark-mode');
+  try { localStorage.setItem('hub-shell-theme', 'dark'); } catch (e) {}
   const themeBtnInit = document.getElementById('theme-btn');
   if(themeBtnInit) { themeBtnInit.innerHTML = '<i data-lucide="sun"></i>'; }
 
@@ -12119,8 +10749,22 @@ ${'<scr' + 'ipt src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.ful
   }
   function applyIframeSkin(frame) {
     try {
+      if (frame && frame.id === 'dashboard-folha-frame') {
+        const folhaDoc = frame.contentDocument;
+        if (!folhaDoc || !folhaDoc.documentElement || !folhaDoc.body) {
+          postDashboardIframeTheme(frame, shellDarkModeEnabled());
+          return;
+        }
+        syncDashboardIframeTheme(frame, folhaDoc);
+        enableMobileFrameResize(frame, folhaDoc);
+        setTimeout(() => resizeMobileFrame(frame, folhaDoc), 80);
+        return;
+      }
       const doc = frame.contentDocument;
-      if (!doc || !doc.head || !doc.body) return;
+      if (!doc || !doc.head || !doc.body) {
+        postDashboardIframeTheme(frame, shellDarkModeEnabled());
+        return;
+      }
       if (!doc.querySelector('link[data-shell-inter]')) {
         const link = doc.createElement('link');
         link.rel = 'stylesheet';
@@ -12135,7 +10779,7 @@ ${'<scr' + 'ipt src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.ful
         doc.head.appendChild(style);
       }
       style.textContent = iframeVisualCSS;
-      doc.body.classList.toggle('dark-mode', document.body.classList.contains('dark-mode'));
+      syncDashboardIframeTheme(frame, doc);
       enableUploadBoxClicks(doc);
       enableMobileTabToggle(doc);
       enableMobileWideTables(doc);
@@ -12271,9 +10915,13 @@ ${'<scr' + 'ipt src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.ful
 
   function toggleDarkMode() {
     const body = document.body;
-    body.classList.toggle('dark-mode');
+    const html = document.documentElement;
+    const nextDark = !shellDarkModeEnabled();
+    body.classList.toggle('dark-mode', nextDark);
+    html.classList.toggle('dark-mode', nextDark);
+    try { localStorage.setItem('hub-shell-theme', nextDark ? 'dark' : 'light'); } catch (e) {}
     const themeBtn = document.getElementById('theme-btn');
-    if (body.classList.contains('dark-mode')) {
+    if (nextDark) {
       themeBtn.innerHTML = '<i data-lucide="sun"></i>';
     } else {
       themeBtn.innerHTML = '<i data-lucide="moon"></i>';
@@ -12695,7 +11343,3 @@ const HUB_RH_VERSION_DATE = '30/04/2026';
   </script>
 </body>
 </html>
-
-
-
-
