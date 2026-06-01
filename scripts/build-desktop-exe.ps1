@@ -94,6 +94,8 @@ foreach ($File in $AppFiles) {
 }
 Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\check-da-folha-ia-192.png") -Destination (Join-Path $AppDist "app\assets\icons\check-da-folha-ia-192.png") -Force
 Copy-Item -LiteralPath (Join-Path $RepoRoot "assets\icons\check-da-folha-ia-512.png") -Destination (Join-Path $AppDist "app\assets\icons\check-da-folha-ia-512.png") -Force
+New-Item -ItemType Directory -Force -Path (Join-Path $AppDist "app\vendor") | Out-Null
+Copy-Item -LiteralPath (Join-Path $RepoRoot "vendor\xlsx.full.min.js") -Destination (Join-Path $AppDist "app\vendor\xlsx.full.min.js") -Force
 
 if (Test-Path -LiteralPath $ZipPath) {
   Remove-Item -LiteralPath $ZipPath -Force
