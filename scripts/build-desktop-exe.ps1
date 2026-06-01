@@ -106,7 +106,7 @@ if (Test-Path -LiteralPath $ZipStage) {
   Remove-Item -LiteralPath $ZipStage -Recurse -Force
 }
 New-Item -ItemType Directory -Force -Path $ZipStage | Out-Null
-Copy-Item -LiteralPath (Join-Path $AppDist "*") -Destination $ZipStage -Recurse -Force
+Copy-Item -Path (Join-Path $AppDist "*") -Destination $ZipStage -Recurse -Force
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::CreateFromDirectory($ZipStage, $ZipPath, [System.IO.Compression.CompressionLevel]::Optimal, $false)
 
